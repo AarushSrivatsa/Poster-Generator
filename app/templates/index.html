@@ -364,7 +364,7 @@
         <div v-if="!templates.length" class="empty-inline">Add a template before creating a poster.</div>
         <div class="picker-grid template-picker">
           <button v-for="template in templates" :key="template.id" class="picker-card template-picker-card" :class="{selected:Number(posterDraft.template_id)===template.id}" @click="posterDraft.template_id=template.id">
-            <iframe class="template-picker-frame" :src="'/api/templates/'+template.id+'/preview'" :title="template.name+' preview'" loading="lazy" tabindex="-1"></iframe>
+            <span class="template-picker-preview"><iframe :src="'/api/templates/'+template.id+'/preview'" :title="template.name+' preview'" loading="lazy" tabindex="-1"></iframe></span>
             <span class="picker-card-copy"><b>[[ template.name ]]</b><small>[[ template.description || 'Vehicle design' ]]</small></span><i>✓</i>
           </button>
         </div>
