@@ -560,3 +560,69 @@ body{color:#e7eee8}
 .editor-image-select .editor-image-name{z-index:1}
 .editor-image-select .editor-image-selected{z-index:2}
 .editor-image-remove{z-index:3}
+
+
+/* One-paste template creation: clear hierarchy, no per-placeholder busywork. */
+.app-modal-template{max-height:calc(100vh - 30px);padding:22px;background:#111a14;border-color:#2b3b30}
+.app-modal-template .app-modal-header{border-color:#2b3b30}
+.app-modal-template .app-modal-header h2{color:#e8f0e9}
+.app-modal-template .app-modal-header p{color:#a0aea3;font-size:11px}
+.app-modal-template .field-label{color:#d2ded4}
+.app-modal-template .form-control{background:#0c140f;border-color:#34463a;color:#edf5ee}
+.app-modal-template .form-control::placeholder{color:#748579}
+.template-create-form{display:grid;gap:15px}
+.template-meta-grid{margin:0}
+.template-paste-section,.template-guide-section{padding:15px;border:1px solid #2e4134;border-radius:11px;background:#141f18}
+.template-paste-heading,.template-guide-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.template-paste-heading>div,.template-guide-top>div{display:flex;align-items:flex-start;gap:10px}
+.template-step{width:25px;height:25px;flex:0 0 25px;display:grid;place-items:center;border-radius:7px;background:#244b33;color:#a8e2ba;font-size:10px;font-weight:900}
+.template-paste-heading strong,.template-guide-top strong{display:block;color:#e4eee6;font-size:12px;font-weight:800}
+.template-paste-heading small,.template-guide-top small{display:block;margin-top:3px;color:#9aaa9e;font-size:9px;line-height:1.5}
+.template-paste-required{padding:4px 7px;border-radius:5px;background:#27362b;color:#b6c5b8;font-size:8px;font-weight:800}
+.template-paste-label{display:block;margin:0}
+.template-paste-label textarea{display:block;width:100%;min-height:245px;padding:13px;border:1px solid #34483a;border-radius:9px;background:#0b130e;color:#dce9df;font:11px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;outline:0}
+.template-paste-label textarea:focus{border-color:#75c397;box-shadow:0 0 0 3px #75c39722}
+.template-paste-label textarea::placeholder{color:#718176}
+.template-detection-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.template-detection-success,.template-detection-empty{font-size:9px;color:#a8b8ab}
+.template-detection-success{color:#91d7a8;font-weight:800}
+.template-detection-success span{margin-right:5px}
+.template-detected-tokens{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.template-detected-tokens code,.template-guide-tokens code{padding:4px 6px;border:1px solid #304739;border-radius:5px;background:#1a2b20;color:#b9e5c4;font:8px ui-monospace,monospace}
+.template-copy-all{flex:0 0 auto;font-size:9px;padding:7px 10px}
+.template-guide-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.template-guide-group{min-width:0;padding:10px;border:1px solid #2b3d31;border-radius:8px;background:#101a14}
+.template-guide-group h3{margin:0 0 4px;color:#dbe8de;font-size:10px;font-weight:800}
+.template-guide-group p{margin:0 0 8px;color:#9dac9f;font-size:8px;line-height:1.5}
+.template-guide-tokens{display:flex;flex-wrap:wrap;gap:5px}
+.template-guide-note{margin:10px 0 0;color:#a5b5a8;font-size:9px;line-height:1.55}
+.template-preview-section{margin:0}
+.template-preview-heading{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.template-preview-heading>div{display:flex;align-items:flex-start;gap:10px}
+.template-preview-heading strong{color:#e4eee6}
+.template-preview-heading small{color:#9aaa9e}
+.template-preview-status{margin-left:auto;color:#a9b8ac;font-size:9px}
+.template-preview-canvas{height:min(54vh,480px);min-height:280px;border-color:#34463a;background:#090f0b}
+.template-preview-canvas iframe{min-height:100%;height:100%;background:#fff}
+.template-preview-message{min-height:280px;color:#aab8ad}
+.template-preview-error{color:#f08f86}
+.template-existing-designs{padding:12px 14px;border:1px solid #2d4033;border-radius:9px;background:#111b15}
+.template-existing-designs summary{color:#cbd9ce;font-size:10px;font-weight:800;cursor:pointer}
+.template-existing-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:11px}
+.template-existing-card{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px;border:1px solid #2b3e31;border-radius:7px;background:#17231a;text-align:left}
+.template-existing-card b,.template-existing-card small{display:block}
+.template-existing-card b{color:#e0ebe2;font-size:9px}
+.template-existing-card small{margin-top:3px;color:#98a99c;font-size:8px;line-height:1.4}
+.template-existing-card i{flex:0 0 auto;color:#91d6a7;font-size:8px;font-style:normal;font-weight:800}
+.template-existing-card:hover{border-color:#75c397;background:#1b2c20}
+.inline-note{display:inline;color:#91a095;font-weight:400}
+.app-modal-template .app-modal-footer{padding-top:14px;border-color:#2b3b30}
+.app-modal-template .btn-ghost{color:#becbbf}
+@media(max-width:720px){
+ .app-modal-template{padding:15px}
+ .template-guide-groups,.template-existing-grid{grid-template-columns:1fr}
+ .template-paste-label textarea{min-height:190px}
+ .template-paste-heading,.template-guide-top{align-items:flex-start}
+ .template-copy-all{padding:6px 8px;font-size:8px}
+ .template-preview-canvas{height:48vh;min-height:250px}
+}
