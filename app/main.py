@@ -643,33 +643,54 @@ def delete_car(car_id: int, db: Session = Depends(get_db)):
 async def upload_car_images(
     car_id: int,
     files: list[UploadFile] = File(...),
+    image_types: list[str] = Form(default=[]),
     image_type: str = Form(""),
     db: Session = Depends(get_db),
 ):
     car = db.get(CarDetails, car_id)
     if not car:
         raise HTTPException(404, "Car not found.")
+
     added = []
-    for file in files:
-        extension = ALLOWED_TYPES.get(file.content_type or "")
-        if not extension:
-            raise HTTPException(415, "Use JPG, PNG, WEBP or AVIF images.")
-        content = await file.read()
-        if len(content) > MAX_UPLOAD_BYTES:
-            raise HTTPException(413, "Each image must be 12 MB or smaller.")
-        key = f"cars/{car_id}/{uuid.uuid4().hex}{extension}"
-        image_url = await upload_storage_object(key, content, file.content_type)
-        image = CarImage(
-            car_id=car_id,
-            image_url=image_url,
-            image_type=(image_type.strip() or Path(file.filename or "Vehicle photo").stem)[:100],
-            sort_order=db.query(CarImage).filter_by(car_id=car_id).count(),
-        )
-        db.add(image)
-        db.flush()
-        added.append(image_to_dict(image))
-    db.commit()
-    return added
+    uploaded_urls = []
+    try:
+        for index, file in enumerate(files):
+            extension = ALLOWED_TYPES.get(file.content_type or "")
+            if not extension:
+                raise HTTPException(415, "Use JPG, PNG, WEBP or AVIF images.")
+            content = await file.read()
+            if len(content) > MAX_UPLOAD_BYTES:
+                raise HTTPException(413, "Each image must be 12 MB or smaller.")
+
+            key = f"cars/{car_id}/{uuid.uuid4().hex}{extension}"
+            image_url = await upload_storage_object(key, content, file.content_type)
+            uploaded_urls.append(image_url)
+
+            supplied_type = image_types[index].strip() if index < len(image_types) else ""
+            final_type = supplied_type or (image_type.strip() if image_type else "")
+            if not final_type:
+                final_type = Path(file.filename or "Vehicle photo").stem
+
+            image = CarImage(
+                car_id=car_id,
+                image_url=image_url,
+                image_type=final_type[:100],
+                sort_order=db.query(CarImage).filter_by(car_id=car_id).count(),
+            )
+            db.add(image)
+            db.flush()
+            added.append(image_to_dict(image))
+
+        db.commit()
+        return added
+    except Exception:
+        db.rollback()
+        for uploaded_url in uploaded_urls:
+            try:
+                delete_storage_object(uploaded_url)
+            except Exception:
+                pass
+        raise
 
 
 @app.patch("/api/images/{image_id}")
