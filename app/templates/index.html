@@ -305,7 +305,7 @@
           <div class="template-help-heading"><div><strong>Start with a design</strong><small>Pick a ready-made layout. You do not need to write code.</small></div><span>STEP 1</span></div>
           <div v-if="starterTemplates.length" class="template-starter-grid">
             <button v-for="starter in starterTemplates" :key="starter.id" type="button" class="template-starter-card" :class="{selected:templateStarterId===starter.id}" @click="chooseTemplateStarter(starter)">
-              <iframe :src="'/api/templates/'+starter.id+'/preview'" :title="starter.name+' preview'" loading="lazy" tabindex="-1"></iframe>
+              <span class="template-starter-preview"><iframe :src="'/api/templates/'+starter.id+'/preview'" :title="starter.name+' preview'" loading="lazy" tabindex="-1"></iframe></span>
               <span class="template-starter-copy"><b>[[ starter.name ]]</b><small>[[ starter.description || 'Ready-made vehicle layout' ]]</small><i>[[ templateStarterId===starter.id ? 'Selected' : 'Use this design' ]]</i></span>
             </button>
           </div>
