@@ -31,6 +31,7 @@ class VehiclePhoto(Base):
     vehicle_id: Mapped[int] = mapped_column(ForeignKey("vehicles.id", ondelete="CASCADE"))
     filename: Mapped[str] = mapped_column(String(255))
     label: Mapped[str] = mapped_column(String(80), default="Vehicle view")
+    slot: Mapped[str] = mapped_column(String(40), default="")
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     vehicle: Mapped[Vehicle] = relationship(back_populates="photos")
 
