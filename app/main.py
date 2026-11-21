@@ -347,8 +347,34 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
             return html.escape(str(value or ""), quote=True)
         return html.escape(str(value if value is not None else ""))
 
-    markup = TOKEN_RE.sub(substitute, template.html_content)
-    print_bridge = (
+    # Mark actual <img src="{{image.key}}"> elements as direct drop targets.
+    markup = template.html_content
+    for key in image_keys:
+        token = r"\{\{\s*image\." + re.escape(key) + r"\s*\}\}"
+        pattern = re.compile(
+            r'(<img\b[^>]*?\bsrc\s*=\s*["\'])\s*' + token + r'\s*(["\'][^>]*?)(/?>)',
+            flags=re.IGNORECASE,
+        )
+        markup = pattern.sub(
+            lambda match, image_key=key: (
+                match.group(1) + "{{image." + image_key + "}}" + match.group(2)
+                + ' data-image-placeholder="' + image_key + '"' + match.group(3)
+            ),
+            markup,
+        )
+
+    markup = TOKEN_RE.sub(substitute, markup)
+    drop_bridge = (
+        "<script>(function(){"
+        "document.querySelectorAll('img[data-image-placeholder]').forEach(function(img){"
+        "img.addEventListener('dragover',function(e){e.preventDefault();img.style.outline='3px dashed #e5bd5b';img.style.outlineOffset='-4px';});"
+        "img.addEventListener('dragleave',function(){img.style.outline='';img.style.outlineOffset='';});"
+        "img.addEventListener('drop',function(e){e.preventDefault();img.style.outline='';img.style.outlineOffset='';"
+        "var imageId=e.dataTransfer.getData('carImageId');"
+        "if(imageId){window.parent.postMessage({type:'POSTER_STUDIO_DROP_IMAGE',imageId:imageId,key:img.dataset.imagePlaceholder},'*');}"
+        "});});})();</script>"
+    )
+    print_bridge = drop_bridge + (
         "<script>window.addEventListener('message',function(event){"
         "if(event.source===window.parent&&event.data&&event.data.type==='POSTER_STUDIO_PRINT'){"
         "window.focus();window.print();}});</script>"
