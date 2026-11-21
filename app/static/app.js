@@ -65,14 +65,275 @@ function renderMakes(){
 }
 $("#makeForm").onsubmit=async e=>{e.preventDefault();const form=e.currentTarget;try{const make=await api("/api/makes",{method:"POST",...jsonOptions({name:form.elements.name.value.trim()})});makes.push(make);if(form.elements.icon.files[0]){const f=new FormData();f.append("file",form.elements.icon.files[0]);const updated=await api("/api/makes/"+make.id+"/icon",{method:"POST",body:f});makes=makes.map(m=>m.id===updated.id?updated:m)}form.reset();renderMakes();toast("Make added.")}catch(error){fail(error)}};
 
-/* CAR CRUD */
-function resetCarForm(){editingCarId=null;$("#carForm").reset();$("#carFormTitle").textContent="Add a car";$("#deleteCar").classList.add("hidden");$("#insuranceMode").value="lapsed";$("#fitnessMode").value="lapsed";$("#insuranceDateWrap").classList.add("hidden");$("#fitnessDateWrap").classList.add("hidden");refreshMakeSelect();$("#fuelSelect").value="";$("#transmissionSelect").value="";$("#yearSelect").value=""}
-function fillCarForm(car){editingCarId=car.id;const f=$("#carForm");f.elements.make_id.value=String(car.make_id);f.elements.model.value=car.model||"";f.elements.variant.value=car.variant||"";f.elements.registration_no.value=car.registration_no||"";f.elements.fuel_type.value=car.fuel_type;f.elements.year.value=String(car.year);f.elements.transmission.value=car.transmission;f.elements.odometer_km.value=car.odometer_km??"";f.elements.owner_count.value=car.owner_count??"";$("#insuranceMode").value=car.insurance_validity?"date":"lapsed";$("#insuranceDateWrap").classList.toggle("hidden",!car.insurance_validity);$("#insuranceDate").value=monthFromIso(car.insurance_validity);$("#fitnessMode").value=car.fitness_validity?"date":"lapsed";$("#fitnessDateWrap").classList.toggle("hidden",!car.fitness_validity);$("#fitnessDate").value=yearFromIso(car.fitness_validity);$("#carFormTitle").textContent="Edit "+car.make.name+" "+car.model;$("#deleteCar").classList.remove("hidden");refreshMakeSelect(car.make_id)}
-function renderCars(){$("#carCount").textContent=cars.length+" cars";$("#carList").innerHTML=cars.map(c=>'<button type="button" class="record-row '+(editingCarId===c.id?"selected":"")+'" data-edit-car="'+c.id+'"><span class="record-main"><b>'+esc(c.make?.name)+" "+esc(c.model)+'</b><small>'+esc(c.year)+" · "+esc(c.registration_no)+'</small></span><span class="record-actions">Edit →</span></button>').join("")||'<div class="empty-card">No cars saved yet.</div>';document.querySelectorAll("[data-edit-car]").forEach(b=>b.onclick=()=>{const car=cars.find(c=>c.id===Number(b.dataset.editCar));if(car)fillCarForm(car);renderCars()})}
-$("#newCar").onclick=()=>{resetCarForm();switchTab("cars");if(!makes.length)toast("Add a make first in the Makes tab.")};
-$("#cancelCarEdit").onclick=resetCarForm;
-$("#saveCar").onclick=async()=>{const f=$("#carForm");const payload={make_id:f.elements.make_id.value,model:f.elements.model.value.trim(),variant:f.elements.variant.value.trim(),registration_no:f.elements.registration_no.value.trim(),fuel_type:f.elements.fuel_type.value,year:f.elements.year.value,transmission:f.elements.transmission.value,odometer_km:f.elements.odometer_km.value||null,owner_count:f.elements.owner_count.value||null,insurance_validity:$("#insuranceMode").value==="lapsed"?"Lapsed":$("#insuranceDate").value,fitness_validity:$("#fitnessMode").value==="lapsed"?"Lapsed":$("#fitnessDate").value};if(!payload.insurance_validity)return toast("Choose an insurance expiry month or mark it lapsed.");if(!payload.fitness_validity)return toast("Choose a fitness expiry year or mark it lapsed.");try{const result=await api(editingCarId?"/api/cars/"+editingCarId:"/api/cars",{method:editingCarId?"PUT":"POST",...jsonOptions(payload)});const car=await api("/api/cars/"+result.id);cars=cars.filter(c=>c.id!==car.id).concat(car);selectedCarId=car.id;resetCarForm();renderCars();renderPosterChoices();renderPosters();toast("Car saved.")}catch(e){fail(e)}};
-$("#deleteCar").onclick=async()=>{if(!editingCarId||!confirm("Delete this car, its photos and its saved posters?"))return;try{await api("/api/cars/"+editingCarId,{method:"DELETE"});cars=cars.filter(c=>c.id!==editingCarId);posters=posters.filter(p=>p.car_id!==editingCarId);if(activePoster?.car_id===editingCarId)closePosterEditor();selectedCarId=cars[0]?.id??null;resetCarForm();renderCars();renderPosterChoices();renderPosters();toast("Car and images deleted.")}catch(e){fail(e)}};
+/* CAR CRUD + PHOTOS */
+let pendingCarPhotos = [];
+
+function clearPendingCarPhotos() {
+  pendingCarPhotos.forEach(photo => URL.revokeObjectURL(photo.previewUrl));
+  pendingCarPhotos = [];
+}
+
+function renderCarPhotoManager() {
+  const car = editingCarId ? cars.find(item => item.id === editingCarId) : null;
+  const saved = car?.images || [];
+
+  $("#carSavedPhotos").innerHTML = saved.length
+    ? '<div class="saved-photo-heading">Already saved to this car · ' + saved.length + '</div><div class="car-photo-grid">' +
+      saved.map(image =>
+        '<article class="car-photo-card saved">' +
+          '<img src="' + esc(image.image_url) + '" alt="' + esc(image.image_type) + '">' +
+          '<div class="car-photo-card-info"><b>' + esc(image.image_type || "Vehicle photo") + '</b><small>Stored with this car</small></div>' +
+          '<button type="button" class="photo-remove-btn" data-remove-car-image="' + image.id + '" aria-label="Remove photo">×</button>' +
+        '</article>'
+      ).join("") + '</div>'
+    : "";
+
+  $("#carPhotoDrafts").innerHTML = pendingCarPhotos.length
+    ? '<div class="saved-photo-heading">Ready to save with this car · ' + pendingCarPhotos.length + '</div><div class="car-photo-grid">' +
+      pendingCarPhotos.map(photo =>
+        '<article class="car-photo-card pending">' +
+          '<img src="' + esc(photo.previewUrl) + '" alt="' + esc(photo.file.name) + '">' +
+          '<div class="car-photo-card-info"><b title="' + esc(photo.file.name) + '">' + esc(photo.file.name) + '</b>' +
+          '<label>Photo type<input data-car-photo-type="' + photo.id + '" value="' + esc(photo.imageType) + '" placeholder="e.g. Front left"></label></div>' +
+          '<button type="button" class="photo-remove-btn" data-remove-draft-photo="' + photo.id + '" aria-label="Remove selected photo">×</button>' +
+        '</article>'
+      ).join("") + '</div>'
+    : '<p class="photo-empty-note">No photos selected yet. Add as many as you need.</p>';
+
+  document.querySelectorAll("[data-car-photo-type]").forEach(input => {
+    input.oninput = () => {
+      const photo = pendingCarPhotos.find(item => item.id === Number(input.dataset.carPhotoType));
+      if (photo) photo.imageType = input.value;
+    };
+  });
+
+  document.querySelectorAll("[data-remove-draft-photo]").forEach(button => {
+    button.onclick = () => {
+      const id = Number(button.dataset.removeDraftPhoto);
+      const photo = pendingCarPhotos.find(item => item.id === id);
+      if (photo) URL.revokeObjectURL(photo.previewUrl);
+      pendingCarPhotos = pendingCarPhotos.filter(item => item.id !== id);
+      renderCarPhotoManager();
+    };
+  });
+
+  document.querySelectorAll("[data-remove-car-image]").forEach(button => {
+    button.onclick = async () => {
+      const imageId = Number(button.dataset.removeCarImage);
+      if (!confirm("Remove this saved photo from this car?")) return;
+      try {
+        await api("/api/images/" + imageId, {method:"DELETE"});
+        cars = cars.map(item => item.id === editingCarId
+          ? {...item, images:(item.images || []).filter(image => image.id !== imageId)}
+          : item);
+        renderCarPhotoManager();
+        renderCars();
+        toast("Photo removed from car.");
+      } catch (error) { fail(error); }
+    };
+  });
+}
+
+function addCarPhotos(fileList) {
+  const allowed = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
+  let added = 0;
+  for (const file of Array.from(fileList || [])) {
+    if (!allowed.has(file.type)) {
+      toast(file.name + " is not supported. Use JPG, PNG, WEBP or AVIF.");
+      continue;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      toast(file.name + " is larger than 12 MB.");
+      continue;
+    }
+    pendingCarPhotos.push({
+      id: Date.now() + Math.floor(Math.random() * 1000000) + added,
+      file,
+      imageType: file.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " "),
+      previewUrl: URL.createObjectURL(file)
+    });
+    added += 1;
+  }
+  renderCarPhotoManager();
+  if (added) toast(added + " photo" + (added === 1 ? "" : "s") + " queued for this car.");
+}
+
+const carPhotoDropZone = $("#carPhotoDropZone");
+const carPhotoInput = $("#carPhotoInput");
+carPhotoDropZone.ondragover = event => {
+  event.preventDefault();
+  carPhotoDropZone.classList.add("drag");
+};
+carPhotoDropZone.ondragleave = () => carPhotoDropZone.classList.remove("drag");
+carPhotoDropZone.ondrop = event => {
+  event.preventDefault();
+  carPhotoDropZone.classList.remove("drag");
+  addCarPhotos(event.dataTransfer.files);
+};
+carPhotoInput.onchange = () => {
+  addCarPhotos(carPhotoInput.files);
+  carPhotoInput.value = "";
+};
+
+function resetCarForm() {
+  clearPendingCarPhotos();
+  editingCarId = null;
+  $("#carForm").reset();
+  $("#carFormTitle").textContent = "Add a car";
+  $("#deleteCar").classList.add("hidden");
+  $("#insuranceMode").value = "lapsed";
+  $("#fitnessMode").value = "lapsed";
+  $("#insuranceDateWrap").classList.add("hidden");
+  $("#fitnessDateWrap").classList.add("hidden");
+  refreshMakeSelect();
+  $("#fuelSelect").value = "";
+  $("#transmissionSelect").value = "";
+  $("#yearSelect").value = "";
+  renderCarPhotoManager();
+}
+
+function fillCarForm(car) {
+  clearPendingCarPhotos();
+  editingCarId = car.id;
+  const f = $("#carForm");
+  f.elements.make_id.value = String(car.make_id);
+  f.elements.model.value = car.model || "";
+  f.elements.variant.value = car.variant || "";
+  f.elements.registration_no.value = car.registration_no || "";
+  f.elements.fuel_type.value = car.fuel_type;
+  f.elements.year.value = String(car.year);
+  f.elements.transmission.value = car.transmission;
+  f.elements.odometer_km.value = car.odometer_km ?? "";
+  f.elements.owner_count.value = car.owner_count ?? "";
+  $("#insuranceMode").value = car.insurance_validity ? "date" : "lapsed";
+  $("#insuranceDateWrap").classList.toggle("hidden", !car.insurance_validity);
+  $("#insuranceDate").value = monthFromIso(car.insurance_validity);
+  $("#fitnessMode").value = car.fitness_validity ? "date" : "lapsed";
+  $("#fitnessDateWrap").classList.toggle("hidden", !car.fitness_validity);
+  $("#fitnessDate").value = yearFromIso(car.fitness_validity);
+  $("#carFormTitle").textContent = "Edit " + car.make.name + " " + car.model;
+  $("#deleteCar").classList.remove("hidden");
+  refreshMakeSelect(car.make_id);
+  renderCarPhotoManager();
+}
+
+function renderCars() {
+  $("#carCount").textContent = cars.length + " cars";
+  $("#carList").innerHTML = cars.map(c =>
+    '<button type="button" class="record-row ' + (editingCarId === c.id ? "selected" : "") + '" data-edit-car="' + c.id + '">' +
+      '<span class="record-main"><b>' + esc(c.make?.name) + " " + esc(c.model) + '</b>' +
+      '<small>' + esc(c.year) + " · " + esc(c.registration_no) + " · " + (c.images?.length || 0) + " photos</small></span>' +
+      '<span class="record-actions">Edit →</span></button>'
+  ).join("") || '<div class="empty-card">No cars saved yet.</div>';
+  document.querySelectorAll("[data-edit-car]").forEach(button => {
+    button.onclick = () => {
+      const car = cars.find(item => item.id === Number(button.dataset.editCar));
+      if (car) fillCarForm(car);
+      renderCars();
+    };
+  });
+}
+
+async function uploadPendingCarPhotos(carId) {
+  if (!pendingCarPhotos.length) return;
+  const form = new FormData();
+  pendingCarPhotos.forEach(photo => {
+    form.append("files", photo.file, photo.file.name);
+    form.append("image_types", photo.imageType || "");
+  });
+  await api("/api/cars/" + carId + "/images", {method:"POST", body:form});
+  clearPendingCarPhotos();
+}
+
+$("#newCar").onclick = () => {
+  resetCarForm();
+  switchTab("cars");
+  if (!makes.length) toast("Add a make first in the Makes tab.");
+};
+$("#cancelCarEdit").onclick = resetCarForm;
+
+$("#saveCar").onclick = async () => {
+  const f = $("#carForm");
+  if (!f.reportValidity()) return;
+
+  const payload = {
+    make_id:f.elements.make_id.value,
+    model:f.elements.model.value.trim(),
+    variant:f.elements.variant.value.trim(),
+    registration_no:f.elements.registration_no.value.trim(),
+    fuel_type:f.elements.fuel_type.value,
+    year:f.elements.year.value,
+    transmission:f.elements.transmission.value,
+    odometer_km:f.elements.odometer_km.value || null,
+    owner_count:f.elements.owner_count.value || null,
+    insurance_validity:$("#insuranceMode").value === "lapsed" ? "Lapsed" : $("#insuranceDate").value,
+    fitness_validity:$("#fitnessMode").value === "lapsed" ? "Lapsed" : $("#fitnessDate").value
+  };
+
+  if (!payload.insurance_validity) return toast("Choose an insurance expiry month or mark it lapsed.");
+  if (!payload.fitness_validity) return toast("Choose a fitness expiry year or mark it lapsed.");
+
+  const button = $("#saveCar");
+  button.disabled = true;
+  button.textContent = "Saving car…";
+  let carId = editingCarId;
+  let detailsSaved = Boolean(editingCarId);
+
+  try {
+    const result = await api(
+      carId ? "/api/cars/" + carId : "/api/cars",
+      {method:carId ? "PUT" : "POST", ...jsonOptions(payload)}
+    );
+    carId = Number(result.id);
+    editingCarId = carId;
+    detailsSaved = true;
+
+    // Photos are uploaded and linked to this car immediately after its row exists.
+    await uploadPendingCarPhotos(carId);
+
+    const car = await api("/api/cars/" + carId);
+    cars = [car, ...cars.filter(item => item.id !== car.id)];
+    selectedCarId = car.id;
+    resetCarForm();
+    renderCars();
+    renderPosterChoices();
+    renderPosters();
+    toast("Car and its photos saved.");
+  } catch (error) {
+    if (detailsSaved && carId) {
+      // Keep the car in edit mode and leave any unuploaded selections queued for retry.
+      try {
+        const car = await api("/api/cars/" + carId);
+        cars = [car, ...cars.filter(item => item.id !== car.id)];
+        $("#carFormTitle").textContent = "Car saved · photo upload needs retry";
+        renderCarPhotoManager();
+        renderCars();
+      } catch (_) {}
+      toast("Car details are saved. Photo upload failed: " + (error.message || "unknown error") + ". Your selected photos are still here; press Save car to retry.");
+    } else {
+      fail(error);
+    }
+  } finally {
+    button.disabled = false;
+    button.textContent = "Save car";
+  }
+};
+
+$("#deleteCar").onclick = async () => {
+  if (!editingCarId || !confirm("Delete this car, its photos and its saved posters?")) return;
+  try {
+    await api("/api/cars/" + editingCarId, {method:"DELETE"});
+    cars = cars.filter(car => car.id !== editingCarId);
+    posters = posters.filter(poster => poster.car_id !== editingCarId);
+    if (activePoster?.car_id === editingCarId) closePosterEditor();
+    selectedCarId = cars[0]?.id ?? null;
+    resetCarForm();
+    renderCars();
+    renderPosterChoices();
+    renderPosters();
+    toast("Car and its photos deleted.");
+  } catch (error) { fail(error); }
+};
 
 /* TEMPLATE CRUD */
 function detectedTokens(markup){return [...new Set([...String(markup||"").matchAll(/\{\{\s*([a-zA-Z][a-zA-Z0-9_.-]{0,79})\s*\}\}/g)].map(m=>m[1]))]}
