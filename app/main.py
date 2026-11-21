@@ -20,6 +20,7 @@ from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, Upload
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.gzip import GZipMiddleware
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
@@ -628,6 +629,8 @@ def render_template_preview_html(markup: str, db: Session) -> str:
 # =====================================================
 
 app = FastAPI(title="Vehicle Poster Studio", version="2.1.0")
+# Compress larger JSON/HTML responses to reduce transfer time on slower connections.
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 # Create any model tables that are absent. Existing table structures and
 # records are left unchanged. The template model uses its own new table name.
