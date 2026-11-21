@@ -244,7 +244,7 @@ def extract_placeholder_schema(markup: str) -> dict:
         "car": car_fields,
         "make": make_fields,
         "images": [
-            {"key": key, "label": f"Image {index}", "required": False}
+            {"key": key, "label": f"Image {key}" if key.isdigit() else f"Image {index}", "required": False}
             for index, key in enumerate(image_keys, start=1)
         ],
         "text": [
@@ -280,7 +280,7 @@ def validate_template_html(markup: str) -> dict:
 def template_to_dict(template: PosterTemplate) -> dict:
     schema = template.placeholder_schema or extract_placeholder_schema(template.html_content)
     schema = {**schema, "images": [
-        {**entry, "label": f"Image {index}"}
+        {**entry, "label": f"Image {entry['key']}" if str(entry.get("key", "")).isdigit() else f"Image {index}"}
         for index, entry in enumerate(schema.get("images", []), start=1)
     ]}
     return {
