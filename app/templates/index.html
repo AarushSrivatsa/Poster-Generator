@@ -17,7 +17,6 @@
     <button class="nav-tab" data-tab="makes">Makes</button>
     <button class="nav-tab" data-tab="templates">Templates</button>
   </nav>
-  <span class="cloud-status"><i></i> Supabase-backed</span>
 </header>
 
 <main class="app-main">
@@ -102,7 +101,23 @@
           <label>Fitness validity<select id="fitnessMode"><option value="lapsed">Lapsed</option><option value="date">Valid until</option></select></label>
           <label id="fitnessDateWrap" class="conditional-field hidden">Expiry year<select id="fitnessDate"></select></label>
         </div>
-      </form>
+      
+        <section class="car-photo-manager" aria-label="Car photos">
+          <div class="car-photo-manager-head">
+            <div><p class="eyebrow">PHOTOS FOR THIS CAR</p><h3>Vehicle photos</h3><p class="muted">Choose photos now. They will be uploaded to Supabase and attached to this car when you press Save car.</p></div>
+            <span class="photo-save-note">Saved per car</span>
+          </div>
+          <label id="carPhotoDropZone" class="car-photo-dropzone">
+            <input id="carPhotoInput" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple hidden>
+            <span class="car-photo-add-icon">＋</span>
+            <b>Drop car photos here</b>
+            <span>or <u>browse files</u></span>
+            <small>JPG · PNG · WEBP · AVIF · up to 12 MB each</small>
+          </label>
+          <div id="carSavedPhotos" class="car-saved-photos"></div>
+          <div id="carPhotoDrafts" class="car-photo-drafts"><p class="photo-empty-note">No photos selected yet. Add as many as you need.</p></div>
+        </section>
+</form>
       <div class="form-footer"><button id="cancelCarEdit" class="quiet-btn">Clear</button><button id="deleteCar" class="danger-btn hidden">Delete car</button><button id="saveCar" class="primary-btn">Save car</button></div>
     </section>
   </div>
