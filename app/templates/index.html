@@ -77,7 +77,6 @@
         <div v-else-if="!posters.length" class="empty-state">
           <div class="empty-illustration">▧</div><h3>Your first poster starts here</h3>
           <p>Add a vehicle, choose a template, and create your first design.</p>
-          <button class="btn btn-primary" @click="openPosterCreate">Create a poster</button>
           <button v-if="!cars.length" class="btn btn-text" @click="openCarDialog()">Add a vehicle first</button>
         </div>
         <div v-else-if="!filteredPosters.length" class="empty-inline">No posters match that search.</div>
@@ -117,7 +116,7 @@
         </div>
         <div v-else class="vehicle-grid">
           <article v-for="car in filteredCars" :key="car.id" class="vehicle-card">
-            <div class="vehicle-image" @click="openCarDialog(car)">
+            <div class="vehicle-image">
               <img v-if="car.images && car.images.length" :src="car.images[0].image_url" :alt="car.make?.name+' '+car.model">
               <div v-else class="vehicle-image-empty"><span>▣</span><small>No vehicle photo</small></div>
               <span class="photo-count">[[ (car.images || []).length ]] photos</span>
