@@ -395,7 +395,7 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
 @lru_cache(maxsize=64)
 def compile_tailwind_css(markup: str) -> str:
     """Compile the utility classes present in this template into production CSS."""
-    executable = ROOT / "node_modules" / ".bin" / "tailwindcss"
+    # Docker installs Node packages in /app/node_modules; ROOT is /app/app.\n    app_root = ROOT.parent\n    executable = app_root / "node_modules" / ".bin" / "tailwindcss"
     if not executable.exists():
         raise RuntimeError("Tailwind CSS compiler is missing. Rebuild the app image to install dependencies.")
 
@@ -422,7 +422,7 @@ def compile_tailwind_css(markup: str) -> str:
         try:
             result = subprocess.run(
                 [executable, "-i", str(input_file), "-o", str(output_file), "--minify"],
-                cwd=ROOT,
+                cwd=app_root,
                 capture_output=True,
                 text=True,
                 timeout=25,
