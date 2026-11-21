@@ -244,14 +244,8 @@ def extract_placeholder_schema(markup: str) -> dict:
         "car": car_fields,
         "make": make_fields,
         "images": [
-            {"key": key, "label": {
-                "hero": "Main photo",
-                "angle": "Front angle",
-                "rear": "Rear view",
-                "interior": "Interior",
-                "detail": "Dashboard / detail",
-            }.get(key, humanize_key(key)), "required": False}
-            for key in image_keys
+            {"key": key, "label": f"Image {index}", "required": False}
+            for index, key in enumerate(image_keys, start=1)
         ],
         "text": [
             {
@@ -278,18 +272,22 @@ def validate_template_html(markup: str) -> dict:
     if not any(schema.values()):
         raise HTTPException(
             400,
-            "Use at least one placeholder: {{car.model}}, {{make.icon}}, {{image.hero}} or {{text.headline}}.",
+            "Use at least one placeholder: {{car.model}}, {{make.icon}}, {{image.1}} or {{text.headline}}.",
         )
     return schema
 
 
 def template_to_dict(template: PosterTemplate) -> dict:
+    schema = template.placeholder_schema or extract_placeholder_schema(template.html_content)
+    schema = {**schema, "images": [
+        {**entry, "label": f"Image {index}"}
+        for index, entry in enumerate(schema.get("images", []), start=1)
+    ]}
     return {
         "id": template.id,
         "name": template.name,
-        "description": template.description,
         "html_content": template.html_content,
-        "placeholder_schema": template.placeholder_schema or {},
+        "placeholder_schema": schema,
         "thumbnail_url": template.thumbnail_url,
         "sort_order": template.sort_order,
         "is_builtin": template.is_builtin,
@@ -640,15 +638,15 @@ app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 views = Jinja2Templates(directory=ROOT / "templates")
 
 BUILT_IN_TEMPLATES = [
-    ("Midnight Gold", "Premium dark layout with a five-photo vehicle gallery", "default_poster.html", 10),
-    ("Studio Minimal", "Editorial light layout with a five-photo vehicle gallery", "poster_studio_minimal.html", 20),
-    ("Electric Motion", "Sport-inspired high-contrast layout with five photo placements", "poster_electric_motion.html", 30),
-    ("Executive Black", "Classic luxury layout with five photo placements", "poster_executive_black.html", 40),
-    ("City Select", "Bold dealership layout with a five-photo vehicle gallery", "poster_urban_sale.html", 50),
+    ("Midnight Gold", "default_poster.html", 10),
+    ("Studio Minimal", "poster_studio_minimal.html", 20),
+    ("Electric Motion", "poster_electric_motion.html", 30),
+    ("Executive Black", "poster_executive_black.html", 40),
+    ("City Select", "poster_urban_sale.html", 50),
 ]
 
 with SessionLocal() as seed_db:
-    for name, description, filename, order in BUILT_IN_TEMPLATES:
+    for name, filename, order in BUILT_IN_TEMPLATES:
         source = ROOT / "templates" / filename
         if not source.exists():
             continue
@@ -658,7 +656,6 @@ with SessionLocal() as seed_db:
         if existing is None:
             seed_db.add(PosterTemplate(
                 name=name,
-                description=description,
                 html_content=markup,
                 placeholder_schema=schema,
                 sort_order=order,
@@ -666,7 +663,6 @@ with SessionLocal() as seed_db:
             ))
         elif existing.is_builtin and 'data-template-version="3"' not in (existing.html_content or ""):
             # One-time refresh of built-in presets. User-created templates are untouched.
-            existing.description = description
             existing.html_content = markup
             existing.placeholder_schema = schema
             existing.sort_order = order
@@ -1015,8 +1011,6 @@ def template_payload(payload: dict, creating: bool = False) -> dict:
         markup = str(payload.get("html_content", ""))
         data["html_content"] = markup
         data["placeholder_schema"] = validate_template_html(markup)
-    if "description" in payload:
-        data["description"] = str(payload.get("description") or "").strip() or None
     if "thumbnail_url" in payload:
         data["thumbnail_url"] = str(payload.get("thumbnail_url") or "").strip() or None
     if "sort_order" in payload:
