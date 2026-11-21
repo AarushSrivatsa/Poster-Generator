@@ -22,7 +22,47 @@ $("#fitnessMode").onchange=()=>$("#fitnessDateWrap").classList.toggle("hidden",$
 
 /* MAKE CRUD */
 function refreshMakeSelect(selected){$("#carMakeSelect").innerHTML='<option value="">Choose make</option>'+makes.map(m=>'<option value="'+m.id+'">'+esc(m.name)+'</option>').join("");$("#carMakeSelect").value=selected?String(selected):""}
-function renderMakes(){$("#makeCount").textContent=makes.length+" makes";$("#makeList").innerHTML=makes.map(m=>'<article class="make-card">'+(m.icon_url?'<img src="'+esc(m.icon_url)+'" alt="">':'<div class="make-placeholder">'+esc(m.name.slice(0,1))+'</div>')+'<div><b>'+esc(m.name)+'</b><button type="button" data-make-icon="'+m.id+'">'+(m.icon_url?"Replace logo":"Upload logo")+'</button></div><input type="file" accept="image/*" hidden data-make-file="'+m.id+'"></article>').join("")||'<div class="empty-card">No makes yet. Add the manufacturers you work with.</div>';refreshMakeSelect(editingCarId?cars.find(c=>c.id===editingCarId)?.make_id:"");document.querySelectorAll("[data-make-icon]").forEach(b=>b.onclick=()=>document.querySelector('[data-make-file="'+b.dataset.makeIcon+'"]').click());document.querySelectorAll("[data-make-file]").forEach(input=>input.onchange=async()=>{if(!input.files.length)return;const f=new FormData();f.append("file",input.files[0]);try{const updated=await api("/api/makes/"+input.dataset.makeFile+"/icon",{method:"POST",body:f});makes=makes.map(m=>m.id===updated.id?updated:m);renderMakes();toast("Make logo uploaded.")}catch(e){fail(e)}input.value=""})}
+function renderMakes(){
+  $("#makeCount").textContent=makes.length+" makes";
+  $("#makeList").innerHTML=makes.map(m=>
+    '<article class="make-card">'+
+    (m.icon_url?'<img src="'+esc(m.icon_url)+'" alt="">':'<div class="make-placeholder">'+esc(m.name.slice(0,1))+'</div>')+
+    '<div><b>'+esc(m.name)+'</b><button type="button" data-make-icon="'+m.id+'">'+(m.icon_url?"Replace logo":"Upload logo")+'</button>'+
+    '<button type="button" data-rename-make="'+m.id+'">Rename</button>'+
+    '<button type="button" data-delete-make="'+m.id+'">Delete</button></div>'+
+    '<input type="file" accept="image/*" hidden data-make-file="'+m.id+'"></article>'
+  ).join("")||'<div class="empty-card">No makes yet. Add the manufacturers you work with.</div>';
+  refreshMakeSelect(editingCarId?cars.find(c=>c.id===editingCarId)?.make_id:"");
+  document.querySelectorAll("[data-make-icon]").forEach(b=>b.onclick=()=>document.querySelector('[data-make-file="'+b.dataset.makeIcon+'"]').click());
+  document.querySelectorAll("[data-make-file]").forEach(input=>input.onchange=async()=>{
+    if(!input.files.length)return;
+    const f=new FormData();f.append("file",input.files[0]);
+    try{
+      const updated=await api("/api/makes/"+input.dataset.makeFile+"/icon",{method:"POST",body:f});
+      makes=makes.map(m=>m.id===updated.id?updated:m);renderMakes();toast("Make logo uploaded.");
+    }catch(e){fail(e)}
+    input.value="";
+  });
+  document.querySelectorAll("[data-rename-make]").forEach(b=>b.onclick=async()=>{
+    const make=makes.find(m=>m.id===Number(b.dataset.renameMake));
+    const name=prompt("Manufacturer name",make?.name||"");
+    if(!name||!name.trim())return;
+    try{
+      const updated=await api("/api/makes/"+make.id,{method:"PUT",...jsonOptions({name:name.trim()})});
+      makes=makes.map(m=>m.id===updated.id?updated:m);
+      cars=await api("/api/cars");renderMakes();renderCars();renderPosterChoices();renderPosters();
+      toast("Make renamed.");
+    }catch(e){fail(e)}
+  });
+  document.querySelectorAll("[data-delete-make]").forEach(b=>b.onclick=async()=>{
+    const make=makes.find(m=>m.id===Number(b.dataset.deleteMake));
+    if(!confirm("Delete make "+make?.name+"?"))return;
+    try{
+      await api("/api/makes/"+make.id,{method:"DELETE"});
+      makes=makes.filter(m=>m.id!==make.id);renderMakes();toast("Make deleted.");
+    }catch(e){fail(e)}
+  });
+}
 $("#makeForm").onsubmit=async e=>{e.preventDefault();const form=e.currentTarget;try{const make=await api("/api/makes",{method:"POST",...jsonOptions({name:form.elements.name.value.trim()})});makes.push(make);if(form.elements.icon.files[0]){const f=new FormData();f.append("file",form.elements.icon.files[0]);const updated=await api("/api/makes/"+make.id+"/icon",{method:"POST",body:f});makes=makes.map(m=>m.id===updated.id?updated:m)}form.reset();renderMakes();toast("Make added.")}catch(error){fail(error)}};
 
 /* CAR CRUD */
