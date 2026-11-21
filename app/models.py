@@ -143,7 +143,8 @@ class CarImage(Base):
 
 
 class PosterTemplate(Base):
-    __tablename__ = "poster_templates"
+    # Separate name avoids colliding with the previous app version's poster_templates table.
+    __tablename__ = "poster_design_templates"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(150), nullable=False, unique=True)
@@ -176,7 +177,7 @@ class CarPoster(Base):
         index=True,
     )
     template_id: Mapped[int] = mapped_column(
-        ForeignKey("poster_templates.id", ondelete="RESTRICT"),
+        ForeignKey("poster_design_templates.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )
