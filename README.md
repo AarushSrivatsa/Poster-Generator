@@ -7,7 +7,7 @@ Car listing poster studio: vehicle records, photo uploads, drag-and-drop image a
 - **Supabase Postgres** stores vehicle records, photo metadata, and saved HTML/Tailwind templates.
 - **Supabase Storage** stores original image files.
 - **FastAPI + SQLAlchemy** serve the frontend and API.
-- **HTML + Tailwind** templates use data placeholders. The photo-placement UI discovers slot names from the selected template HTML; the app imposes no fixed front/rear/interior layout.
+- **HTML + Tailwind** templates use simple placeholders. The Studio detects editable text fields and image targets from the selected template. The workspace keeps the copy editor, live preview, photo library, and drag-and-drop targets together; there are no fixed front/rear/interior positions or fixed image count.
 - No SQLite, local upload directory, or Render disk is used.
 
 ## Render environment variables
@@ -27,7 +27,7 @@ Car listing poster studio: vehicle records, photo uploads, drag-and-drop image a
 4. In **Storage**, create a bucket named `vehicle-photos` and mark it **Public**. Listing images are intended to be visible through public asset URLs. Upload and delete calls are still made server-side with the service-role key.
 5. Add the three required environment variables to Render: `DATABASE_URL`, `SUPABASE_URL`, and `SUPABASE_SECRET_KEY`. The bucket variable is optional unless you choose another bucket name.
 
-The app creates its application tables on startup. It also adds the `vehicle_photos.slot` column idempotently for databases created by the earlier version.
+The app creates its application tables on startup. It also adds the `vehicle_photos.slot` and `vehicles.poster_fields` columns idempotently for databases created by earlier versions.
 
 ## Render free deployment
 
@@ -40,11 +40,13 @@ Do not attach a disk. Render Free filesystems are ephemeral; vehicle records are
 
 ## Template placeholders
 
-Vehicle fields: `{{car.make}}`, `{{car.model}}`, `{{car.variant}}`, `{{car.year}}`, `{{car.registration}}`, `{{car.owner}}`, `{{car.transmission}}`, `{{car.fuel}}`, `{{car.odometer}}`, `{{car.insurance}}`, `{{car.insurance_expiry}}`, `{{car.tax_validity}}`, `{{car.fitness_validity}}`, `{{car.seller}}`, `{{car.condition}}`, `{{car.highlights}}`.
+Use plain names in HTML + Tailwind templates:
 
-**Any image slot name is allowed.** Add tokens such as `{{slot.hero}}`, `{{slot.left_front_three_quarter}}`, `{{slot.dashboard_closeup}}`, or `{{slot.detail_01}}` to an image's `src`. The app scans the selected template and creates a drop target for each unique `slot.*` placeholder.
+- **Text:** `{{title1}}`, `{{title2}}`, `{{price}}`, `{{description}}`, or any other name. Each becomes a large editable field in the Studio.
+- **Images:** `{{image1}}`, `{{image2}}`, `{{image3}}`, and so on. Each becomes a drag-and-drop target. There is no hardcoded image count.
+- Existing templates using `{{car.make}}`, `{{slot.hero}}`, and `{{label.hero}}` remain supported for backwards compatibility.
 
-Add an optional matching caption token such as `{{label.left_front_three_quarter}}` wherever that slot's editable caption belongs.
+Put an image token in an image source, for example `<img src="{{image1}}" alt="">`. Put text tokens wherever that text should appear. The app detects each unique token from the selected template automatically.
 
 ## Security
 
