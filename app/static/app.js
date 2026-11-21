@@ -147,5 +147,16 @@ uploadZone.ondragover=e=>{e.preventDefault();uploadZone.classList.add("drag")};u
 imageInput.onchange=()=>uploadImages(imageInput.files).catch(fail);
 async function uploadImages(files,slotKey=""){if(!activePoster||!activeCar||!files?.length)return;const form=new FormData();[...files].forEach(file=>form.append("files",file));const added=await api("/api/cars/"+activeCar.id+"/images",{method:"POST",body:form});activeCar=await api("/api/cars/"+activeCar.id);cars=cars.map(c=>c.id===activeCar.id?activeCar:c);if(slotKey&&added.length){activePoster.image_assignments={...(activePoster.image_assignments||{}),[slotKey]:added[0].id};await savePosterNow()}imageInput.value="";selectedImageId=null;renderImageLibrary();renderImageSlots();refreshPosterPreview();toast(added.length+" photo"+(added.length===1?"":"s")+" uploaded.")}
 
+
+window.addEventListener("message", event => {
+  const frame = $("#posterFrame");
+  if (event.source !== frame.contentWindow || !event.data || event.data.type !== "POSTER_STUDIO_DROP_IMAGE") return;
+  if (!activePoster || !activeTemplate) return;
+  const key = String(event.data.key || "");
+  const allowed = (activeTemplate.placeholder_schema?.images || []).some(slot => slot.key === key);
+  const imageId = Number(event.data.imageId);
+  if (allowed && Number.isInteger(imageId)) assignImage(imageId, key);
+});
+
 initControls();
 loadAll();
