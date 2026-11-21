@@ -4,7 +4,15 @@ A FastAPI + Supabase car inventory and poster builder. Store vehicle information
 
 ## Frontend
 
-The interface is built with Vue 3 (loaded from its pinned CDN build) and custom responsive CSS. FastAPI + Jinja2 serve the app shell and existing JSON APIs; no separate Node build step is required. The poster templates remain independent HTML/Tailwind documents rendered by the backend.
+The workspace uses Vue 3, Bootstrap 5.3, and a custom dark theme. Bootstrap styles the application controls and layout; Tailwind is never loaded into the application shell.
+
+Templates are previewed as real rendered documents, not source-code placeholders. The template editor shows the visual result first; HTML/Tailwind source and detected placeholders are inside a collapsed **Advanced** section. Preview rendering uses sample values and the first vehicle's uploaded photos when available.
+
+## Template rendering
+
+Each saved template is rendered in its own sandboxed iframe. The backend compiles the utility classes found in that template with the Tailwind CSS CLI and embeds the resulting stylesheet into the rendered HTML. This is production compilation, not Tailwind's browser Play CDN. Bootstrap never enters the template iframe, and Tailwind never enters the workspace shell, so the two frameworks cannot reset or override each other's styles.
+
+The compiled CSS is cached in process memory (up to 64 template sources) and automatically rebuilt when the template HTML changes. Docker installs Node 22 plus the pinned Tailwind CLI 4.3.5; the application server itself remains Python 3.12 + FastAPI. No user HTML is executed as part of the CSS compilation step.
 
 ## Data model
 
