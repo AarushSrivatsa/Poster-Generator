@@ -669,9 +669,10 @@ const app = Vue.createApp({
       this.uploadEditorPhotos(event.dataTransfer.files);
     },
     async deleteEditorImage(image) {
-      if (!confirm("Remove this photo from the vehicle? Existing poster placements will become empty.")) return;
+      if (!confirm("Remove this photo from the vehicle? Any poster placement using it will be emptied.")) return;
       try {
         await this.api("/api/images/" + image.id, {method:"DELETE"});
+        if (this.selectedImageId === image.id) this.selectedImageId = null;
         this.activeCar.images = this.activeCar.images.filter(item => item.id !== image.id);
         this.cars = this.cars.map(item => item.id === this.activeCar.id ? this.activeCar : item);
         const assignments = this.activePoster.image_assignments || {};
