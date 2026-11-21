@@ -2,12 +2,14 @@ services:
   - type: web
     name: poster-generator
     runtime: docker
-    plan: starter
-    healthCheckPath: /
+    plan: free
+    healthCheckPath: /healthz
     envVars:
-      - key: DATA_DIR
-        value: /var/data
-    disk:
-      name: poster-generator-data
-      mountPath: /var/data
-      sizeGB: 1
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: vehicle-photos
