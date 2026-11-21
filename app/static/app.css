@@ -179,15 +179,15 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .preview-stage{min-height:calc(100vh - 135px);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:25px;background:#e9ece7}
 .preview-stage iframe{width:100%;min-height:calc(100vh - 190px);border:0;background:#fff;box-shadow:0 5px 24px #1d2a1d13}
 /* Modals */
-.modal-backdrop{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(25,33,27,.48);backdrop-filter:blur(4px)}
-.modal{width:min(100%,650px);max-height:calc(100vh - 48px);overflow:auto;padding:23px;background:#fff;border:1px solid #e5e9e2;border-radius:15px;box-shadow:0 28px 90px #1d2a1d32}
-.modal-wide{width:min(100%,920px)}
-.modal-medium{width:min(100%,520px)}
-.modal-template{width:min(100%,980px)}
-.modal-header{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid #edf0eb}
-.modal-header h2{margin:5px 0;color:#263229;font:800 21px Manrope,sans-serif;letter-spacing:-.04em}
-.modal-header p{margin:0;color:#899289;font-size:10px}
-.modal-close{width:30px;height:30px;border:0;border-radius:8px;background:#f2f4f0;color:#657065;font-size:18px}
+.app-modal-backdrop{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(25,33,27,.48);backdrop-filter:blur(4px)}
+.app-modal{width:min(100%,650px);max-height:calc(100vh - 48px);overflow:auto;padding:23px;background:#fff;border:1px solid #e5e9e2;border-radius:15px;box-shadow:0 28px 90px #1d2a1d32}
+.app-modal-wide{width:min(100%,920px)}
+.app-modal-medium{width:min(100%,520px)}
+.app-modal-template{width:min(100%,980px)}
+.app-modal-header{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid #edf0eb}
+.app-modal-header h2{margin:5px 0;color:#263229;font:800 21px Manrope,sans-serif;letter-spacing:-.04em}
+.app-modal-header p{margin:0;color:#899289;font-size:10px}
+.app-modal-close{width:30px;height:30px;border:0;border-radius:8px;background:#f2f4f0;color:#657065;font-size:18px}
 .modal-form{display:grid;gap:4px}
 .form-section{margin-bottom:24px}
 .form-section-title{display:flex;align-items:flex-start;gap:11px;margin-bottom:14px}
@@ -213,7 +213,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .photo-tile-bottom input{width:100%;min-width:0;height:29px;padding:5px 7px;border:1px solid #e6e9e2;border-radius:5px;outline:0;color:#49564a;font-size:8px}
 .photo-tile-bottom button{width:25px;height:25px;flex:0 0 auto;border:0;border-radius:5px;background:#faf0ef;color:var(--red);font-size:15px}
 .photo-empty{padding:13px;border:1px dashed #e2e8df;border-radius:9px;color:#a0a89f;font-size:9px;text-align:center}
-.modal-footer{display:flex;justify-content:flex-end;gap:9px;margin-top:22px;padding-top:15px;border-top:1px solid #edf0eb}
+.app-modal-footer{display:flex;justify-content:flex-end;gap:9px;margin-top:22px;padding-top:15px;border-top:1px solid #edf0eb}
 .make-logo-preview{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:10px;border:1px solid #edf0eb;border-radius:8px;color:#8b948a;font-size:9px}
 .make-logo-preview img{width:44px;height:44px;object-fit:contain}
 .template-meta-grid{margin-bottom:12px}
@@ -244,5 +244,23 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .toast-message{position:fixed;right:22px;bottom:22px;z-index:100;max-width:min(90vw,420px);padding:12px 16px;border-radius:9px;background:#263e30;color:#fff;box-shadow:0 12px 35px #1b2a1d2b;font-size:10px;font-weight:700}
 @media(max-width:1180px){.poster-grid,.vehicle-grid,.template-grid,.make-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar{width:220px}.main-area{margin-left:220px}.page-content{padding:35px 25px 60px}.editor-layout{grid-template-columns:320px minmax(0,1fr)}}
 @media(max-width:850px){.sidebar{position:static;width:auto;height:auto;padding:12px 14px;border-right:0;border-bottom:1px solid var(--line)}.brand{padding:0 4px 12px}.sidebar-label,.sidebar-bottom{display:none}.main-nav{display:flex;overflow-x:auto}.nav-item{width:auto;flex:1;justify-content:center;min-width:88px;padding:0 9px}.nav-count{display:none}.main-area{margin-left:0}.topbar{height:48px;padding:0 18px}.page-content{padding:25px 18px 45px}.editor-layout{grid-template-columns:1fr}.editor-inspector{order:2}.editor-preview-area{order:1}.preview-stage{min-height:620px}.preview-stage iframe{min-height:620px}.editor-topbar{padding:0 13px;gap:10px}.editor-top-actions{gap:5px}.editor-top-actions .btn{padding:0 9px}.editor-heading{flex:1}}
-@media(max-width:580px){.page-heading{align-items:flex-start;flex-direction:column}.stats-row{gap:7px}.stat{padding:12px}.stat strong{font-size:19px}.poster-grid,.vehicle-grid,.template-grid,.make-grid{grid-template-columns:1fr}.section-toolbar{align-items:flex-start;flex-direction:column}.toolbar-right,.search-box{width:100%}.toolbar-right .search-box{flex:1}.modal-backdrop{padding:8px}.modal{max-height:calc(100vh - 16px);padding:16px;border-radius:12px}.form-grid{grid-template-columns:1fr}.picker-grid{grid-template-columns:1fr;max-height:190px}.editor-topbar{height:auto;min-height:60px;flex-wrap:wrap;padding:9px 12px}.editor-heading{order:3;width:100%;flex-basis:100%}.editor-top-actions{margin-left:auto}.editor-top-actions .save-indicator{display:none}.editor-layout{padding:8px}.preview-stage{padding:10px;min-height:500px}.preview-stage iframe{min-height:540px}.editor-image-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.modal-footer{flex-wrap:wrap}.modal-footer .btn{flex:1}}
+@media(max-width:580px){.page-heading{align-items:flex-start;flex-direction:column}.stats-row{gap:7px}.stat{padding:12px}.stat strong{font-size:19px}.poster-grid,.vehicle-grid,.template-grid,.make-grid{grid-template-columns:1fr}.section-toolbar{align-items:flex-start;flex-direction:column}.toolbar-right,.search-box{width:100%}.toolbar-right .search-box{flex:1}.app-modal-backdrop{padding:8px}.modal{max-height:calc(100vh - 16px);padding:16px;border-radius:12px}.form-grid{grid-template-columns:1fr}.picker-grid{grid-template-columns:1fr;max-height:190px}.editor-topbar{height:auto;min-height:60px;flex-wrap:wrap;padding:9px 12px}.editor-heading{order:3;width:100%;flex-basis:100%}.editor-top-actions{margin-left:auto}.editor-top-actions .save-indicator{display:none}.editor-layout{padding:8px}.preview-stage{padding:10px;min-height:500px}.preview-stage iframe{min-height:540px}.editor-image-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.app-modal-footer{flex-wrap:wrap}.app-modal-footer .btn{flex:1}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Bootstrap is the app-wide component foundation. These namespaced rules are the Motor Studio theme layer. */
+.template-preview{cursor:pointer}
+.template-preview iframe{display:block;width:100%;height:100%;border:0;background:#fff;pointer-events:none}
+.template-preview-section{margin:4px 0 14px}
+.template-preview-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px}
+.template-preview-heading>div{display:flex;flex-direction:column;gap:3px}
+.template-preview-heading strong{color:#354237;font-size:12px}
+.template-preview-heading small{color:#899289;font-size:9px}
+.template-preview-canvas{height:min(62vh,560px);min-height:350px;display:flex;align-items:stretch;justify-content:center;overflow:auto;border:1px solid #e4e9e1;border-radius:10px;background:#e9ece7}
+.template-preview-canvas iframe{display:block;width:100%;height:100%;min-height:500px;flex:1;border:0;background:#fff}
+.template-preview-message{width:100%;min-height:350px;display:flex;align-items:center;justify-content:center;padding:25px;color:#7d887d;font-size:11px;text-align:center}
+.template-preview-error{color:#a34740}
+.template-source-details{margin-top:12px;padding:13px 14px;border:1px solid #e8ece5;border-radius:9px;background:#fafbf9}
+.template-source-details summary{color:#4b5d4c;font-size:10px;font-weight:800;cursor:pointer}
+.template-source-details[open] summary{margin-bottom:12px}
+.template-source-details .template-code-label{margin-top:10px}
+.template-picker-frame{width:52px;height:50px;flex:0 0 auto;border:0;border-radius:6px;background:#eef1ec;pointer-events:none}
