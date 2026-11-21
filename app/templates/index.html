@@ -68,7 +68,7 @@
         <div class="section-toolbar">
           <div><h2>Recent posters</h2><p>Open a design to continue editing or export it.</p></div>
           <div class="toolbar-right">
-            <label class="search-box"><span>⌕</span><input v-model="posterSearch" type="search" placeholder="Search posters"></label>
+            <label class="search-box"><span>⌕</span><input class="form-control" v-model="posterSearch" type="search" placeholder="Search posters"></label>
             <span class="result-count">[[ filteredPosters.length ]] items</span>
           </div>
         </div>
@@ -107,7 +107,7 @@
         </div>
         <div class="section-toolbar">
           <div><h2>Vehicle inventory</h2><p>[[ cars.length ]] saved vehicles</p></div>
-          <label class="search-box"><span>⌕</span><input v-model="carSearch" type="search" placeholder="Search make, model or registration"></label>
+          <label class="search-box"><span>⌕</span><input class="form-control" v-model="carSearch" type="search" placeholder="Search make, model or registration"></label>
         </div>
         <div v-if="!filteredCars.length" class="empty-state compact">
           <div class="empty-illustration">▣</div><h3>[[ cars.length ? 'No matching vehicles' : 'No vehicles yet' ]]</h3>
@@ -138,7 +138,7 @@
         </div>
         <div class="section-toolbar">
           <div><h2>All manufacturers</h2><p>One shared record per brand.</p></div>
-          <label class="search-box"><span>⌕</span><input v-model="makeSearch" type="search" placeholder="Search manufacturers"></label>
+          <label class="search-box"><span>⌕</span><input class="form-control" v-model="makeSearch" type="search" placeholder="Search manufacturers"></label>
         </div>
         <div v-if="!filteredMakes.length" class="empty-inline">[[ makes.length ? 'No manufacturers match your search.' : 'No manufacturers yet. Add one to start building your inventory.' ]]</div>
         <div v-else class="make-grid">
@@ -157,7 +157,7 @@
         </div>
         <div class="section-toolbar">
           <div><h2>Available designs</h2><p>Choose a design when creating a poster.</p></div>
-          <label class="search-box"><span>⌕</span><input v-model="templateSearch" type="search" placeholder="Search templates"></label>
+          <label class="search-box"><span>⌕</span><input class="form-control" v-model="templateSearch" type="search" placeholder="Search templates"></label>
         </div>
         <div v-if="!filteredTemplates.length" class="empty-inline">[[ templates.length ? 'No templates match your search.' : 'No templates found.' ]]</div>
         <div v-else class="template-grid">
@@ -193,12 +193,12 @@
       <aside class="editor-inspector">
         <div class="inspector-section">
           <div class="inspector-heading"><div><div class="overline">CONTENT</div><h2>Text and details</h2></div></div>
-          <label class="field-label">Poster name<input v-model="activePoster.name" @input="schedulePosterSave" placeholder="Give this poster a name"></label>
+          <label class="field-label">Poster name<input class="form-control" v-model="activePoster.name" @input="schedulePosterSave" placeholder="Give this poster a name"></label>
           <div v-if="activeTextFields.length" class="dynamic-fields">
             <label v-for="field in activeTextFields" :key="field.key" class="field-label">
               [[ field.label || field.key ]]
-              <textarea v-if="field.multiline" v-model="activePoster.text_values[field.key]" @input="schedulePosterSave" rows="3" :placeholder="'Write '+(field.label || field.key).toLowerCase()+'…'"></textarea>
-              <input v-else v-model="activePoster.text_values[field.key]" @input="schedulePosterSave" :placeholder="'Write '+(field.label || field.key).toLowerCase()+'…'">
+              <textarea class="form-control" v-if="field.multiline" v-model="activePoster.text_values[field.key]" @input="schedulePosterSave" rows="3" :placeholder="'Write '+(field.label || field.key).toLowerCase()+'…'"></textarea>
+              <input class="form-control" v-else v-model="activePoster.text_values[field.key]" @input="schedulePosterSave" :placeholder="'Write '+(field.label || field.key).toLowerCase()+'…'">
             </label>
           </div>
           <p v-else class="inspector-hint">This design has no editable text fields.</p>
@@ -242,17 +242,17 @@
         <div class="form-section">
           <div class="form-section-title"><span>01</span><div><h3>Vehicle details</h3><p>Basic information and specifications.</p></div></div>
           <div class="form-grid">
-            <label class="field-label">Make<select v-model="carForm.make_id" required><option value="">Choose manufacturer</option><option v-for="make in makes" :key="make.id" :value="String(make.id)">[[ make.name ]]</option></select></label>
-            <label class="field-label">Model<input v-model="carForm.model" placeholder="e.g. Creta" required></label>
-            <label class="field-label">Variant<input v-model="carForm.variant" placeholder="e.g. SX(O) 1.5 Diesel"></label>
-            <label class="field-label">Registration number<input v-model="carForm.registration_no" placeholder="e.g. TS09AB1234" required></label>
-            <label class="field-label">Fuel type<select v-model="carForm.fuel_type" required><option value="">Choose fuel type</option><option v-for="fuel in fuelTypes" :key="fuel">[[ fuel ]]</option></select></label>
-            <label class="field-label">Year<select v-model="carForm.year" required><option value="">Choose year</option><option v-for="year in years" :key="year" :value="String(year)">[[ year ]]</option></select></label>
-            <label class="field-label">Transmission<select v-model="carForm.transmission" required><option value="">Choose transmission</option><option v-for="type in transmissionTypes" :key="type">[[ type ]]</option></select></label>
-            <label class="field-label">Odometer <span class="field-unit">KM · leave empty if unrecorded</span><input v-model="carForm.odometer_km" type="number" step="1" placeholder="e.g. 42,500"></label>
-            <label class="field-label">Number of owners <span class="field-unit">Leave empty if unrecorded</span><input v-model="carForm.owner_count" type="number" step="1" placeholder="e.g. 2"></label>
-            <div class="field-label"><span>Insurance validity</span><div class="validity-control"><select v-model="carForm.insurance_mode"><option value="lapsed">Lapsed</option><option value="date">Valid until</option></select><input v-if="carForm.insurance_mode==='date'" v-model="carForm.insurance_date" type="month" aria-label="Insurance expiry month"></div></div>
-            <div class="field-label"><span>Fitness validity</span><div class="validity-control"><select v-model="carForm.fitness_mode"><option value="lapsed">Lapsed</option><option value="date">Valid until</option></select><select v-if="carForm.fitness_mode==='date'" v-model="carForm.fitness_year" aria-label="Fitness expiry year"><option value="">Choose year</option><option v-for="year in years" :key="year" :value="String(year)">[[ year ]]</option></select></div></div>
+            <label class="field-label">Make<select class="form-select" v-model="carForm.make_id" required><option value="">Choose manufacturer</option><option v-for="make in makes" :key="make.id" :value="String(make.id)">[[ make.name ]]</option></select></label>
+            <label class="field-label">Model<input class="form-control" v-model="carForm.model" placeholder="e.g. Creta" required></label>
+            <label class="field-label">Variant<input class="form-control" v-model="carForm.variant" placeholder="e.g. SX(O) 1.5 Diesel"></label>
+            <label class="field-label">Registration number<input class="form-control" v-model="carForm.registration_no" placeholder="e.g. TS09AB1234" required></label>
+            <label class="field-label">Fuel type<select class="form-select" v-model="carForm.fuel_type" required><option value="">Choose fuel type</option><option v-for="fuel in fuelTypes" :key="fuel">[[ fuel ]]</option></select></label>
+            <label class="field-label">Year<select class="form-select" v-model="carForm.year" required><option value="">Choose year</option><option v-for="year in years" :key="year" :value="String(year)">[[ year ]]</option></select></label>
+            <label class="field-label">Transmission<select class="form-select" v-model="carForm.transmission" required><option value="">Choose transmission</option><option v-for="type in transmissionTypes" :key="type">[[ type ]]</option></select></label>
+            <label class="field-label">Odometer <span class="field-unit">KM · leave empty if unrecorded</span><input class="form-control" v-model="carForm.odometer_km" type="number" step="1" placeholder="e.g. 42,500"></label>
+            <label class="field-label">Number of owners <span class="field-unit">Leave empty if unrecorded</span><input class="form-control" v-model="carForm.owner_count" type="number" step="1" placeholder="e.g. 2"></label>
+            <div class="field-label"><span>Insurance validity</span><div class="validity-control"><select class="form-select" v-model="carForm.insurance_mode"><option value="lapsed">Lapsed</option><option value="date">Valid until</option></select><input class="form-control" v-if="carForm.insurance_mode==='date'" v-model="carForm.insurance_date" type="month" aria-label="Insurance expiry month"></div></div>
+            <div class="field-label"><span>Fitness validity</span><div class="validity-control"><select class="form-select" v-model="carForm.fitness_mode"><option value="lapsed">Lapsed</option><option value="date">Valid until</option></select><select class="form-select" v-if="carForm.fitness_mode==='date'" v-model="carForm.fitness_year" aria-label="Fitness expiry year"><option value="">Choose year</option><option v-for="year in years" :key="year" :value="String(year)">[[ year ]]</option></select></div></div>
           </div>
         </div>
         <div class="form-section">
@@ -264,13 +264,13 @@
           <div v-if="editingCarImages.length" class="photo-group"><div class="photo-group-label">Saved photos · [[ editingCarImages.length ]]</div><div class="photo-grid">
             <article v-for="image in editingCarImages" :key="image.id" class="photo-tile">
               <img :src="image.image_url" :alt="image.image_type">
-              <div class="photo-tile-bottom"><input v-model="image.image_type" @change="saveImageType(image)" aria-label="Photo description"><button type="button" @click="removeSavedCarImage(image)" title="Remove photo">×</button></div>
+              <div class="photo-tile-bottom"><input class="form-control" v-model="image.image_type" @change="saveImageType(image)" aria-label="Photo description"><button type="button" @click="removeSavedCarImage(image)" title="Remove photo">×</button></div>
             </article>
           </div></div>
           <div v-if="pendingPhotos.length" class="photo-group"><div class="photo-group-label">Ready to save · [[ pendingPhotos.length ]]</div><div class="photo-grid">
             <article v-for="photo in pendingPhotos" :key="photo.id" class="photo-tile pending-tile">
               <img :src="photo.previewUrl" :alt="photo.file.name">
-              <div class="photo-tile-bottom"><input v-model="photo.imageType" aria-label="Photo description" placeholder="e.g. Front left"><button type="button" @click="removePendingPhoto(photo)" title="Remove selected photo">×</button></div>
+              <div class="photo-tile-bottom"><input class="form-control" v-model="photo.imageType" aria-label="Photo description" placeholder="e.g. Front left"><button type="button" @click="removePendingPhoto(photo)" title="Remove selected photo">×</button></div>
             </article>
           </div></div>
           <div v-if="!editingCarImages.length && !pendingPhotos.length" class="photo-empty">No photos selected yet.</div>
@@ -288,7 +288,7 @@
     <section class="modal app-modal-medium" role="dialog" aria-modal="true" aria-labelledby="makeDialogTitle">
       <header class="app-modal-header"><div><div class="overline">MANUFACTURER</div><h2 id="makeDialogTitle">[[ editingMakeId ? 'Edit manufacturer' : 'Add manufacturer' ]]</h2><p>Name and logo are shared across all its vehicles.</p></div><button class="app-modal-close" @click="closeMakeDialog">×</button></header>
       <form @submit.prevent="saveMake" class="modal-form">
-        <label class="field-label">Manufacturer name<input v-model="makeForm.name" placeholder="e.g. Hyundai" required></label>
+        <label class="field-label">Manufacturer name<input class="form-control" v-model="makeForm.name" placeholder="e.g. Hyundai" required></label>
         <label class="field-label">Logo <input type="file" accept="image/*" @change="chooseMakeLogo"></label>
         <div v-if="makeLogoPreview" class="make-logo-preview"><img :src="makeLogoPreview" alt="Logo preview"><span>Selected logo</span></div>
         <div class="app-modal-footer"><button type="button" class="btn btn-ghost" @click="closeMakeDialog">Cancel</button><button class="btn btn-primary" type="submit" :disabled="busy==='make'">[[ busy==='make' ? 'Saving…' : (editingMakeId ? 'Save changes' : 'Add manufacturer') ]]</button></div>
@@ -302,8 +302,8 @@
       <header class="app-modal-header"><div><div class="overline">DESIGN LIBRARY</div><h2 id="templateDialogTitle">[[ editingTemplateId ? 'Edit template' : 'Create template' ]]</h2><p>See the finished design first. The source is available in advanced settings.</p></div><button class="app-modal-close" @click="closeTemplateDialog">×</button></header>
       <form @submit.prevent="saveTemplate">
         <div class="form-grid template-meta-grid">
-          <label class="field-label">Template name<input v-model="templateForm.name" placeholder="e.g. Premium dark listing" required></label>
-          <label class="field-label">Description<input v-model="templateForm.description" placeholder="A short description"></label>
+          <label class="field-label">Template name<input class="form-control" v-model="templateForm.name" placeholder="e.g. Premium dark listing" required></label>
+          <label class="field-label">Description<input class="form-control" v-model="templateForm.description" placeholder="A short description"></label>
         </div>
         <section class="template-preview-section">
           <div class="template-preview-heading">
@@ -320,7 +320,7 @@
         <details class="template-source-details">
           <summary>Advanced: HTML + Tailwind source</summary>
           <p class="subtle-note">For template authors. Tailwind is loaded inside the preview and poster only, so it cannot affect the Bootstrap app.</p>
-          <label class="field-label template-code-label">Template source<textarea v-model="templateForm.html_content" @input="scheduleTemplatePreview" rows="16" spellcheck="false" placeholder="<main class='poster'>&#10;  <h1>&#123;&#123;car.model&#125;&#125;</h1>&#10;  <img src='&#123;&#123;make.icon&#125;&#125;'>&#10;  <img src='&#123;&#123;image.hero&#125;&#125;'>&#10;  <h2>&#123;&#123;text.headline&#125;&#125;</h2>&#10;</main>"></textarea></label>
+          <label class="field-label template-code-label">Template source<textarea v-model="templateForm.html_content" @input="scheduleTemplatePreview" rows="16" spellcheck="false" placeholder="<main class='poster form-control'>&#10;  <h1>&#123;&#123;car.model&#125;&#125;</h1>&#10;  <img src='&#123;&#123;make.icon&#125;&#125;'>&#10;  <img src='&#123;&#123;image.hero&#125;&#125;'>&#10;  <h2>&#123;&#123;text.headline&#125;&#125;</h2>&#10;</main>"></textarea></label>
           <div class="placeholder-panel"><div class="placeholder-panel-title"><b>Detected placeholders</b><span>[[ detectedTokens.length ]] found</span></div><div v-if="detectedTokens.length" class="token-list"><code v-for="token in detectedTokens" :key="token">[[ token ]]</code></div><p v-else class="subtle-note">Use car.*, make.*, image.* and text.* placeholders in your HTML.</p></div>
         </details>
         <div class="app-modal-footer"><button type="button" class="btn btn-ghost" @click="closeTemplateDialog">Cancel</button><button type="submit" class="btn btn-primary" :disabled="busy==='template'">[[ busy==='template' ? 'Saving…' : 'Save template' ]]</button></div>
