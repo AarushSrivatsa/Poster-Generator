@@ -23,8 +23,10 @@ $("#fitnessMode").onchange=()=>$("#fitnessDateWrap").classList.toggle("hidden",$
 /* MAKE CRUD */
 function refreshMakeSelect(selected){$("#carMakeSelect").innerHTML='<option value="">Choose make</option>'+makes.map(m=>'<option value="'+m.id+'">'+esc(m.name)+'</option>').join("");$("#carMakeSelect").value=selected?String(selected):""}
 function renderMakes(){
-  $("#makeCount").textContent=makes.length+" makes";
-  $("#makeList").innerHTML=makes.map(m=>
+  const query = ($("#makeSearch")?.value || "").trim().toLowerCase();
+  const filtered = makes.filter(m => m.name.toLowerCase().includes(query));
+  $("#makeCount").textContent=query ? filtered.length+" of "+makes.length+" makes" : makes.length+" makes";
+  $("#makeList").innerHTML=filtered.map(m=>
     '<article class="make-card">'+
     (m.icon_url?'<img src="'+esc(m.icon_url)+'" alt="">':'<div class="make-placeholder">'+esc(m.name.slice(0,1))+'</div>')+
     '<div><b>'+esc(m.name)+'</b><button type="button" data-make-icon="'+m.id+'">'+(m.icon_url?"Replace logo":"Upload logo")+'</button>'+
@@ -218,11 +220,13 @@ function fillCarForm(car) {
 }
 
 function renderCars() {
-  $("#carCount").textContent = cars.length + " cars";
-  $("#carList").innerHTML = cars.map(c =>
+  const query = ($("#carSearch")?.value || "").trim().toLowerCase();
+  const filtered = cars.filter(c => [c.make?.name, c.model, c.variant, c.registration_no, c.year].join(" ").toLowerCase().includes(query));
+  $("#carCount").textContent = query ? filtered.length + " of " + cars.length + " cars" : cars.length + " cars";
+  $("#carList").innerHTML = filtered.map(c =>
     '<button type="button" class="record-row ' + (editingCarId === c.id ? "selected" : "") + '" data-edit-car="' + c.id + '">' +
       '<span class="record-main"><b>' + esc(c.make?.name) + " " + esc(c.model) + '</b>' +
-      '<small>' + esc(c.year) + " · " + esc(c.registration_no) + " · " + (c.images?.length || 0) + " photos</small></span>' +
+      '<small>' + esc(c.year) + " · " + esc(c.registration_no) + " · " + (c.images?.length || 0) + ' photos</small></span>' +
       '<span class="record-actions">Edit →</span></button>'
   ).join("") || '<div class="empty-card">No cars saved yet.</div>';
   document.querySelectorAll("[data-edit-car]").forEach(button => {
@@ -342,8 +346,10 @@ $("#templateHtml").oninput=showDetectedSchema;
 function resetTemplateForm(){editingTemplateId=null;$("#templateForm").reset();$("#templateForm").elements.id.value="";$("#templateFormTitle").textContent="Add a template";showDetectedSchema()}
 function editTemplate(id){const t=templates.find(x=>x.id===id);if(!t)return;editingTemplateId=id;const f=$("#templateForm");f.elements.id.value=t.id;f.elements.name.value=t.name;f.elements.description.value=t.description||"";f.elements.html_content.value=t.html_content;$("#templateFormTitle").textContent=t.name;showDetectedSchema();switchTab("templates");f.scrollIntoView({behavior:"smooth",block:"start"})}
 function renderTemplates() {
-  $("#templateCount").textContent = templates.length + " templates";
-  const rows = templates.map(t => {
+  const query = ($("#templateSearch")?.value || "").trim().toLowerCase();
+  const filtered = templates.filter(t => [t.name, t.description].join(" ").toLowerCase().includes(query));
+  $("#templateCount").textContent = query ? filtered.length + " of " + templates.length + " templates" : templates.length + " templates";
+  const rows = filtered.map(t => {
     let actions = '<button type="button" data-edit-template="' + t.id + '">Edit</button>' +
       '<button type="button" data-copy-template="' + t.id + '">Copy</button>';
     if (!t.is_builtin) actions += '<button type="button" class="delete-link" data-delete-template="' + t.id + '">Delete</button>';
@@ -385,7 +391,7 @@ $("#templateForm").onsubmit=async e=>{e.preventDefault();const f=e.currentTarget
 function renderPosterChoices(){$("#posterCarChoices").innerHTML=cars.map(c=>'<button type="button" class="choice-pill '+(selectedCarId===c.id?"selected":"")+'" data-choose-car="'+c.id+'">'+esc(c.make?.name)+" "+esc(c.model)+" · "+esc(c.year)+'</button>').join("")||'<span class="muted">Add a car in Cars first.</span>';$("#posterTemplateChoices").innerHTML=templates.map(t=>'<button type="button" class="template-pill '+(selectedTemplateId===t.id?"selected":"")+'" data-choose-template="'+t.id+'">'+esc(t.name)+'</button>').join("")||'<span class="muted">Add a template first.</span>';document.querySelectorAll("[data-choose-car]").forEach(b=>b.onclick=()=>{selectedCarId=Number(b.dataset.chooseCar);renderPosterChoices()});document.querySelectorAll("[data-choose-template]").forEach(b=>b.onclick=()=>{selectedTemplateId=Number(b.dataset.chooseTemplate);renderPosterChoices()});$("#createPoster").disabled=!(selectedCarId&&selectedTemplateId)}
 $("#startNewPoster").onclick=()=>document.querySelector(".create-strip").scrollIntoView({behavior:"smooth",block:"center"});
 $("#createPoster").onclick=async()=>{if(!selectedCarId||!selectedTemplateId)return toast("Choose a car and template.");try{const p=await api("/api/posters",{method:"POST",...jsonOptions({car_id:selectedCarId,template_id:selectedTemplateId})});posters.unshift(p);renderPosters();await openPoster(p.id);toast("Poster created. Edit text and drag photos into place.")}catch(e){fail(e)}};
-function renderPosters(){$("#posterCount").textContent=posters.length+" posters";$("#posterList").innerHTML=posters.map(p=>{const c=cars.find(x=>x.id===p.car_id),t=templates.find(x=>x.id===p.template_id);return'<article class="poster-card"><div class="poster-card-main"><b>'+esc(p.name||t?.name||"Poster")+'</b><small>'+esc(c?.make?.name||"")+" "+esc(c?.model||"Car")+" · "+esc(t?.name||"Template")+'</small></div><div class="poster-card-actions"><button type="button" data-open-poster="'+p.id+'">Open</button><button type="button" class="delete-link" data-delete-poster="'+p.id+'">Delete</button></div></article>'}).join("")||'<div class="empty-card">No posters saved. Choose a car and template above to create one.</div>';document.querySelectorAll("[data-open-poster]").forEach(b=>b.onclick=()=>openPoster(Number(b.dataset.openPoster)).catch(fail));document.querySelectorAll("[data-delete-poster]").forEach(b=>b.onclick=async()=>{if(!confirm("Delete this poster?"))return;try{const id=Number(b.dataset.deletePoster);await api("/api/posters/"+id,{method:"DELETE"});posters=posters.filter(p=>p.id!==id);if(activePoster?.id===id)closePosterEditor();renderPosters();toast("Poster deleted.")}catch(e){fail(e)}})}
+function renderPosters(){const query=($("#posterSearch")?.value||"").trim().toLowerCase();const filtered=posters.filter(p=>{const c=cars.find(x=>x.id===p.car_id),t=templates.find(x=>x.id===p.template_id);return [p.name,c?.make?.name,c?.model,t?.name].join(" ").toLowerCase().includes(query)});$("#posterCount").textContent=query?filtered.length+" of "+posters.length+" posters":posters.length+" posters";$("#posterList").innerHTML=filtered.map(p=>{const c=cars.find(x=>x.id===p.car_id),t=templates.find(x=>x.id===p.template_id);return'<article class="poster-card"><div class="poster-card-main"><b>'+esc(p.name||t?.name||"Poster")+'</b><small>'+esc(c?.make?.name||"")+" "+esc(c?.model||"Car")+" · "+esc(t?.name||"Template")+'</small></div><div class="poster-card-actions"><button type="button" data-open-poster="'+p.id+'">Open</button><button type="button" class="delete-link" data-delete-poster="'+p.id+'">Delete</button></div></article>'}).join("")||'<div class="empty-card">No posters saved. Choose a car and template above to create one.</div>';document.querySelectorAll("[data-open-poster]").forEach(b=>b.onclick=()=>openPoster(Number(b.dataset.openPoster)).catch(fail));document.querySelectorAll("[data-delete-poster]").forEach(b=>b.onclick=async()=>{if(!confirm("Delete this poster?"))return;try{const id=Number(b.dataset.deletePoster);await api("/api/posters/"+id,{method:"DELETE"});posters=posters.filter(p=>p.id!==id);if(activePoster?.id===id)closePosterEditor();renderPosters();toast("Poster deleted.")}catch(e){fail(e)}})}
 async function openPoster(id){if(activePoster&&activePoster.id!==id){clearTimeout(posterSaveTimer);await savePosterNow()}const p=await api("/api/posters/"+id),c=await api("/api/cars/"+p.car_id),t=templates.find(x=>x.id===p.template_id);if(!t)throw Error("The template for this poster no longer exists.");activePoster=p;activeCar=c;activeTemplate=t;selectedImageId=null;$("#posterEditor").classList.remove("hidden");$("#activePosterTitle").textContent=p.name||t.name;$("#activePosterSubtitle").textContent=c.make.name+" "+c.model+" · "+t.name;$("#posterName").value=p.name||t.name;renderPosterTextFields();renderImageLibrary();renderImageSlots();refreshPosterPreview();setSaveStatus("saved");switchTab("posters");$("#posterEditor").scrollIntoView({behavior:"smooth",block:"start"})}
 function closePosterEditor(){clearTimeout(posterSaveTimer);activePoster=null;activeCar=null;activeTemplate=null;$("#posterEditor").classList.add("hidden");$("#canvasEmpty").classList.remove("hidden");$("#posterFrame").classList.add("hidden")}
 function setSaveStatus(state){const e=$("#saveStatus");e.classList.remove("saving","error");if(state==="saving"){e.classList.add("saving");e.innerHTML="<i></i> Saving…"}else if(state==="error"){e.classList.add("error");e.innerHTML="<i></i> Save failed"}else e.innerHTML="<i></i> All changes saved"}
@@ -418,6 +424,11 @@ window.addEventListener("message", event => {
   const imageId = Number(event.data.imageId);
   if (allowed && Number.isInteger(imageId)) assignImage(imageId, key);
 });
+
+$("#carSearch").oninput = renderCars;
+$("#makeSearch").oninput = renderMakes;
+$("#templateSearch").oninput = renderTemplates;
+$("#posterSearch").oninput = renderPosters;
 
 initControls();
 loadAll();
