@@ -96,7 +96,7 @@ with SessionLocal() as seed_db:
 def health():
     return {"ok": True}
 
-@app.get("/", response_class=HTMLResponse)
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def home(request: Request):
     return views.TemplateResponse("index.html", {"request": request})
 
