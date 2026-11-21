@@ -2,6 +2,10 @@
 
 A FastAPI + Supabase car inventory and poster builder. Store vehicle information once, create reusable HTML/Tailwind poster templates, then generate independent posters with their own image assignments and editable text.
 
+## Frontend
+
+The interface is built with Vue 3 (loaded from its pinned CDN build) and custom responsive CSS. FastAPI + Jinja2 serve the app shell and existing JSON APIs; no separate Node build step is required. The poster templates remain independent HTML/Tailwind documents rendered by the backend.
+
 ## Data model
 
 - \`CarMake\`: one shared manufacturer record, with its optional public Supabase logo URL.
