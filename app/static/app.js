@@ -48,5 +48,5 @@ $("#buildPoster").onclick=async()=>{if(!current){toast("Add a vehicle first.");r
 $("#tryNextDesign").onclick=()=>{if(!templates.length)return;const index=templates.findIndex(template=>template.id===Number(selectedTemplateId));selectTemplate(templates[(index+1)%templates.length].id)};
 $("#templateForm").onsubmit=async event=>{event.preventDefault();try{const saved=await api("/api/templates",{method:"POST",...json(payload(event.target))});templates=await api("/api/templates");selectedTemplateId=saved.id;renderTemplates();renderContentFields();renderPhotos();refreshPreview();event.target.reset();switchTab("studio");toast("Design saved")}catch(error){toast(error.message)}};
 $("#refreshPreview").onclick=refreshPreview;
-$("#printPoster").onclick=()=>{const frame=$("#posterFrame");if(!current||frame.classList.contains("hidden")){toast("Choose a vehicle and design first.");return}frame.contentWindow?.focus();frame.contentWindow?.print()};
+$("#printPoster").onclick=()=>{const frame=$("#posterFrame");if(!current||frame.classList.contains("hidden")){toast("Choose a vehicle and design first.");return}frame.contentWindow?.postMessage({type:"POSTER_STUDIO_PRINT"},"*")};
 load();
