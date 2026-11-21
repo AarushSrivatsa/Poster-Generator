@@ -9,7 +9,7 @@ from pathlib import Path
 from urllib.parse import quote, unquote, urlparse
 
 import httpx
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -439,7 +439,7 @@ def health():
 
 
 @app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
-def home(request):
+def home(request: Request):
     return views.TemplateResponse("index.html", {"request": request})
 
 
