@@ -28,7 +28,7 @@ const app = Vue.createApp({
       makeLogoPreview: "",
       templateDialogOpen: false,
       editingTemplateId: null,
-      templateForm: {name:"", description:"", html_content:""},
+      templateForm: {name:"", html_content:""},
       templateStarterId: null,
       templateNameTouched: false,
       placeholderGroups: [
@@ -42,11 +42,10 @@ const app = Vue.createApp({
         {title:"Manufacturer branding",description:"Use the name as text and the logo as an image source.",items:[
           {token:"{{make.name}}",label:"Manufacturer name"},{token:"{{make.icon}}",label:"Manufacturer logo"}
         ]},
-        {title:"Vehicle photos",description:"Each unique photo token creates a photo placement the customer can fill.",items:[
-          {token:"{{image.hero}}",label:"Main photo"},{token:"{{image.angle}}",label:"Front / side angle"},
-          {token:"{{image.rear}}",label:"Rear view"},{token:"{{image.interior}}",label:"Interior"},
-          {token:"{{image.detail}}",label:"Dashboard / detail"}
-        ],tip:"Each unique token creates a separate photo slot. Add any name such as {{image.dashboard}}; in the layout, place it in an image element's src attribute."},
+        {title:"Images",description:"Generic photo placements. Each number can hold any vehicle photo; the numbers do not describe photo types.",items:[
+          {token:"{{image.1}}",label:"Image 1"},{token:"{{image.2}}",label:"Image 2"},
+          {token:"{{image.3}}",label:"Image 3"},{token:"{{image.4}}",label:"Image 4"}
+        ],tip:"These are not fixed photo types. Use {{image.5}}, {{image.6}}, or any further number when the layout needs more photo placements."},
         {title:"Editable poster text",description:"These become fields the customer can fill separately on each poster.",items:[
           {token:"{{text.eyebrow}}",label:"Small heading"},{token:"{{text.price}}",label:"Selling price"},
           {token:"{{text.tagline}}",label:"Short description"},{token:"{{text.contact}}",label:"Contact information"}
@@ -97,7 +96,7 @@ const app = Vue.createApp({
     },
     filteredTemplates() {
       const q = this.templateSearch.trim().toLowerCase();
-      return this.templates.filter(template => [template.name,template.description].join(" ").toLowerCase().includes(q));
+      return this.templates.filter(template => template.name.toLowerCase().includes(q));
     },
     starterTemplates() {
       return this.templates.filter(template => template.is_builtin);
@@ -407,8 +406,8 @@ const app = Vue.createApp({
       this.templateStarterId = null;
       this.templateNameTouched = false;
       this.templateForm = template
-        ? {name:template.name, description:template.description || "", html_content:template.html_content}
-        : {name:this.uniqueTemplateName("New template"), description:"", html_content:""};
+        ? {name:template.name, html_content:template.html_content}
+        : {name:this.uniqueTemplateName("New template"), html_content:""};
       this.templatePreviewHtml = "";
       this.templatePreviewError = "";
       this.templatePreviewLoading = false;
@@ -420,7 +419,6 @@ const app = Vue.createApp({
       this.templateStarterId = starter.id;
       if (!this.templateNameTouched) this.templateForm.name = this.uniqueTemplateName(starter.name + " Custom");
       this.templateForm.html_content = starter.html_content;
-      this.templateForm.description = starter.description || "A custom vehicle poster design.";
       this.scheduleTemplatePreview();
       this.notify("Design starting point changed.");
     },
@@ -446,12 +444,12 @@ const app = Vue.createApp({
         "{{make.name}} — manufacturer name",
         "{{make.icon}} — manufacturer logo URL (use as an image src)",
         "",
-        "VEHICLE PHOTOS (each one creates its own replaceable photo slot; use as img src):",
-        '<img src="{{image.hero}}" alt="Main vehicle photo">',
-        '<img src="{{image.angle}}" alt="Front or side angle">',
-        '<img src="{{image.rear}}" alt="Rear view">',
-        '<img src="{{image.interior}}" alt="Interior">',
-        '<img src="{{image.detail}}" alt="Dashboard or detail">',
+        "IMAGES (generic numbered photo placements; each can contain ANY vehicle photo):",
+        '<img src="{{image.1}}" alt="Image 1">',
+        '<img src="{{image.2}}" alt="Image 2">',
+        '<img src="{{image.3}}" alt="Image 3">',
+        '<img src="{{image.4}}" alt="Image 4">',
+        "Use {{image.5}}, {{image.6}}, etc. for as many additional image placements as the design needs. They are not tied to front, rear, interior or any particular photo type.",
         "",
         "CUSTOM POSTER TEXT (editable separately for each poster):",
         "{{text.eyebrow}} — small heading",
@@ -543,7 +541,7 @@ const app = Vue.createApp({
       }
       this.busy = "template";
       try {
-        const payload = {name:this.templateForm.name.trim(), description:this.templateForm.description.trim(), html_content:this.templateForm.html_content};
+        const payload = {name:this.templateForm.name.trim(), html_content:this.templateForm.html_content};
         const duplicateName = this.templates.some(template =>
           template.name.trim().toLowerCase() === payload.name.toLowerCase()
           && template.id !== this.editingTemplateId
@@ -566,7 +564,6 @@ const app = Vue.createApp({
     async duplicateTemplate(template) {
       const payload = {
         name:this.uniqueTemplateName(template.name + " Copy"),
-        description:template.description || "",
         html_content:template.html_content
       };
       try {
