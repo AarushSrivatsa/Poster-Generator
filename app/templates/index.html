@@ -294,54 +294,97 @@
   <!-- Template form -->
   <div v-if="templateDialogOpen" class="app-modal-backdrop" @click.self="closeTemplateDialog">
     <section class="app-modal app-modal-template" role="dialog" aria-modal="true" aria-labelledby="templateDialogTitle">
-      <header class="app-modal-header"><div><div class="overline">DESIGN LIBRARY</div><h2 id="templateDialogTitle">[[ editingTemplateId ? 'Edit template' : 'Create template' ]]</h2><p>A template is a reusable layout. Each poster gets its own vehicle, photos and text.</p></div><button class="app-modal-close" @click="closeTemplateDialog">×</button></header>
-      <form @submit.prevent="saveTemplate">
-        <section v-if="!editingTemplateId" class="template-start-panel">
-          <div class="template-help-heading"><div><strong>Start with a design</strong><small>Pick a ready-made layout. You do not need to write code.</small></div><span>STEP 1</span></div>
-          <div v-if="starterTemplates.length" class="template-starter-grid">
-            <button v-for="starter in starterTemplates" :key="starter.id" type="button" class="template-starter-card" :class="{selected:templateStarterId===starter.id}" @click="chooseTemplateStarter(starter)">
-              <span class="template-starter-preview"><iframe :src="'/api/templates/'+starter.id+'/preview'" :title="starter.name+' preview'" loading="lazy" tabindex="-1"></iframe></span>
-              <span class="template-starter-copy"><b>[[ starter.name ]]</b><small>[[ starter.description || 'Ready-made vehicle layout' ]]</small><i>[[ templateStarterId===starter.id ? 'Selected' : 'Use this design' ]]</i></span>
-            </button>
-          </div>
-          <p v-else class="subtle-note">No ready-made designs are available yet. Add a built-in design before creating a custom one.</p>
-        </section>
-        <div class="form-grid template-meta-grid">
-          <label class="field-label">Template name<input class="form-control" v-model="templateForm.name" @input="templateNameTouched=true" placeholder="e.g. Premium dark listing" required></label>
-          <label class="field-label">Description<input class="form-control" v-model="templateForm.description" placeholder="A short description"></label>
+      <header class="app-modal-header">
+        <div>
+          <div class="overline">DESIGN LIBRARY</div>
+          <h2 id="templateDialogTitle">[[ editingTemplateId ? 'Edit template' : 'Add a template' ]]</h2>
+          <p>Paste the complete design once. Motor Studio finds the vehicle fields and photo slots for you.</p>
         </div>
-        <section class="template-preview-section">
-          <div class="template-preview-heading">
-            <div><strong>Live sample preview</strong><small>Shows how this design looks with example vehicle details</small></div>
-            <button type="button" class="btn btn-outline" @click="refreshTemplatePreview" :disabled="templatePreviewLoading">[[ templatePreviewLoading ? 'Rendering…' : 'Refresh preview ↻' ]]</button>
+        <button class="app-modal-close" type="button" @click="closeTemplateDialog" aria-label="Close">×</button>
+      </header>
+
+      <form @submit.prevent="saveTemplate" class="template-create-form">
+        <div class="form-grid template-meta-grid">
+          <label class="field-label">Template name
+            <input class="form-control" v-model="templateForm.name" @input="templateNameTouched=true" placeholder="e.g. Premium SUV listing" required>
+          </label>
+          <label class="field-label">Description <span class="subtle-note inline-note">Optional</span>
+            <input class="form-control" v-model="templateForm.description" placeholder="A short description">
+          </label>
+        </div>
+
+        <section class="template-paste-section">
+          <div class="template-paste-heading">
+            <div>
+              <span class="template-step">01</span>
+              <div><strong>Paste your complete HTML design</strong><small>One paste only. Keep the {{...}} placeholders exactly as written.</small></div>
+            </div>
+            <span class="template-paste-required">Required</span>
           </div>
-          <div class="template-preview-canvas">
-            <div v-if="templatePreviewLoading" class="template-preview-message">Rendering the design…</div>
-            <div v-else-if="templatePreviewError" class="template-preview-message template-preview-error">[[ templatePreviewError ]]</div>
-            <iframe v-else-if="templatePreviewHtml" :srcdoc="templatePreviewHtml" title="Rendered template preview" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
-            <div v-else class="template-preview-message">Choose a ready-made design above to see a preview here.</div>
+          <label class="field-label template-paste-label">
+            <span class="visually-hidden">Complete HTML template</span>
+            <textarea v-model="templateForm.html_content" @input="scheduleTemplatePreview" rows="13" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste the complete HTML you received from your designer or AI tool here…"></textarea>
+          </label>
+          <div class="template-detection-row">
+            <div v-if="detectedTokens.length" class="template-detection-success"><span>✓</span> [[ detectedTokens.length ]] placeholders detected automatically</div>
+            <div v-else class="template-detection-empty">No vehicle fields detected yet. Use the complete field guide below when preparing your design.</div>
+            <button v-if="templateForm.html_content.trim()" type="button" class="text-action" @click="refreshTemplatePreview" :disabled="templatePreviewLoading">[[ templatePreviewLoading ? 'Updating…' : 'Update preview' ]]</button>
+          </div>
+          <div v-if="detectedTokens.length" class="template-detected-tokens">
+            <code v-for="token in detectedTokens" :key="token">[[ '{{' + token + '}}' ]]</code>
           </div>
         </section>
-        <section class="placeholder-library">
-          <div class="placeholder-library-heading"><div><strong>What can go into a poster?</strong><small>These fields are filled in automatically or become easy-to-edit boxes for each poster.</small></div><span>PLACEHOLDER GUIDE</span></div>
-          <div class="placeholder-library-grid">
-            <article v-for="group in placeholderGroups" :key="group.title" class="placeholder-group">
-              <h3>[[ group.title ]]</h3><p>[[ group.description ]]</p>
-              <button v-for="item in group.items" :key="item.token" type="button" class="placeholder-copy-row" @click="copyPlaceholder(item.token)" :title="'Copy '+item.token">
-                <span>[[ item.label ]]</span><code>[[ item.token ]]</code><small>Copy</small>
-              </button>
-              <p v-if="group.tip" class="placeholder-tip">[[ group.tip ]]</p>
+
+        <section class="template-guide-section">
+          <div class="template-guide-top">
+            <div>
+              <span class="template-step">02</span>
+              <div><strong>Fields your design can use</strong><small>Give this whole list to your AI designer in one go. Do not copy fields individually.</small></div>
+            </div>
+            <button type="button" class="btn btn-outline template-copy-all" @click="copyPlaceholderGuide">Copy all fields</button>
+          </div>
+          <div class="template-guide-groups">
+            <article v-for="group in placeholderGroups" :key="group.title" class="template-guide-group">
+              <h3>[[ group.title ]]</h3>
+              <p>[[ group.items.map(item => item.label).join(' · ') ]]</p>
+              <div class="template-guide-tokens"><code v-for="item in group.items" :key="item.token">[[ item.token ]]</code></div>
             </article>
           </div>
-          <p class="placeholder-library-foot">You can copy any token for advanced editing. For everyday use, start with a design above and change the poster text and photos in the visual editor.</p>
+          <p class="template-guide-note">Only fields used in your pasted design will appear in the poster editor. Photo placeholders create separate photo slots. Ownership is automatically shown as 1st owner, 2nd owner, 3rd owner and so on.</p>
         </section>
-        <details class="template-source-details">
-          <summary>Advanced editing (optional)</summary>
-          <p class="subtle-note">Only open this if you are comfortable editing HTML, CSS or Tailwind. Ready-made designs and the visual poster editor do not require code.</p>
-          <label class="field-label template-code-label">Design source<textarea v-model="templateForm.html_content" @input="scheduleTemplatePreview" rows="16" spellcheck="false" placeholder="Choose a ready-made design above. Advanced users can edit its source here."></textarea></label>
-          <div class="placeholder-panel"><div class="placeholder-panel-title"><b>Detected placeholders</b><span>[[ detectedTokens.length ]] found</span></div><div v-if="detectedTokens.length" class="token-list"><code v-for="token in detectedTokens" :key="token">[[ token ]]</code></div><p v-else class="subtle-note">No placeholders detected in the current design yet.</p></div>
+
+        <section class="template-preview-section">
+          <div class="template-preview-heading">
+            <div>
+              <span class="template-step">03</span>
+              <div><strong>Preview your design</strong><small>Check the layout before saving it.</small></div>
+            </div>
+            <span v-if="templatePreviewLoading" class="template-preview-status">Rendering…</span>
+          </div>
+          <div class="template-preview-canvas">
+            <div v-if="templatePreviewLoading" class="template-preview-message">Updating your sample preview…</div>
+            <div v-else-if="templatePreviewError" class="template-preview-message template-preview-error">[[ templatePreviewError ]]</div>
+            <iframe v-else-if="templatePreviewHtml" :srcdoc="templatePreviewHtml" title="Rendered template preview" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
+            <div v-else class="template-preview-message">Paste your design above to see it here.</div>
+          </div>
+        </section>
+
+        <details v-if="!editingTemplateId && starterTemplates.length" class="template-existing-designs">
+          <summary>Use or adapt one of the existing designs instead</summary>
+          <div class="template-existing-grid">
+            <button v-for="starter in starterTemplates" :key="starter.id" type="button" class="template-existing-card" @click="chooseTemplateStarter(starter)">
+              <span><b>[[ starter.name ]]</b><small>[[ starter.description || 'Ready-made vehicle poster' ]]</small></span>
+              <i>Use design</i>
+            </button>
+          </div>
         </details>
-        <div class="app-modal-footer"><button type="button" class="btn btn-ghost" @click="closeTemplateDialog">Cancel</button><button type="submit" class="btn btn-primary" :disabled="busy==='template'">[[ busy==='template' ? 'Saving…' : 'Save template' ]]</button></div>
+
+        <div class="app-modal-footer">
+          <button type="button" class="btn btn-ghost" @click="closeTemplateDialog">Cancel</button>
+          <button type="submit" class="btn btn-primary" :disabled="busy==='template' || !templateForm.html_content.trim()">
+            [[ busy==='template' ? 'Saving…' : (editingTemplateId ? 'Save changes' : 'Save template') ]]
+          </button>
+        </div>
       </form>
     </section>
   </div>
