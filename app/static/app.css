@@ -23,3 +23,28 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 @media(max-width:1280px){.studio-grid{grid-template-columns:minmax(240px,.8fr) minmax(400px,1.2fr)}.media-panel{grid-column:1/-1}.image-library{grid-template-columns:repeat(6,minmax(0,1fr));max-height:none}.image-slots{grid-template-columns:repeat(4,minmax(0,1fr))}.canvas-wrap{max-height:none}.poster-frame{height:900px}}
 @media(max-width:850px){.app-header{height:auto;min-height:68px;flex-wrap:wrap;padding:10px 13px;gap:9px}.brand{min-width:auto}.brand small{display:none}.top-nav{order:3;width:100%;justify-content:center}.cloud-status{margin-left:auto}.app-main{padding:19px 12px 40px}.page-heading,.editor-titlebar{align-items:flex-start;flex-direction:column}.create-strip{grid-template-columns:1fr;gap:8px}.create-action{grid-column:auto}.create-action .primary-btn{width:100%}.studio-grid,.management-grid,.make-layout,.template-management-grid{grid-template-columns:1fr}.canvas-panel{order:-1}.canvas-wrap{min-height:560px}.poster-frame{height:700px;min-height:700px}.media-panel{grid-column:auto}.image-library{grid-template-columns:repeat(4,minmax(0,1fr))}.image-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.editor-actions{width:100%}.editor-actions>*{flex:1}.form-grid,.make-form{grid-template-columns:1fr}.make-form .primary-btn{grid-column:auto;justify-self:stretch}.token-groups{grid-template-columns:1fr 1fr}}
 @media(max-width:480px){.brand b{font-size:12px}.nav-tab{padding:8px 9px;font-size:10px}.form-grid,.validity-field{grid-template-columns:1fr}.poster-list{grid-template-columns:1fr}.image-library{grid-template-columns:repeat(3,minmax(0,1fr))}.image-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.token-groups{grid-template-columns:1fr}.page-heading h1{font-size:29px}}
+
+
+/* Car photos are managed with the vehicle record, before poster creation. */
+.car-photo-manager{grid-column:1/-1;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.car-photo-manager-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:13px}
+.car-photo-manager-head h3{font:700 18px 'Space Grotesk';margin:0}
+.car-photo-manager-head .muted{max-width:580px;margin:6px 0 0;font-size:11px}
+.photo-save-note{font-size:10px;font-weight:900;color:var(--green);border:1px solid #7bdaa144;background:#7bdaa111;border-radius:100px;padding:7px 10px;white-space:nowrap}
+.car-photo-dropzone{min-height:145px;border:2px dashed #8d7849;border-radius:14px;background:linear-gradient(145deg,#d8ad4f12,#d8ad4f04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;cursor:pointer;transition:.15s}
+.car-photo-dropzone:hover,.car-photo-dropzone.drag{border-color:var(--gold);background:#d8ad4f20;transform:translateY(-1px)}
+.car-photo-dropzone b{font-size:13px}.car-photo-dropzone span{font-size:11px;color:#b5bdc8}.car-photo-dropzone small{font-size:9px;color:#7e8b9b}
+.car-photo-add-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:var(--gold);color:#17130a!important;font-size:25px!important}
+.car-saved-photos,.car-photo-drafts{margin-top:14px}
+.saved-photo-heading{margin:0 0 9px;color:#cbd5df;font-size:10px;font-weight:900;letter-spacing:.04em}
+.car-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px}
+.car-photo-card{position:relative;min-width:0;overflow:hidden;border:1px solid #ffffff1b;border-radius:12px;background:#0b121a}
+.car-photo-card>img{display:block;width:100%;height:115px;object-fit:cover;background:#111}
+.car-photo-card-info{padding:9px;min-width:0}
+.car-photo-card-info>b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:#e7edf4}
+.car-photo-card-info>small{display:block;margin-top:4px;color:#8391a0;font-size:9px}
+.car-photo-card-info label{display:flex;flex-direction:column;gap:5px;margin-top:7px;color:#aeb9c7;font-size:9px;font-weight:800}
+.car-photo-card-info input{width:100%;min-height:34px;border:1px solid #344253;border-radius:7px;background:#080e15;color:#fff;padding:7px;font-size:10px}
+.photo-remove-btn{position:absolute;top:7px;right:7px;width:27px;height:27px;border:1px solid #ffffff44;border-radius:50%;background:#080d14df;color:#ffb1b1;font-size:19px;line-height:1}
+.photo-empty-note{padding:13px;border:1px dashed #ffffff22;border-radius:10px;color:#8290a0;font-size:10px}
+@media(max-width:600px){.car-photo-manager-head{flex-direction:column}.car-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
