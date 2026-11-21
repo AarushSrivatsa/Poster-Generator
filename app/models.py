@@ -22,6 +22,7 @@ class Vehicle(Base):
     seller: Mapped[str] = mapped_column(String(120), default="")
     condition: Mapped[str] = mapped_column(String(120), default="Well cared-for vehicle")
     highlights: Mapped[str] = mapped_column(String(300), default="Robust | Reliable | Value for money")
+    poster_fields: Mapped[str] = mapped_column(Text, default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     photos: Mapped[list["VehiclePhoto"]] = relationship(back_populates="vehicle", cascade="all, delete-orphan")
 
