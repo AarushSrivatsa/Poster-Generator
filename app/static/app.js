@@ -40,7 +40,42 @@ function showDetectedSchema(){const keys=detectedTokens($("#templateHtml").value
 $("#templateHtml").oninput=showDetectedSchema;
 function resetTemplateForm(){editingTemplateId=null;$("#templateForm").reset();$("#templateForm").elements.id.value="";$("#templateFormTitle").textContent="Add a template";showDetectedSchema()}
 function editTemplate(id){const t=templates.find(x=>x.id===id);if(!t)return;editingTemplateId=id;const f=$("#templateForm");f.elements.id.value=t.id;f.elements.name.value=t.name;f.elements.description.value=t.description||"";f.elements.html_content.value=t.html_content;$("#templateFormTitle").textContent=t.name;showDetectedSchema();switchTab("templates");f.scrollIntoView({behavior:"smooth",block:"start"})}
-function renderTemplates(){$("#templateCount").textContent=templates.length+" templates";$("#templateList").innerHTML=templates.map(t=>'<article class="record-row"><span class="record-main"><b>'+esc(t.name)+(t.is_builtin?" · Built-in":"")+'</b><small>'+esc(t.description||"Custom template")+" · "+((t.placeholder_schema?.images||[]).length)+" images · "+((t.placeholder_schema?.text||[]).length)+" text fields</small></span><span class="record-actions"><button type="button" data-edit-template="'+t.id+'">Edit</button><button type="button" data-copy-template="'+t.id+'">Copy</button>'+(t.is_builtin?"":'<button type="button" class="delete-link" data-delete-template="'+t.id+'">Delete</button>')+'</span></article>').join("")||'<div class="empty-card">No templates yet.</div>';document.querySelectorAll("[data-edit-template]").forEach(b=>b.onclick=()=>editTemplate(Number(b.dataset.editTemplate)));document.querySelectorAll("[data-copy-template]").forEach(b=>b.onclick=()=>{const t=templates.find(x=>x.id===Number(b.dataset.copyTemplate));if(!t)return;resetTemplateForm();$("#templateForm").elements.name.value=t.name+" Copy";$("#templateForm").elements.description.value=t.description||"";$("#templateForm").elements.html_content.value=t.html_content;showDetectedSchema();switchTab("templates")});document.querySelectorAll("[data-delete-template]").forEach(b=>b.onclick=async()=>{if(!confirm("Delete this template?"))return;try{await api("/api/templates/"+b.dataset.deleteTemplate,{method:"DELETE"});templates=await api("/api/templates");posters=await api("/api/posters");renderTemplates();renderPosterChoices();renderPosters();toast("Template deleted.")}catch(e){fail(e)}})}
+function renderTemplates() {
+  $("#templateCount").textContent = templates.length + " templates";
+  const rows = templates.map(t => {
+    let actions = '<button type="button" data-edit-template="' + t.id + '">Edit</button>' +
+      '<button type="button" data-copy-template="' + t.id + '">Copy</button>';
+    if (!t.is_builtin) actions += '<button type="button" class="delete-link" data-delete-template="' + t.id + '">Delete</button>';
+    return '<article class="record-row">' +
+      '<span class="record-main"><b>' + esc(t.name) + (t.is_builtin ? " · Built-in" : "") +
+      '</b><small>' + esc(t.description || "Custom template") + " · " +
+      ((t.placeholder_schema?.images || []).length) + " images · " +
+      ((t.placeholder_schema?.text || []).length) + " text fields</small></span>" +
+      '<span class="record-actions">' + actions + '</span></article>';
+  }).join("");
+  $("#templateList").innerHTML = rows || '<div class="empty-card">No templates yet.</div>';
+  document.querySelectorAll("[data-edit-template]").forEach(b => b.onclick = () => editTemplate(Number(b.dataset.editTemplate)));
+  document.querySelectorAll("[data-copy-template]").forEach(b => b.onclick = () => {
+    const t = templates.find(x => x.id === Number(b.dataset.copyTemplate));
+    if (!t) return;
+    resetTemplateForm();
+    $("#templateForm").elements.name.value = t.name + " Copy";
+    $("#templateForm").elements.description.value = t.description || "";
+    $("#templateForm").elements.html_content.value = t.html_content;
+    showDetectedSchema();
+    switchTab("templates");
+  });
+  document.querySelectorAll("[data-delete-template]").forEach(b => b.onclick = async () => {
+    if (!confirm("Delete this template?")) return;
+    try {
+      await api("/api/templates/" + b.dataset.deleteTemplate, {method:"DELETE"});
+      templates = await api("/api/templates");
+      posters = await api("/api/posters");
+      renderTemplates(); renderPosterChoices(); renderPosters();
+      toast("Template deleted.");
+    } catch (e) { fail(e); }
+  });
+}
 $("#newTemplate").onclick=()=>{resetTemplateForm();switchTab("templates")};
 $("#cancelTemplateEdit").onclick=resetTemplateForm;
 $("#templateForm").onsubmit=async e=>{e.preventDefault();const f=e.currentTarget;const payload={name:f.elements.name.value.trim(),description:f.elements.description.value.trim(),html_content:f.elements.html_content.value};try{await api(editingTemplateId?"/api/templates/"+editingTemplateId:"/api/templates",{method:editingTemplateId?"PUT":"POST",...jsonOptions(payload)});templates=await api("/api/templates");resetTemplateForm();renderTemplates();renderPosterChoices();toast("Template saved. Placeholders detected.")}catch(error){fail(error)}};
