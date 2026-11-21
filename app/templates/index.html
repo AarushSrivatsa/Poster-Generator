@@ -235,9 +235,9 @@
   </main>
 
   <!-- Vehicle form -->
-  <div v-if="carDialogOpen" class="modal-backdrop" @click.self="closeCarDialog">
-    <section class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="carDialogTitle">
-      <header class="modal-header"><div><div class="overline">VEHICLE RECORD</div><h2 id="carDialogTitle">[[ editingCarId ? 'Edit vehicle' : 'Add a vehicle' ]]</h2><p>Save the details and every photo together.</p></div><button class="modal-close" @click="closeCarDialog" aria-label="Close">×</button></header>
+  <div v-if="carDialogOpen" class="app-modal-backdrop" @click.self="closeCarDialog">
+    <section class="modal app-modal-wide" role="dialog" aria-modal="true" aria-labelledby="carDialogTitle">
+      <header class="app-modal-header"><div><div class="overline">VEHICLE RECORD</div><h2 id="carDialogTitle">[[ editingCarId ? 'Edit vehicle' : 'Add a vehicle' ]]</h2><p>Save the details and every photo together.</p></div><button class="app-modal-close" @click="closeCarDialog" aria-label="Close">×</button></header>
       <form @submit.prevent="saveCar">
         <div class="form-section">
           <div class="form-section-title"><span>01</span><div><h3>Vehicle details</h3><p>Basic information and specifications.</p></div></div>
@@ -275,7 +275,7 @@
           </div></div>
           <div v-if="!editingCarImages.length && !pendingPhotos.length" class="photo-empty">No photos selected yet.</div>
         </div>
-        <footer class="modal-footer">
+        <footer class="app-modal-footer">
           <button type="button" class="btn btn-ghost" @click="closeCarDialog">Cancel</button>
           <button type="submit" class="btn btn-primary" :disabled="busy==='car'">[[ busy==='car' ? 'Saving…' : (editingCarId ? 'Save changes' : 'Save vehicle') ]]</button>
         </footer>
@@ -284,38 +284,54 @@
   </div>
 
   <!-- Make form -->
-  <div v-if="makeDialogOpen" class="modal-backdrop" @click.self="closeMakeDialog">
-    <section class="modal modal-medium" role="dialog" aria-modal="true" aria-labelledby="makeDialogTitle">
-      <header class="modal-header"><div><div class="overline">MANUFACTURER</div><h2 id="makeDialogTitle">[[ editingMakeId ? 'Edit manufacturer' : 'Add manufacturer' ]]</h2><p>Name and logo are shared across all its vehicles.</p></div><button class="modal-close" @click="closeMakeDialog">×</button></header>
+  <div v-if="makeDialogOpen" class="app-modal-backdrop" @click.self="closeMakeDialog">
+    <section class="modal app-modal-medium" role="dialog" aria-modal="true" aria-labelledby="makeDialogTitle">
+      <header class="app-modal-header"><div><div class="overline">MANUFACTURER</div><h2 id="makeDialogTitle">[[ editingMakeId ? 'Edit manufacturer' : 'Add manufacturer' ]]</h2><p>Name and logo are shared across all its vehicles.</p></div><button class="app-modal-close" @click="closeMakeDialog">×</button></header>
       <form @submit.prevent="saveMake" class="modal-form">
         <label class="field-label">Manufacturer name<input v-model="makeForm.name" placeholder="e.g. Hyundai" required></label>
         <label class="field-label">Logo <input type="file" accept="image/*" @change="chooseMakeLogo"></label>
         <div v-if="makeLogoPreview" class="make-logo-preview"><img :src="makeLogoPreview" alt="Logo preview"><span>Selected logo</span></div>
-        <div class="modal-footer"><button type="button" class="btn btn-ghost" @click="closeMakeDialog">Cancel</button><button class="btn btn-primary" type="submit" :disabled="busy==='make'">[[ busy==='make' ? 'Saving…' : (editingMakeId ? 'Save changes' : 'Add manufacturer') ]]</button></div>
+        <div class="app-modal-footer"><button type="button" class="btn btn-ghost" @click="closeMakeDialog">Cancel</button><button class="btn btn-primary" type="submit" :disabled="busy==='make'">[[ busy==='make' ? 'Saving…' : (editingMakeId ? 'Save changes' : 'Add manufacturer') ]]</button></div>
       </form>
     </section>
   </div>
 
   <!-- Template form -->
-  <div v-if="templateDialogOpen" class="modal-backdrop" @click.self="closeTemplateDialog">
-    <section class="modal modal-template" role="dialog" aria-modal="true" aria-labelledby="templateDialogTitle">
-      <header class="modal-header"><div><div class="overline">DESIGN TEMPLATE</div><h2 id="templateDialogTitle">[[ editingTemplateId ? 'Edit template' : 'Create template' ]]</h2><p>Paste your HTML and Tailwind. Placeholders are detected automatically.</p></div><button class="modal-close" @click="closeTemplateDialog">×</button></header>
+  <div v-if="templateDialogOpen" class="app-modal-backdrop" @click.self="closeTemplateDialog">
+    <section class="modal app-modal-template" role="dialog" aria-modal="true" aria-labelledby="templateDialogTitle">
+      <header class="app-modal-header"><div><div class="overline">DESIGN LIBRARY</div><h2 id="templateDialogTitle">[[ editingTemplateId ? 'Edit template' : 'Create template' ]]</h2><p>See the finished design first. The source is available in advanced settings.</p></div><button class="app-modal-close" @click="closeTemplateDialog">×</button></header>
       <form @submit.prevent="saveTemplate">
         <div class="form-grid template-meta-grid">
           <label class="field-label">Template name<input v-model="templateForm.name" placeholder="e.g. Premium dark listing" required></label>
           <label class="field-label">Description<input v-model="templateForm.description" placeholder="A short description"></label>
         </div>
-        <label class="field-label template-code-label">HTML + Tailwind<textarea v-model="templateForm.html_content" rows="16" spellcheck="false" placeholder="<main class='poster'>&#10;  <h1>&#123;&#123;car.model&#125;&#125;</h1>&#10;  <img src='&#123;&#123;make.icon&#125;&#125;'>&#10;  <img src='&#123;&#123;image.hero&#125;&#125;'>&#10;  <h2>&#123;&#123;text.headline&#125;&#125;</h2>&#10;</main>"></textarea></label>
-        <div class="placeholder-panel"><div class="placeholder-panel-title"><b>Detected placeholders</b><span>[[ detectedTokens.length ]] found</span></div><div v-if="detectedTokens.length" class="token-list"><code v-for="token in detectedTokens" :key="token">[[ token ]]</code></div><p v-else class="subtle-note">Use car.*, make.*, image.* and text.* placeholders in your HTML.</p></div>
-        <div class="modal-footer"><button type="button" class="btn btn-ghost" @click="closeTemplateDialog">Cancel</button><button type="submit" class="btn btn-primary" :disabled="busy==='template'">[[ busy==='template' ? 'Saving…' : 'Save template' ]]</button></div>
+        <section class="template-preview-section">
+          <div class="template-preview-heading">
+            <div><strong>Template preview</strong><small>Rendered with sample vehicle details and photos</small></div>
+            <button type="button" class="btn btn-outline" @click="refreshTemplatePreview" :disabled="templatePreviewLoading">[[ templatePreviewLoading ? 'Rendering…' : 'Refresh preview ↻' ]]</button>
+          </div>
+          <div class="template-preview-canvas">
+            <div v-if="templatePreviewLoading" class="template-preview-message">Rendering the design…</div>
+            <div v-else-if="templatePreviewError" class="template-preview-message template-preview-error">[[ templatePreviewError ]]</div>
+            <iframe v-else-if="templatePreviewHtml" :srcdoc="templatePreviewHtml" title="Rendered template preview" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
+            <div v-else class="template-preview-message">Add HTML in the advanced section below, then the preview will appear here.</div>
+          </div>
+        </section>
+        <details class="template-source-details">
+          <summary>Advanced: HTML + Tailwind source</summary>
+          <p class="subtle-note">For template authors. Tailwind is loaded inside the preview and poster only, so it cannot affect the Bootstrap app.</p>
+          <label class="field-label template-code-label">Template source<textarea v-model="templateForm.html_content" @input="scheduleTemplatePreview" rows="16" spellcheck="false" placeholder="<main class='poster'>&#10;  <h1>&#123;&#123;car.model&#125;&#125;</h1>&#10;  <img src='&#123;&#123;make.icon&#125;&#125;'>&#10;  <img src='&#123;&#123;image.hero&#125;&#125;'>&#10;  <h2>&#123;&#123;text.headline&#125;&#125;</h2>&#10;</main>"></textarea></label>
+          <div class="placeholder-panel"><div class="placeholder-panel-title"><b>Detected placeholders</b><span>[[ detectedTokens.length ]] found</span></div><div v-if="detectedTokens.length" class="token-list"><code v-for="token in detectedTokens" :key="token">[[ token ]]</code></div><p v-else class="subtle-note">Use car.*, make.*, image.* and text.* placeholders in your HTML.</p></div>
+        </details>
+        <div class="app-modal-footer"><button type="button" class="btn btn-ghost" @click="closeTemplateDialog">Cancel</button><button type="submit" class="btn btn-primary" :disabled="busy==='template'">[[ busy==='template' ? 'Saving…' : 'Save template' ]]</button></div>
       </form>
     </section>
   </div>
 
   <!-- Create poster -->
-  <div v-if="posterCreateOpen" class="modal-backdrop" @click.self="posterCreateOpen=false">
-    <section class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="createPosterTitle">
-      <header class="modal-header"><div><div class="overline">NEW DESIGN</div><h2 id="createPosterTitle">Create a poster</h2><p>Choose the vehicle and template to start with.</p></div><button class="modal-close" @click="posterCreateOpen=false">×</button></header>
+  <div v-if="posterCreateOpen" class="app-modal-backdrop" @click.self="posterCreateOpen=false">
+    <section class="modal app-modal-wide" role="dialog" aria-modal="true" aria-labelledby="createPosterTitle">
+      <header class="app-modal-header"><div><div class="overline">NEW DESIGN</div><h2 id="createPosterTitle">Create a poster</h2><p>Choose the vehicle and template to start with.</p></div><button class="app-modal-close" @click="posterCreateOpen=false">×</button></header>
       <div class="picker-section"><div class="picker-title"><h3>1. Choose a vehicle</h3><span>[[ cars.length ]] available</span></div>
         <div v-if="!cars.length" class="empty-inline">Add a vehicle before creating a poster.</div>
         <div class="picker-grid">
@@ -334,12 +350,13 @@
           </button>
         </div>
       </div>
-      <div class="modal-footer"><button class="btn btn-ghost" @click="posterCreateOpen=false">Cancel</button><button class="btn btn-primary" :disabled="!posterDraft.car_id || !posterDraft.template_id || busy==='poster'" @click="createPoster">[[ busy==='poster' ? 'Creating…' : 'Create poster' ]]</button></div>
+      <div class="app-modal-footer"><button class="btn btn-ghost" @click="posterCreateOpen=false">Cancel</button><button class="btn btn-primary" :disabled="!posterDraft.car_id || !posterDraft.template_id || busy==='poster'" @click="createPoster">[[ busy==='poster' ? 'Creating…' : 'Create poster' ]]</button></div>
     </section>
   </div>
 
   <div v-if="toastMessage" class="toast-message" role="status">[[ toastMessage ]]</div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"></script>
 <script src="/static/app.js"></script>
 </body>
