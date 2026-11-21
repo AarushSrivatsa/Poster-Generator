@@ -46,11 +46,11 @@ const app = Vue.createApp({
           {token:"{{image.hero}}",label:"Main photo"},{token:"{{image.angle}}",label:"Front / side angle"},
           {token:"{{image.rear}}",label:"Rear view"},{token:"{{image.interior}}",label:"Interior"},
           {token:"{{image.detail}}",label:"Dashboard / detail"}
-        ],tip:"You can add more photo areas with any name, such as {{image.dashboard}}."},
+        ],tip:"Each unique token creates a separate photo slot. Add any name such as {{image.dashboard}}; in the layout, place it in an image element's src attribute."},
         {title:"Editable poster text",description:"These become fields the customer can fill separately on each poster.",items:[
           {token:"{{text.eyebrow}}",label:"Small heading"},{token:"{{text.price}}",label:"Selling price"},
           {token:"{{text.tagline}}",label:"Short description"},{token:"{{text.contact}}",label:"Contact information"}
-        ],tip:"You can add more text fields with any name, such as {{text.offer}} or {{text.phone}}."}
+        ],tip:"You can add more text fields with any name, such as {{text.offer}} or {{text.phone}}. Each becomes its own editable field on the poster."}
       ],
       templatePreviewHtml: "",
       templatePreviewLoading: false,
@@ -444,6 +444,7 @@ const app = Vue.createApp({
     },
     scheduleTemplatePreview() {
       clearTimeout(this.templatePreviewTimer);
+      this.templatePreviewRequestId += 1;
       this.templatePreviewTimer = setTimeout(() => this.refreshTemplatePreview(), 420);
     },
     async refreshTemplatePreview() {
