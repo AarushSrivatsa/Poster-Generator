@@ -34,9 +34,6 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .breadcrumb{display:flex;align-items:center;gap:10px;color:#929990;font-size:11px}
 .breadcrumb i{font-style:normal;color:#c7ccc3}
 .breadcrumb strong{color:#353d34;font-weight:700}
-.topbar-right{display:flex;align-items:center;gap:16px}
-.topbar-date{color:#929990;font-size:10px}
-.avatar{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#edf2ec;color:var(--green);font-size:9px;font-weight:800}
 .page-content{max-width:1500px;margin:0 auto;padding:43px 42px 70px}
 .page-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:32px}
 .page-heading h1{margin:8px 0 7px;font:800 clamp(30px,3vw,39px)/1.1 Manrope,sans-serif;letter-spacing:-.055em;color:#202820}
@@ -305,8 +302,6 @@ body{color:#e7eee8}
 .topbar{background:rgba(16,25,20,.94);border-color:#29382f}
 .breadcrumb{color:#86958a}
 .breadcrumb strong{color:#e0e9e1}
-.topbar-date{color:#909e93}
-.avatar{background:#20362a;color:#94d4aa}
 .page-heading h1{color:#eff5ef}
 .page-heading p,.section-toolbar p{color:#9aa79d}
 .section-toolbar h2{color:#e5eee7}
