@@ -6,6 +6,7 @@ import re
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 from urllib.parse import quote, unquote, urlparse
 
 import httpx
@@ -36,6 +37,7 @@ ALLOWED_TYPES = {
 }
 MAX_UPLOAD_BYTES = 12 * 1024 * 1024
 TOKEN_RE = re.compile(r"\{\{\s*([a-zA-Z][a-zA-Z0-9_.-]{0,79})\s*\}\}")
+PREVIEW_IMAGE = "data:image/svg+xml," + quote('<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#dfe7df"/><stop offset="1" stop-color="#aebdaf"/></linearGradient></defs><rect width="960" height="640" fill="url(#g)"/><path d="M170 390l65-105q18-26 58-30l240-20q50-4 80 34l70 86 75 22q30 9 30 42v35H160v-28q0-23 10-36z" fill="#526858"/><circle cx="300" cy="452" r="54" fill="#26352a"/><circle cx="300" cy="452" r="24" fill="#cbd4ca"/><circle cx="660" cy="452" r="54" fill="#26352a"/><circle cx="660" cy="452" r="24" fill="#cbd4ca"/><text x="480" y="555" fill="#405143" font-family="Arial,sans-serif" font-size="24" text-anchor="middle" letter-spacing="7">VEHICLE PHOTO</text></svg>')
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
 SUPABASE_SECRET_KEY = os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
@@ -280,7 +282,7 @@ def poster_to_dict(poster: CarPoster) -> dict:
     }
 
 
-def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDetails, db: Session) -> str:
+def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDetails, db: Session, preview: bool = False) -> str:
     schema = template.placeholder_schema or extract_placeholder_schema(template.html_content)
     image_keys = {entry["key"] for entry in schema.get("images", [])}
     text_keys = {entry["key"] for entry in schema.get("text", [])}
@@ -319,6 +321,7 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
         "make": car.make.name if car.make else "",
     }
     transparent_pixel = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+    fallback_image = PREVIEW_IMAGE if preview else transparent_pixel
     make_values = {
         "name": car.make.name if car.make else "",
         "icon": (car.make.icon_url if car.make and car.make.icon_url else transparent_pixel),
@@ -333,7 +336,7 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
 
     for key in image_keys:
         image = image_map.get(valid_ids.get(key))
-        replacements["image." + key] = image.image_url if image else transparent_pixel
+        replacements["image." + key] = image.image_url if image else fallback_image
 
     text_values = poster.text_values or {}
     for key in text_keys:
@@ -382,7 +385,81 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
         markup = re.sub(r"</body\s*>", print_bridge + "</body>", markup, count=1, flags=re.IGNORECASE)
     else:
         markup += print_bridge
-    return markup
+    return inject_tailwind_runtime(markup)
+
+
+def inject_tailwind_runtime(markup: str) -> str:
+    """Load Tailwind only inside the isolated template document, never in the Bootstrap app."""
+    runtime = '<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>'
+    if re.search(r"@tailwindcss/browser|cdn\.tailwindcss\.com", markup, flags=re.IGNORECASE):
+        return markup
+    head = re.search(r"<head\\b[^>]*>", markup, flags=re.IGNORECASE)
+    if head:
+        return markup[:head.end()] + runtime + markup[head.end():]
+    html_tag = re.search(r"<html\\b[^>]*>", markup, flags=re.IGNORECASE)
+    if html_tag:
+        return markup[:html_tag.end()] + "<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" + runtime + "</head>" + markup[html_tag.end():]
+    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' + runtime + '</head><body>' + markup + '</body></html>'
+
+
+def preview_text_value(key: str) -> str:
+    lowered = key.lower()
+    if "price" in lowered or "amount" in lowered:
+        return "₹ 12.85 Lakh"
+    if "headline" in lowered or lowered in {"title", "name"}:
+        return "A drive worth remembering"
+    if "tagline" in lowered or "subtitle" in lowered:
+        return "Premium condition · Ready to drive"
+    if "description" in lowered or "note" in lowered:
+        return "Carefully maintained and ready for its next owner."
+    if "phone" in lowered or "contact" in lowered:
+        return "+91 98765 43210"
+    if "location" in lowered or "address" in lowered:
+        return "Hyderabad"
+    if "offer" in lowered or "badge" in lowered:
+        return "Special offer"
+    if "cta" in lowered or "button" in lowered:
+        return "Enquire now"
+    return humanize_key(key)
+
+
+def render_template_preview_html(markup: str, db: Session) -> str:
+    """Render a saved or unsaved template with a real inventory sample where possible."""
+    schema = extract_placeholder_schema(markup)
+    car = (
+        db.query(CarDetails)
+        .options(selectinload(CarDetails.make), selectinload(CarDetails.images))
+        .order_by(CarDetails.id)
+        .first()
+    )
+    if car is None:
+        car = SimpleNamespace(
+            id=0,
+            make=SimpleNamespace(name="BMW", icon_url=None),
+            model="X5",
+            variant="M Sport",
+            registration_no="TS09AB1234",
+            fuel_type="Diesel",
+            year=2024,
+            transmission="Automatic",
+            odometer_km=18500,
+            owner_count=1,
+            insurance_validity=None,
+            fitness_validity=None,
+            images=[],
+        )
+    images = sorted(getattr(car, "images", []) or [], key=lambda item: (item.sort_order, item.id))
+    image_assignments = {}
+    if images:
+        for index, field in enumerate(schema.get("images", [])):
+            image_assignments[field["key"]] = images[index % len(images)].id
+    text_values = {
+        field["key"]: preview_text_value(field["key"])
+        for field in schema.get("text", [])
+    }
+    preview_template = SimpleNamespace(html_content=markup, placeholder_schema=schema)
+    preview_poster = SimpleNamespace(image_assignments=image_assignments, text_values=text_values)
+    return render_poster_html(preview_template, preview_poster, car, db, preview=True)
 
 
 # =====================================================
@@ -735,6 +812,26 @@ def get_template(template_id: int, db: Session = Depends(get_db)):
     if not template:
         raise HTTPException(404, "Template not found.")
     return template_to_dict(template)
+
+
+@app.get("/api/templates/{template_id}/preview", response_class=HTMLResponse)
+def preview_saved_template(template_id: int, db: Session = Depends(get_db)):
+    template = db.get(PosterTemplate, template_id)
+    if not template:
+        raise HTTPException(404, "Template not found.")
+    rendered = render_template_preview_html(template.html_content, db)
+    return HTMLResponse(rendered, headers={"Cache-Control": "no-store"})
+
+
+@app.post("/api/templates/preview", response_class=HTMLResponse)
+def preview_unsaved_template(payload: dict, db: Session = Depends(get_db)):
+    markup = str(payload.get("html_content") or "")
+    if not markup.strip():
+        raise HTTPException(400, "Add template HTML to preview it.")
+    if len(markup) > 200_000:
+        raise HTTPException(413, "Template HTML is limited to 200 KB.")
+    rendered = render_template_preview_html(markup, db)
+    return HTMLResponse(rendered, headers={"Cache-Control": "no-store"})
 
 
 def template_payload(payload: dict, creating: bool = False) -> dict:
