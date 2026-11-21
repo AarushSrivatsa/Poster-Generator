@@ -1,5 +1,4 @@
 import html
-import os
 import re
 import uuid
 from pathlib import Path
@@ -9,6 +8,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi import Request
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session, selectinload
 
 from .database import Base, engine, get_db, DATA_DIR
@@ -22,9 +22,23 @@ MAX_UPLOAD = 12 * 1024 * 1024
 
 app = FastAPI(title="Poster Studio", version="1.0.0")
 Base.metadata.create_all(bind=engine)
+# Lightweight SQLite schema upgrade for an existing persistent disk.
+if engine.dialect.name == "sqlite":
+    columns = {c["name"] for c in inspect(engine).get_columns("vehicle_photos")}
+    if "slot" not in columns:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE vehicle_photos ADD COLUMN slot VARCHAR(40) DEFAULT ''"))
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 views = Jinja2Templates(directory=ROOT / "templates")
+
+# Seed a starter template on first boot.
+from .database import SessionLocal
+with SessionLocal() as seed_db:
+    if seed_db.query(PosterTemplate).count() == 0:
+        starter = (ROOT / "templates" / "default_poster.html").read_text(encoding="utf-8")
+        seed_db.add(PosterTemplate(name="Midnight Gold", description="Bold black and gold dealership layout", html=starter))
+        seed_db.commit()
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
