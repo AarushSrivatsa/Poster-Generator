@@ -1,10 +1,51 @@
 <!doctype html>
-<html lang="en" data-template-version="2"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>City Select</title>
+<html lang="en" data-template-version="3">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>City Select</title>
 <style>
-@page{size:A4 portrait;margin:0}*{box-sizing:border-box}body{margin:0;background:#e7e9e5;color:#111b1a;font-family:Arial,Helvetica,sans-serif}.poster{max-width:900px;min-height:1125px;margin:auto;background:#f7f8f4;overflow:hidden}.hero{height:590px;position:relative;background:#aeb9b2;overflow:hidden}.hero img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1}.hero:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(transparent,#071b1bcc);z-index:2;pointer-events:none}.hero-ph{position:absolute;inset:0;display:grid;place-items:center;color:#34453e;font-size:10px;letter-spacing:.2em;font-weight:900}.top{position:absolute;z-index:3;top:25px;left:32px;right:32px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:10px;letter-spacing:.25em;font-weight:900;color:#fff;text-shadow:0 2px 8px #0008}.top img{max-width:82px;max-height:42px;object-fit:contain}.hero-copy{position:absolute;z-index:3;bottom:30px;left:38px;right:38px;color:white}.kicker{font-size:10px;letter-spacing:.22em;font-weight:900;color:#b9f06b}.title{font-size:clamp(48px,8vw,88px);line-height:.88;letter-spacing:-.07em;font-weight:900;text-transform:uppercase;margin:12px 0}.sub{font-size:16px;color:#e3e9e2}.body{padding:0 38px 30px}.price-row{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:24px 0;border-bottom:1px solid #c8d0c8}.price-label{font-size:9px;letter-spacing:.2em;color:#50714d;font-weight:900}.price{font-size:38px;font-weight:900;margin-top:5px}.tagline{max-width:270px;text-align:right;color:#56645b;font-size:13px;line-height:1.5}.facts{display:grid;grid-template-columns:repeat(4,1fr);margin-top:22px;background:#13221d;color:#fff}.fact{text-align:center;padding:17px 6px;border-right:1px solid #ffffff24}.fact:last-child{border:0}.fact small{display:block;color:#b9f06b;font-size:8px;letter-spacing:.17em;margin-bottom:7px}.fact b{font-size:11px}.footer{display:flex;justify-content:space-between;gap:15px;padding-top:22px}.contact{font-size:14px;font-weight:900;color:#1b3928}.reg{font-size:10px;color:#69766d;text-align:right}@media print{.poster{width:210mm;min-height:297mm;max-width:none}}@media(max-width:560px){.hero{height:500px}.hero-copy{left:22px;right:22px}.top{left:22px;right:22px}.body{padding:0 22px 24px}.title{font-size:49px}.price{font-size:30px}.facts{grid-template-columns:repeat(2,1fr)}.fact:nth-child(2){border-right:0}}
-</style></head><body><main class="poster">
-<section class="hero"><div class="hero-ph">YOUR BEST VEHICLE PHOTO</div><img src="{{image.hero}}" alt=""><header class="top"><div class="brand">CITY SELECT&nbsp; / &nbsp;PRE-OWNED</div><img src="{{make.icon}}" alt="{{make.name}}"></header><div class="hero-copy"><div class="kicker">{{text.eyebrow}}</div><h1 class="title">{{car.make}} {{car.model}}</h1><div class="sub">{{car.variant}} · {{car.year}}</div></div></section>
-<section class="body"><div class="price-row"><div><div class="price-label">YOUR NEXT CAR</div><div class="price">{{text.price}}</div></div><div class="tagline">{{text.tagline}}</div></div>
-<section class="facts"><div class="fact"><small>FUEL</small><b>{{car.fuel_type}}</b></div><div class="fact"><small>GEARBOX</small><b>{{car.transmission}}</b></div><div class="fact"><small>KILOMETRES</small><b>{{car.odometer_km}}</b></div><div class="fact"><small>OWNERS</small><b>{{car.owner_count}}</b></div></section>
-<footer class="footer"><strong class="contact">{{text.contact}}</strong><span class="reg">{{car.registration_no}} · FITNESS {{car.fitness_validity}}</span></footer></section>
+@page{size:A4 portrait;margin:0}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%;background:#dfe6e2;color:#10221e;font-family:Arial,Helvetica,sans-serif}
+.poster{width:100%;max-width:900px;min-height:1123px;margin:auto;padding:30px 34px 28px;background:#f7faf6;overflow:hidden}
+.top{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #142d25;padding-bottom:13px}
+.brand{font-size:9px;letter-spacing:.29em;font-weight:900;color:#27543e}
+.top img{max-width:82px;max-height:40px;object-fit:contain}
+.herohead{display:flex;justify-content:space-between;align-items:end;gap:18px;padding:23px 0 17px}
+.kicker{font-size:9px;color:#477b4b;letter-spacing:.23em;font-weight:900;text-transform:uppercase}
+h1{font-size:55px;line-height:.87;letter-spacing:-.07em;font-weight:900;text-transform:uppercase;margin:9px 0 8px}
+.sub{font-size:12px;color:#63766a;letter-spacing:.1em;text-transform:uppercase}
+.price{font-size:30px;font-weight:900;color:#f7faf6;background:#173b2b;padding:11px 14px;white-space:nowrap;box-shadow:5px 5px 0 #a4d65f}
+.price small{display:block;font-size:8px;letter-spacing:.2em;color:#b9eb7d;margin-bottom:4px}
+.gallery{display:grid;grid-template-columns:1.2fr 1fr 1fr;grid-template-rows:155px 155px;gap:8px}
+.photo{position:relative;overflow:hidden;background:#d1ded3;min-width:0}
+.photo img{position:relative;z-index:1;width:100%;height:100%;display:block;object-fit:cover}
+.photo span{position:absolute;inset:0;display:grid;place-items:center;color:#315c4388;font-size:8px;letter-spacing:.18em;font-weight:900;text-transform:uppercase}
+.photo.hero{grid-row:1/3}
+.photo.hero img{object-position:center}
+.details{display:grid;grid-template-columns:1.1fr 1.5fr;gap:20px;align-items:center;padding:21px 0 18px;border-bottom:1px solid #c5d4c8}
+.tagline{font-size:13px;line-height:1.45;color:#52675a}
+.note{font-size:8px;letter-spacing:.2em;font-weight:900;color:#477b4b}
+.facts{display:grid;grid-template-columns:repeat(5,1fr);margin:18px 0;background:#173b2b;color:#fff}
+.fact{text-align:center;padding:14px 4px;border-right:1px solid #ffffff2c}
+.fact:last-child{border:0}
+.fact small{display:block;color:#b9eb7d;font-size:7px;letter-spacing:.15em;font-weight:900;margin-bottom:7px}
+.fact b{font-size:10px}
+.footer{display:flex;justify-content:space-between;align-items:end;gap:15px;padding-top:15px}
+.contact{font-size:13px;font-weight:900;color:#173b2b}
+.meta{font-size:8px;color:#66766c;text-align:right;line-height:1.6}
+@media print{html,body{background:#f7faf6}.poster{width:210mm;min-height:297mm;max-width:none}}
+@media(max-width:600px){.poster{padding:22px 18px}h1{font-size:40px}.herohead{align-items:start}.price{font-size:22px;padding:9px}.gallery{grid-template-rows:125px 125px;gap:6px}.details{gap:12px}.facts{grid-template-columns:repeat(3,1fr);row-gap:1px}.fact{padding:11px 3px}.fact b{font-size:8px}}
+</style></head>
+<body><main class="poster">
+<header class="top"><div class="brand">CITY SELECT&nbsp; / &nbsp;PRE-OWNED, WELL CHOSEN</div><img src="{{make.icon}}" alt="{{make.name}}"></header>
+<section class="herohead"><div><div class="kicker">{{text.eyebrow}}</div><h1>{{car.make}}<br>{{car.model}}</h1><div class="sub">{{car.variant}} · {{car.year}}</div></div><div class="price"><small>YOUR NEXT CAR</small>{{text.price}}</div></section>
+<section class="gallery">
+<div class="photo hero"><span>01 / Lead photo</span><img src="{{image.hero}}" alt="Main vehicle photo"></div>
+<div class="photo"><span>02 / Front angle</span><img src="{{image.angle}}" alt="Front angle"></div>
+<div class="photo"><span>03 / Rear view</span><img src="{{image.rear}}" alt="Rear view"></div>
+<div class="photo"><span>04 / Interior</span><img src="{{image.interior}}" alt="Interior"></div>
+<div class="photo"><span>05 / Detail</span><img src="{{image.detail}}" alt="Vehicle detail"></div>
+</section>
+<section class="details"><div><div class="note">A BETTER WAY TO MOVE</div><div class="tagline">{{text.tagline}}</div></div><div class="tagline">A considered vehicle, presented with the details that matter. Enquire today and make it yours.</div></section>
+<section class="facts"><div class="fact"><small>YEAR</small><b>{{car.year}}</b></div><div class="fact"><small>FUEL</small><b>{{car.fuel_type}}</b></div><div class="fact"><small>GEARBOX</small><b>{{car.transmission}}</b></div><div class="fact"><small>KILOMETRES</small><b>{{car.odometer_km}} km</b></div><div class="fact"><small>OWNERSHIP</small><b>{{car.owner_count}}</b></div></section>
+<footer class="footer"><strong class="contact">{{text.contact}}</strong><span class="meta">{{car.registration_no}}<br>INSURANCE {{car.insurance_validity}} · FITNESS {{car.fitness_validity}}</span></footer>
 </main></body></html>
