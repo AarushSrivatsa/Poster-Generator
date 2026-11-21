@@ -65,11 +65,13 @@ Required Render environment variables:
 
 The Storage bucket must be public because the database stores public object URLs for use in posters. Upload and delete operations use the server-side secret key.
 
-## Automatic schema reset
+## Database startup behaviour
 
-On the first deployment of this version, the app creates a persistent \`poster_generator_schema_meta\` marker in Supabase Postgres. When no schema marker exists, it drops the app's old/partial tables (\`vehicles\`, \`vehicle_photos\`, and the previous/partial poster tables), then creates the current tables from the SQLAlchemy models. It records schema version 1 so this reset does **not** repeat on later restarts.
+The app runs SQLAlchemy `Base.metadata.create_all()` at startup. This creates missing tables only. It does **not** drop, truncate, alter or migrate existing tables, and it does not run a reset on startup.
 
-**This one-time reset permanently deletes the old app records and old template records in those tables.** It does not drop unrelated tables or delete old orphaned Storage objects. Back up any old records you need before deploying.
+The template model uses the new table name `poster_design_templates` so it does not conflict with the previous version's `poster_templates` table. Existing legacy tables and records are left untouched. The new application tables are created alongside them.
+
+This deliberately avoids automatic migrations. If a future code change changes the columns of an already-created table, that table will need a manual schema update or a new table name; `create_all()` does not change existing table structures.
 
 ## Important
 
