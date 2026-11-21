@@ -1,0 +1,54 @@
+<main class="poster-shell relative overflow-hidden bg-[#101416] text-white">
+  <header class="relative z-10 bg-gradient-to-r from-black via-[#202729] to-black px-7 pt-7 pb-5">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <p class="text-5xl font-black italic tracking-tight text-[#f4cb68]">FOR SALE</p>
+        <h1 class="mt-1 text-4xl font-black uppercase leading-none">{{ car.make }} {{ car.model }}</h1>
+        <p class="mt-2 text-2xl font-extrabold italic text-[#f3cf78]">{{ car.variant }}</p>
+      </div>
+      <div class="rounded-xl border border-[#e7c36b] px-3 py-2 text-center text-sm font-black uppercase text-[#f4d27f]">★ Best<br>Deal!</div>
+    </div>
+    <div class="mt-4 rounded-md bg-[#e9c36c] px-4 py-2 text-center text-sm font-black uppercase tracking-wide text-[#171717]">{{ car.highlights }}</div>
+  </header>
+
+  <section class="relative">
+    {% if photos|length > 0 %}
+      <img src="{{ photos[0].url }}" alt="{{ photos[0].label }}" class="h-[420px] w-full object-cover">
+    {% else %}
+      <div class="flex h-[420px] items-center justify-center bg-gradient-to-br from-zinc-700 to-zinc-950 text-7xl">🚘</div>
+    {% endif %}
+    <div class="absolute right-5 top-5 max-w-[190px] rotate-3 rounded-lg bg-[#f3d17c] px-4 py-3 text-center text-lg font-black uppercase text-black shadow-xl">{{ car.condition }}</div>
+  </section>
+
+  <section class="grid grid-cols-3 gap-px bg-[#b9964e] text-center">
+    {% for item in specs %}
+    <div class="bg-[#111719] px-2 py-4">
+      <div class="text-2xl text-[#edc96f]">{{ item.icon }}</div>
+      <div class="mt-1 text-lg font-extrabold leading-tight">{{ item.value }}</div>
+      <div class="text-xs font-bold uppercase tracking-wide text-zinc-400">{{ item.label }}</div>
+    </div>
+    {% endfor %}
+  </section>
+
+  <section class="grid grid-cols-3 gap-3 bg-black p-4">
+    {% for photo in photos[1:7] %}
+    <figure class="overflow-hidden rounded-lg border-2 border-[#c6a45b] bg-zinc-900">
+      <img src="{{ photo.url }}" alt="{{ photo.label }}" class="h-32 w-full object-cover">
+      <figcaption class="bg-[#e8c36d] px-1 py-1 text-center text-xs font-black uppercase text-black">{{ photo.label }}</figcaption>
+    </figure>
+    {% endfor %}
+    {% for n in range(6 - (photos[1:7]|length)) %}
+    <div class="flex h-36 items-center justify-center rounded-lg border border-dashed border-zinc-700 text-xs uppercase text-zinc-600">Add vehicle photo</div>
+    {% endfor %}
+  </section>
+
+  <footer class="border-t-4 border-[#d1ad60] bg-[#0a0e0f] p-5">
+    <div class="mb-3 inline-block bg-[#e8c36d] px-4 py-1 text-lg font-black uppercase text-black">Vehicle details</div>
+    <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+      {% for item in details %}
+      <div><span class="mr-1 text-[#e7c36f]">✓</span><b>{{ item.label }}:</b> {{ item.value }}</div>
+      {% endfor %}
+    </div>
+    <div class="mt-4 border-t border-zinc-700 pt-3 text-right text-lg font-black">By {{ car.seller }}</div>
+  </footer>
+</main>
