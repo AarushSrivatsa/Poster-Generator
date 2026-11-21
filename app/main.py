@@ -319,9 +319,10 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
         "fitness_validity": car.fitness_validity.strftime("%Y") if car.fitness_validity else "Lapsed",
         "make": car.make.name if car.make else "",
     }
+    transparent_pixel = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
     make_values = {
         "name": car.make.name if car.make else "",
-        "icon": car.make.icon_url if car.make else "",
+        "icon": (car.make.icon_url if car.make and car.make.icon_url else transparent_pixel),
     }
 
     replacements = {}
@@ -333,7 +334,7 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
 
     for key in image_keys:
         image = image_map.get(valid_ids.get(key))
-        replacements["image." + key] = image.image_url if image else ""
+        replacements["image." + key] = image.image_url if image else transparent_pixel
 
     text_values = poster.text_values or {}
     for key in text_keys:
