@@ -1,29 +1,27 @@
 import os
-from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-DATA_DIR = Path(os.getenv("DATA_DIR", "data"))
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATA_DIR / 'posters.db'}")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is required. Configure the Supabase Session pooler URI in Render.")
 
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-engine_url = DATABASE_URL
-engine_options = {"pool_pre_ping": True}
+parsed = make_url(DATABASE_URL)
+if parsed.drivername in {"postgres", "postgresql"}:
+    parsed = parsed.set(drivername="postgresql+psycopg")
+if parsed.drivername != "postgresql+psycopg":
+    raise RuntimeError("Only Supabase PostgreSQL is supported; local SQLite storage is intentionally disabled.")
+if "sslmode" not in parsed.query:
+    parsed = parsed.update_query_dict({"sslmode": "require"})
 
-if not DATABASE_URL.startswith("sqlite"):
-    # Convert Supabase's standard PostgreSQL URI to the psycopg 3 SQLAlchemy dialect.
-    parsed = make_url(DATABASE_URL)
-    if parsed.drivername in {"postgres", "postgresql"}:
-        parsed = parsed.set(drivername="postgresql+psycopg")
-    if "sslmode" not in parsed.query:
-        parsed = parsed.update_query_dict({"sslmode": "require"})
-    engine_url = parsed
-    # Persistent Render web service: modest pool for Supabase's IPv4 Session pooler.
-    engine_options.update({"pool_size": 3, "max_overflow": 2, "pool_recycle": 1800})
-
-engine = create_engine(engine_url, connect_args=connect_args, **engine_options)
+engine = create_engine(
+    parsed,
+    pool_pre_ping=True,
+    pool_size=2,
+    max_overflow=1,
+    pool_recycle=1800,
+)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 class Base(DeclarativeBase):
