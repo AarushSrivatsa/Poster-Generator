@@ -313,7 +313,7 @@
           <p v-else class="subtle-note">No ready-made designs are available yet. Add a built-in design before creating a custom one.</p>
         </section>
         <div class="form-grid template-meta-grid">
-          <label class="field-label">Template name<input class="form-control" v-model="templateForm.name" placeholder="e.g. Premium dark listing" required></label>
+          <label class="field-label">Template name<input class="form-control" v-model="templateForm.name" @input="templateNameTouched=true" placeholder="e.g. Premium dark listing" required></label>
           <label class="field-label">Description<input class="form-control" v-model="templateForm.description" placeholder="A short description"></label>
         </div>
         <section class="template-preview-section">
