@@ -404,20 +404,16 @@ const app = Vue.createApp({
     },
     openTemplateDialog(template) {
       this.editingTemplateId = template?.id || null;
-      const starter = template ? null : (this.starterTemplates[0] || this.templates[0] || null);
-      this.templateStarterId = starter?.id || null;
+      this.templateStarterId = null;
       this.templateNameTouched = false;
       this.templateForm = template
         ? {name:template.name, description:template.description || "", html_content:template.html_content}
-        : {
-            name:this.uniqueTemplateName(starter ? starter.name + " Custom" : "My new design"),
-            description:starter?.description || "A custom vehicle poster design.",
-            html_content:starter?.html_content || ""
-          };
+        : {name:this.uniqueTemplateName("New template"), description:"", html_content:""};
       this.templatePreviewHtml = "";
       this.templatePreviewError = "";
+      this.templatePreviewLoading = false;
       this.templateDialogOpen = true;
-      this.refreshTemplatePreview();
+      if (template?.html_content) this.refreshTemplatePreview();
     },
     chooseTemplateStarter(starter) {
       if (!starter || !starter.html_content) return;
@@ -428,13 +424,49 @@ const app = Vue.createApp({
       this.scheduleTemplatePreview();
       this.notify("Design starting point changed.");
     },
-    async copyPlaceholder(token) {
+    async copyPlaceholderGuide() {
+      const guide = [
+        "MOTOR STUDIO — VEHICLE POSTER PLACEHOLDERS",
+        "Create a complete HTML/CSS vehicle poster. Use these exact placeholders and keep the braces unchanged. Do not invent vehicle details.",
+        "",
+        "VEHICLE INFORMATION (automatically filled):",
+        "{{car.make}} — make",
+        "{{car.model}} — model",
+        "{{car.variant}} — variant",
+        "{{car.year}} — year",
+        "{{car.registration_no}} — registration number",
+        "{{car.fuel_type}} — fuel",
+        "{{car.transmission}} — transmission",
+        "{{car.odometer_km}} — kilometres driven",
+        "{{car.owner_count}} — formatted ownership, e.g. 1st owner or 2nd owner",
+        "{{car.insurance_validity}} — insurance validity",
+        "{{car.fitness_validity}} — fitness validity",
+        "",
+        "MANUFACTURER BRANDING:",
+        "{{make.name}} — manufacturer name",
+        "{{make.icon}} — manufacturer logo URL (use as an image src)",
+        "",
+        "VEHICLE PHOTOS (each one creates its own replaceable photo slot; use as img src):",
+        '<img src="{{image.hero}}" alt="Main vehicle photo">',
+        '<img src="{{image.angle}}" alt="Front or side angle">',
+        '<img src="{{image.rear}}" alt="Rear view">',
+        '<img src="{{image.interior}}" alt="Interior">',
+        '<img src="{{image.detail}}" alt="Dashboard or detail">',
+        "",
+        "CUSTOM POSTER TEXT (editable separately for each poster):",
+        "{{text.eyebrow}} — small heading",
+        "{{text.price}} — selling price",
+        "{{text.tagline}} — short description",
+        "{{text.contact}} — contact details",
+        "",
+        "Use only the fields that fit the design. Use multiple image slots. Keep all placeholders exactly as written. The app automatically detects them; users do not need to configure them separately."
+      ].join("\n");
       try {
         if (navigator.clipboard?.writeText) {
-          await navigator.clipboard.writeText(token);
+          await navigator.clipboard.writeText(guide);
         } else {
           const field = document.createElement("textarea");
-          field.value = token;
+          field.value = guide;
           field.setAttribute("readonly", "");
           field.style.position = "fixed";
           field.style.opacity = "0";
@@ -444,9 +476,9 @@ const app = Vue.createApp({
           field.remove();
           if (!copied) throw new Error("Clipboard access is unavailable.");
         }
-        this.notify("Copied " + token);
+        this.notify("Copied the complete field guide. Paste it once into your AI design prompt.");
       } catch (error) {
-        this.notify("Could not copy automatically. Open Advanced editing to copy the token.");
+        this.notify("Clipboard access was blocked. You can still read all fields in this window.");
       }
     },
     closeTemplateDialog() {
@@ -498,7 +530,15 @@ const app = Vue.createApp({
     },
     async saveTemplate() {
       if (!this.templateForm.html_content.trim()) {
-        this.notify("Choose a starting design before saving this template.");
+        this.notify("Paste your complete HTML design before saving.");
+        return;
+      }
+      if (!this.detectedTokens.some(token => /^(car|make|image|text)\./.test(token))) {
+        this.notify("No Motor Studio fields found. Add at least one placeholder from the field guide.");
+        return;
+      }
+      if (!this.templateForm.name.trim()) {
+        this.notify("Give this template a name before saving.");
         return;
       }
       this.busy = "template";
