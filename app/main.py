@@ -3,7 +3,11 @@ import html
 import json
 import os
 import re
+import shutil
+import subprocess
+import tempfile
 import uuid
+from functools import lru_cache
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -385,22 +389,82 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
         markup = re.sub(r"</body\s*>", print_bridge + "</body>", markup, count=1, flags=re.IGNORECASE)
     else:
         markup += print_bridge
-    return inject_tailwind_runtime(markup)
+    return inject_compiled_tailwind(markup, compile_tailwind_css(template.html_content))
 
 
-def inject_tailwind_runtime(markup: str) -> str:
-    """Load Tailwind only inside the isolated template document, never in the Bootstrap app."""
-    runtime = '<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>'
-    if re.search(r"@tailwindcss/browser|cdn\.tailwindcss\.com", markup, flags=re.IGNORECASE):
-        return markup
+@lru_cache(maxsize=64)
+def compile_tailwind_css(markup: str) -> str:
+    """Compile the utility classes present in this template into production CSS."""
+    executable = shutil.which("tailwindcss")
+    if not executable:
+        raise RuntimeError("Tailwind CSS compiler is missing. Rebuild the app image to install it.")
+
+    inline_tailwind_css = "\n".join(
+        match.group(1)
+        for match in re.finditer(
+            r"<style\b[^>]*\btype\s*=\s*['\"]text/tailwindcss['\"][^>]*>(.*?)</style\s*>",
+            markup,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+    )
+    with tempfile.TemporaryDirectory(prefix="poster-tailwind-") as temp_dir:
+        workdir = Path(temp_dir)
+        source_file = workdir / "template.html"
+        input_file = workdir / "input.css"
+        output_file = workdir / "output.css"
+        source_file.write_text(markup, encoding="utf-8")
+        input_file.write_text(
+            '@import "tailwindcss" source(none);\n'
+            '@source "./template.html";\n'
+            + inline_tailwind_css,
+            encoding="utf-8",
+        )
+        try:
+            result = subprocess.run(
+                [executable, "-i", str(input_file), "-o", str(output_file), "--minify"],
+                cwd=workdir,
+                capture_output=True,
+                text=True,
+                timeout=25,
+                check=False,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise RuntimeError("Tailwind took too long to compile this template.") from exc
+        if result.returncode != 0 or not output_file.exists():
+            detail = (result.stderr or result.stdout or "Unknown Tailwind compiler error").strip()
+            raise RuntimeError("Could not compile this template's Tailwind classes: " + detail[:500])
+        return output_file.read_text(encoding="utf-8")
+
+
+def inject_compiled_tailwind(markup: str, compiled_css: str) -> str:
+    """Embed compiled Tailwind CSS in the isolated template document."""
+    markup = re.sub(
+        r"<script\b[^>]*\bsrc\s*=\s*['\"](?:https?://cdn\.tailwindcss\.com|https?://cdn\.jsdelivr\.net/npm/@tailwindcss/browser@4)[^'\"]*['\"][^>]*>\s*</script\s*>",
+        "",
+        markup,
+        flags=re.IGNORECASE,
+    )
+    style = "<style id=\"poster-tailwind-generated\">\n" + compiled_css + "\n</style>"
     head = re.search(r"<head\b[^>]*>", markup, flags=re.IGNORECASE)
     if head:
-        return markup[:head.end()] + runtime + markup[head.end():]
+        return markup[:head.end()] + style + markup[head.end():]
     html_tag = re.search(r"<html\b[^>]*>", markup, flags=re.IGNORECASE)
     if html_tag:
-        return markup[:html_tag.end()] + "<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" + runtime + "</head>" + markup[html_tag.end():]
-    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' + runtime + '</head><body>' + markup + '</body></html>'
-
+        return (
+            markup[:html_tag.end()]
+            + "<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+            + style
+            + "</head>"
+            + markup[html_tag.end():]
+        )
+    return (
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        + '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        + style
+        + "</head><body>"
+        + markup
+        + "</body></html>"
+    )
 
 def preview_text_value(key: str) -> str:
     lowered = key.lower()
