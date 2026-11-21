@@ -164,5 +164,6 @@ def render_poster(vehicle_id: int, template_id: int, db: Session = Depends(get_d
     for p in v.photos:
         if p.slot:
             markup = markup.replace("{{slot."+p.slot+"}}", html.escape(f"/uploads/{p.filename}"))
-    markup = re.sub(r"\{\{(?:car\.[a-zA-Z_]+|slot\.[a-zA-Z0-9_-]+)\}\}", "", markup)
+            markup = markup.replace("{{label."+p.slot+"}}", html.escape(p.label))
+    markup = re.sub(r"\{\{(?:car\.[a-zA-Z_]+|slot\.[a-zA-Z0-9_-]+|label\.[a-zA-Z0-9_-]+)\}\}", "", markup)
     return HTMLResponse(markup)
