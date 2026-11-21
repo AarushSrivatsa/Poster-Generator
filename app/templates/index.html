@@ -210,10 +210,11 @@
             <span>＋</span><b>Add photos to vehicle</b><small>Photos remain attached to this vehicle.</small>
           </label>
           <div class="editor-image-grid">
-            <article v-for="image in (activeCar?.images || [])" :key="image.id" class="editor-image" draggable="true" @dragstart="startImageDrag($event,image)">
+            <article v-for="image in (activeCar?.images || [])" :key="image.id" class="editor-image" :class="{selected:selectedImageId===image.id}" role="button" tabindex="0" :aria-label="'Select '+(image.image_type || 'vehicle photo')" :aria-pressed="selectedImageId===image.id" draggable="true" @click="selectedImageId=image.id" @keydown.enter.prevent="selectedImageId=image.id" @keydown.space.prevent="selectedImageId=image.id" @dragstart="startImageDrag($event,image)">
               <img :src="image.image_url" :alt="image.image_type">
-              <span class="editor-image-name">[[ image.image_type ]]</span>
-              <button class="editor-image-remove" title="Remove photo from vehicle" @click="deleteEditorImage(image)">×</button>
+              <span class="editor-image-name">[[ image.image_type || 'Vehicle photo' ]]</span>
+              <span v-if="selectedImageId===image.id" class="editor-image-selected">Selected</span>
+              <button type="button" class="editor-image-remove" title="Remove photo from vehicle" @click.stop="deleteEditorImage(image)">×</button>
             </article>
           </div>
           <div class="placeholder-heading"><b>Photo placements</b><small>Tap a photo above, then tap a placement below — or drag a photo onto it.</small></div>
