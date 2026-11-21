@@ -224,7 +224,7 @@
         </div>
       </aside>
       <section class="editor-preview-area">
-        <div class="preview-toolbar"><div><span class="preview-live-dot"></span><strong>Live preview</strong><small>Changes save automatically</small></div><button class="text-action" @click="refreshPreview">Refresh ↻</button></div>
+        <div class="preview-toolbar"><div><span class="preview-live-dot"></span><strong>Live preview</strong><small>Changes save automatically</small></div><div class="preview-toolbar-actions"><button v-if="saveState==='error'" class="text-action" @click="savePosterNow">Retry save</button><button class="text-action" @click="refreshPreview">Refresh preview ↻</button></div></div>
         <div class="preview-stage"><iframe id="posterFrame" :key="previewVersion" :src="previewUrl" title="Live poster preview" sandbox="allow-scripts allow-modals"></iframe></div>
       </section>
     </div>
