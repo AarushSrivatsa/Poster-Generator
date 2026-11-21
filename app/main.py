@@ -395,9 +395,9 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
 @lru_cache(maxsize=64)
 def compile_tailwind_css(markup: str) -> str:
     """Compile the utility classes present in this template into production CSS."""
-    executable = shutil.which("tailwindcss")
-    if not executable:
-        raise RuntimeError("Tailwind CSS compiler is missing. Rebuild the app image to install it.")
+    executable = ROOT / "node_modules" / ".bin" / "tailwindcss"
+    if not executable.exists():
+        raise RuntimeError("Tailwind CSS compiler is missing. Rebuild the app image to install dependencies.")
 
     inline_tailwind_css = "\n".join(
         match.group(1)
@@ -407,7 +407,7 @@ def compile_tailwind_css(markup: str) -> str:
             flags=re.IGNORECASE | re.DOTALL,
         )
     )
-    with tempfile.TemporaryDirectory(prefix="poster-tailwind-") as temp_dir:
+    # Keep temporary sources under the app root so Node package resolution can\n    # find the locally installed Tailwind packages from the temp directory.\n    with tempfile.TemporaryDirectory(prefix=".poster-tailwind-", dir=ROOT) as temp_dir:
         workdir = Path(temp_dir)
         source_file = workdir / "template.html"
         input_file = workdir / "input.css"
@@ -422,7 +422,7 @@ def compile_tailwind_css(markup: str) -> str:
         try:
             result = subprocess.run(
                 [executable, "-i", str(input_file), "-o", str(output_file), "--minify"],
-                cwd=workdir,
+                cwd=ROOT,
                 capture_output=True,
                 text=True,
                 timeout=25,
