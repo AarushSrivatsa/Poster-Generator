@@ -542,3 +542,15 @@ body{color:#e7eee8}
   position:absolute;top:0;left:50%;width:900px;height:1123px;margin-left:-76.5px;
   transform:scale(.17);transform-origin:top left;border:0;pointer-events:none;background:#fff;
 }
+
+.form-inline-help{
+  grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 12px;border:1px solid #3b5843;border-radius:8px;background:#17251b;
+  color:#a8b8ab;font-size:9px;
+}
+.poster-create-empty{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.preview-toolbar-actions{display:flex;align-items:center;gap:14px}
+@media(max-width:580px){
+  .form-inline-help{align-items:flex-start;flex-direction:column}
+  .preview-toolbar-actions{gap:8px}
+}
