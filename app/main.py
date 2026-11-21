@@ -426,7 +426,7 @@ _TAILWIND_UTILITY_RE = re.compile(
     r"^(?:"
     r"-?(?:m|p)(?:[trblxyse])?-|"
     r"(?:sm|md|lg|xl|2xl|dark|light|hover|focus|focus-visible|active|disabled|group-hover|peer-checked|motion-safe|motion-reduce|print|portrait|landscape):|"
-    r"(?:block|inline|inline-block|inline-flex|inline-grid|flex|grid|hidden|contents|flow-root|"
+    r"(?:container|prose(?:-|$)|group$|peer$|block|inline|inline-block|inline-flex|inline-grid|flex|grid|hidden|contents|flow-root|"
     r"absolute|relative|fixed|sticky|static|isolate|"
     r"items-|justify-|self-|place-|content-|gap-|space-[xy]-|"
     r"grid-cols-|grid-rows-|col-span-|row-span-|columns-|flex-|basis-|grow$|shrink$|"
@@ -524,7 +524,7 @@ def compile_tailwind_css(markup: str) -> str:
 
         try:
             _TAILWIND_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-            temporary_cache_file = cache_file.with_suffix(".tmp")
+            temporary_cache_file = cache_file.with_suffix(".tmp-" + uuid.uuid4().hex)
             temporary_cache_file.write_text(compiled_css, encoding="utf-8")
             os.replace(temporary_cache_file, cache_file)
         except OSError:
