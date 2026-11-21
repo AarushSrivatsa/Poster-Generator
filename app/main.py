@@ -393,10 +393,10 @@ def inject_tailwind_runtime(markup: str) -> str:
     runtime = '<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>'
     if re.search(r"@tailwindcss/browser|cdn\.tailwindcss\.com", markup, flags=re.IGNORECASE):
         return markup
-    head = re.search(r"<head\\b[^>]*>", markup, flags=re.IGNORECASE)
+    head = re.search(r"<head\b[^>]*>", markup, flags=re.IGNORECASE)
     if head:
         return markup[:head.end()] + runtime + markup[head.end():]
-    html_tag = re.search(r"<html\\b[^>]*>", markup, flags=re.IGNORECASE)
+    html_tag = re.search(r"<html\b[^>]*>", markup, flags=re.IGNORECASE)
     if html_tag:
         return markup[:html_tag.end()] + "<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" + runtime + "</head>" + markup[html_tag.end():]
     return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' + runtime + '</head><body>' + markup + '</body></html>'
