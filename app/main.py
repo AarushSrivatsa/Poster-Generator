@@ -542,10 +542,11 @@ app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 views = Jinja2Templates(directory=ROOT / "templates")
 
 BUILT_IN_TEMPLATES = [
-    ("Midnight Gold", "Warm black-and-gold automotive poster", "default_poster.html", 10),
-    ("Studio Minimal", "Clean editorial layout with generous space", "poster_studio_minimal.html", 20),
-    ("Electric Motion", "High-energy dark design with neon accents", "poster_electric_motion.html", 30),
-    ("Executive Black", "Luxury editorial layout with warm metallic details", "poster_executive_black.html", 40),
+    ("Midnight Gold", "Dramatic black-and-gold premium showroom layout", "default_poster.html", 10),
+    ("Studio Minimal", "Refined editorial layout with oversized typography", "poster_studio_minimal.html", 20),
+    ("Electric Motion", "High-energy performance design with electric teal accents", "poster_electric_motion.html", 30),
+    ("Executive Black", "Heritage grand-touring design with warm ivory details", "poster_executive_black.html", 40),
+    ("City Select", "Bold photo-first dealership advert for everyday listings", "poster_urban_sale.html", 50),
 ]
 
 with SessionLocal() as seed_db:
@@ -565,7 +566,12 @@ with SessionLocal() as seed_db:
                 sort_order=order,
                 is_builtin=True,
             ))
-        # Existing built-ins are left untouched so user edits survive restarts.
+        elif existing.is_builtin and 'data-template-version="2"' not in (existing.html_content or ""):
+            # One-time refresh of the original built-in presets. User-created templates are untouched.
+            existing.description = description
+            existing.html_content = markup
+            existing.placeholder_schema = schema
+            existing.sort_order = order
     seed_db.commit()
 
 
