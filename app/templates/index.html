@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Poster Studio — Vehicle Marketing</title>
+<title>Motor Poster Studio</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -10,97 +10,147 @@
 </head>
 <body>
 <header class="app-header">
-  <a class="brand" href="/"><span class="brand-mark">✳</span><span><b>POSTER STUDIO</b><small>Make every listing worth a second look.</small></span></a>
-  <nav class="top-nav" aria-label="Main navigation">
-    <button class="nav-tab active" data-tab="studio">Create poster</button>
-    <button class="nav-tab" data-tab="vehicle">Vehicles</button>
-    <button class="nav-tab" data-tab="templates">My designs</button>
+  <a class="brand" href="#"><span class="brand-mark">M</span><span><b>MOTOR STUDIO</b><small>Vehicle posters, without the fuss.</small></span></a>
+  <nav class="top-nav">
+    <button class="nav-tab active" data-tab="posters">Posters</button>
+    <button class="nav-tab" data-tab="cars">Cars</button>
+    <button class="nav-tab" data-tab="makes">Makes</button>
+    <button class="nav-tab" data-tab="templates">Templates</button>
   </nav>
-  <button id="newVehicle" class="primary-btn">＋ Add vehicle</button>
+  <span class="cloud-status"><i></i> Supabase connected</span>
 </header>
 
 <main class="app-main">
-<section id="studioPanel" class="panel">
-  <div class="studio-heading">
-    <div><p class="eyebrow">THE 60-SECOND POSTER STUDIO</p><h1>Turn a car into <span>a standout listing.</span></h1><p class="muted">Pick a vehicle, add photos, choose a look. Your poster builds as you go.</p></div>
-    <div class="studio-actions"><button id="refreshPreview" class="quiet-btn">↻ Refresh</button><button id="printPoster" class="quiet-btn">Print / Save PDF ↗</button><button id="buildPoster" class="primary-btn">✦ Build my poster</button></div>
+<section id="postersPanel" class="panel">
+  <div class="page-heading">
+    <div><p class="eyebrow">MAKE SOMETHING THAT SELLS</p><h1>Your posters</h1><p class="muted">Choose a car, choose a design, and make it yours.</p></div>
+    <button id="startNewPoster" class="primary-btn">＋ Create poster</button>
   </div>
 
-  <section id="firstRun" class="first-run surface hidden">
-    <div class="first-run-copy"><p class="eyebrow">LET'S MAKE YOUR FIRST POSTER</p><h2>Start with the car.</h2><p>Just the basics for now. You can add photos and poster wording next.</p></div>
-    <form id="quickVehicleForm" class="quick-vehicle-form">
-      <label>Make<input name="make" placeholder="e.g. Mahindra" required></label>
-      <label>Model<input name="model" placeholder="e.g. Thar" required></label>
-      <label>Year<input name="year" placeholder="2022"></label>
-      <label>Variant<input name="variant" placeholder="LX 4x4"></label>
-      <button class="primary-btn">Create vehicle <span>→</span></button>
-    </form>
+  <section class="surface create-strip">
+    <div class="create-step"><span>01</span><div><b>Choose a car</b><small>Select an existing car record</small></div></div>
+    <div id="posterCarChoices" class="choice-row"><span class="muted">Add a car in Cars to get started.</span></div>
+    <div class="create-step"><span>02</span><div><b>Choose a design</b><small>Pick a template</small></div></div>
+    <div id="posterTemplateChoices" class="template-choice-row"><span class="muted">Templates will appear here.</span></div>
+    <div class="create-action"><button id="createPoster" class="primary-btn" disabled>Create poster →</button></div>
   </section>
 
-  <div id="studioContent">
-    <div class="vehicle-strip surface">
-      <div class="strip-label"><span class="eyebrow">01 · VEHICLE</span><b>What are we selling?</b></div>
-      <div id="vehicleChips" class="vehicle-chip-list"><span class="muted">Add a vehicle to get started.</span></div>
+  <div class="subheading"><div><p class="eyebrow">SAVED WORK</p><h2>Recent posters</h2></div><span id="posterCount" class="count-pill">0 posters</span></div>
+  <div id="posterList" class="poster-list"><div class="empty-card">Your saved posters will appear here.</div></div>
+
+  <section id="posterEditor" class="poster-editor hidden">
+    <div class="editor-titlebar">
+      <div><p class="eyebrow">POSTER EDITOR</p><h2 id="activePosterTitle">Untitled poster</h2><span id="activePosterSubtitle" class="muted"></span></div>
+      <div class="editor-actions">
+        <span id="saveStatus" class="save-status"><i></i> All changes saved</span>
+        <button id="duplicatePoster" class="quiet-btn">Duplicate</button>
+        <button id="deletePoster" class="danger-btn">Delete</button>
+        <button id="printPoster" class="primary-btn">Print / Save PDF ↗</button>
+      </div>
     </div>
-
-    <section class="design-section">
-      <div class="section-heading"><div><p class="eyebrow">02 · PICK A LOOK</p><h2>Choose your design</h2><p class="muted">Tap a design to see your vehicle in that style.</p></div><span class="design-count">Ready-made designs</span></div>
-      <div id="templateChoices" class="template-gallery"><p class="muted">Loading designs…</p></div>
-    </section>
-
-    <div class="section-heading editor-heading"><div><p class="eyebrow">03 · MAKE IT YOURS</p><h2>Fine-tune your poster</h2><p class="muted">Everything updates in the preview. You can edit text and drop photos without leaving this screen.</p></div><span class="live-pill"><i></i> LIVE PREVIEW</span></div>
-    <div class="workspace">
-      <aside class="editor-panel surface">
-        <div class="panel-heading"><div><p class="eyebrow">YOUR WORDS</p><h3>Poster details</h3></div><span class="panel-icon">Aa</span></div>
-        <p class="helper">Change anything. Leave a field blank to keep it off the poster.</p>
-        <div id="contentFields" class="content-fields"><div class="empty-hint">Choose a design to see its editable text.</div></div>
+    <div class="studio-grid">
+      <aside class="surface edit-panel">
+        <div class="panel-heading"><div><p class="eyebrow">PERSONALISE</p><h3>Poster text</h3></div><span class="panel-icon">Aa</span></div>
+        <p class="helper">Car information fills itself. These are the words you can change.</p>
+        <label class="poster-name-field">Poster name<input id="posterName" placeholder="e.g. Thar social post"></label>
+        <div id="posterTextFields" class="poster-text-fields"><div class="empty-card">Choose a poster to edit its text.</div></div>
       </aside>
 
-      <section class="preview-panel surface">
-        <div class="preview-top"><div><p class="eyebrow">THE FINAL LOOK</p><h3>Poster preview</h3></div><div class="preview-actions"><span class="preview-status"><i></i> Updating live</span></div></div>
-        <div class="preview-wrap"><iframe id="posterFrame" title="Live poster preview" sandbox="allow-scripts allow-modals" class="preview-frame"></iframe><div id="previewEmpty" class="preview-empty"><div class="empty-art">✳</div><b>Your poster will appear here</b><span>Add a vehicle and choose a design to begin.</span></div></div>
-        <div class="preview-footer"><span>Tip: choose another design above to instantly try a different look.</span><button id="tryNextDesign" class="text-btn">Try another look ↗</button></div>
+      <section class="surface canvas-panel">
+        <div class="canvas-heading"><div><p class="eyebrow">LIVE CANVAS</p><h3>Preview</h3></div><span class="live-status"><i></i> LIVE</span></div>
+        <div class="canvas-wrap"><iframe id="posterFrame" title="Live poster preview" sandbox="allow-scripts allow-modals" class="poster-frame"></iframe><div id="canvasEmpty" class="canvas-empty"><div class="empty-art">✳</div><b>Your poster preview</b><span>Create or open a poster to see it here.</span></div></div>
+        <div class="canvas-footer"><span>Changes are saved automatically and reflected here.</span><button id="refreshPoster" class="text-btn">Refresh preview ↻</button></div>
       </section>
 
-      <aside class="photo-panel surface">
-        <div class="panel-heading"><div><p class="eyebrow">YOUR PHOTOS</p><h3>Vehicle gallery</h3></div><span id="photoCount" class="count-pill">0 photos</span></div>
-        <p class="helper">Add as many photos as you like. Drag one onto a photo space, or tap a photo and then a space.</p>
-        <label id="uploadZone" class="upload-zone">
-          <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
-          <span class="upload-icon">＋</span><b>Drop photos here</b><span>or <u>browse your device</u></span><small>JPG · PNG · WEBP · 12 MB per image</small>
+      <aside class="surface media-panel">
+        <div class="panel-heading"><div><p class="eyebrow">CAR PHOTOS</p><h3>Image library</h3></div><span id="imageCount" class="count-pill">0 images</span></div>
+        <label id="imageUploadZone" class="upload-zone">
+          <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple hidden>
+          <span class="upload-plus">＋</span><b>Drop photos here</b><span>or <u>browse files</u></span><small>JPG · PNG · WEBP · AVIF · 12 MB each</small>
         </label>
-        <div class="library-heading"><b>Uploaded photos</b><span id="photoHint">Select or drag a photo</span></div>
-        <div id="photoLibrary" class="photo-library"><div class="empty-library">Your uploaded photos will show up here.</div></div>
-        <div class="slot-heading"><div><b>Photos on this design</b><p>These spaces come from the design you picked.</p></div><button id="autoArrange" class="text-btn">Auto-place ↗</button></div>
-        <div id="slotBoard" class="slot-board"><div class="empty-hint">Choose a design to see its photo spaces.</div></div>
+        <div class="media-subhead"><b>Uploaded photos</b><small>Drag or tap to select</small></div>
+        <div id="imageLibrary" class="image-library"><div class="empty-card">Upload photos for this car.</div></div>
+        <div class="media-subhead slots-title"><div><b>Image placeholders</b><small>Drop a photo into any space. Reuse photos if needed.</small></div></div>
+        <div id="imageSlots" class="image-slots"><div class="empty-card">Image spaces are detected from the selected template.</div></div>
       </aside>
     </div>
+  </section>
+</section>
+
+<section id="carsPanel" class="panel hidden">
+  <div class="page-heading"><div><p class="eyebrow">INVENTORY</p><h1>Cars</h1><p class="muted">Store each car once. Posters reuse these details.</p></div><button id="newCar" class="primary-btn">＋ Add car</button></div>
+  <div class="management-grid">
+    <aside class="surface records-panel"><div class="panel-heading"><h3>Your cars</h3><span id="carCount" class="count-pill">0</span></div><div id="carList" class="record-list"></div></aside>
+    <section class="surface form-panel">
+      <div class="panel-heading"><div><p class="eyebrow">CAR DETAILS</p><h3 id="carFormTitle">Add a car</h3></div></div>
+      <form id="carForm" class="form-grid">
+        <input type="hidden" name="id">
+        <label>Make<select name="make_id" id="carMakeSelect" required><option value="">Choose make</option></select></label>
+        <label>Model<input name="model" placeholder="Creta" required></label>
+        <label>Variant<input name="variant" placeholder="SX(O) 1.5 Diesel"></label>
+        <label>Registration number<input name="registration_no" placeholder="TS09AB1234" required></label>
+        <label>Fuel type<select name="fuel_type" id="fuelSelect" required></select></label>
+        <label>Year<select name="year" id="yearSelect" required></select></label>
+        <label>Transmission<select name="transmission" id="transmissionSelect" required></select></label>
+        <label>Odometer (km)<input name="odometer_km" type="number" step="1" placeholder="Leave empty if unrecorded"></label>
+        <label>Number of owners<input name="owner_count" type="number" step="1" placeholder="Leave empty if unrecorded"></label>
+        <div class="validity-field">
+          <label>Insurance validity<select id="insuranceMode"><option value="lapsed">Lapsed</option><option value="date">Valid until</option></select></label>
+          <label id="insuranceDateWrap" class="conditional-field hidden">Expiry month<input id="insuranceDate" type="month"></label>
+        </div>
+        <div class="validity-field">
+          <label>Fitness validity<select id="fitnessMode"><option value="lapsed">Lapsed</option><option value="date">Valid until</option></select></label>
+          <label id="fitnessDateWrap" class="conditional-field hidden">Expiry year<select id="fitnessDate"></select></label>
+        </div>
+      </form>
+      <div class="form-footer"><button id="cancelCarEdit" class="quiet-btn">Clear</button><button id="deleteCar" class="danger-btn hidden">Delete car</button><button id="saveCar" class="primary-btn">Save car</button></div>
+    </section>
   </div>
 </section>
 
-<section id="vehiclePanel" class="panel hidden">
-  <div class="page-heading"><div><p class="eyebrow">YOUR INVENTORY</p><h1>Vehicles</h1><p class="muted">Save the basics once. Reuse them across any design.</p></div><button id="saveVehicle" class="primary-btn">Save vehicle</button></div>
-  <div class="vehicle-layout">
-    <aside class="surface vehicle-list-panel"><div class="panel-heading"><h2>Your vehicles</h2><span id="vehicleCount" class="count-pill">0</span></div><div id="vehicleList" class="vehicle-list"></div></aside>
-    <section class="surface vehicle-form-panel"><div class="panel-heading"><div><p class="eyebrow">VEHICLE BASICS</p><h2>About this vehicle</h2></div></div>
-      <form id="vehicleForm" class="vehicle-fields"><input type="hidden" name="id"><label>Make<input name="make" placeholder="Mahindra" required></label><label>Model<input name="model" placeholder="Thar" required></label><label>Variant <small>optional</small><input name="variant" placeholder="LX 4x4"></label><label>Year <small>optional</small><input name="year" placeholder="2022"></label></form>
-      <div class="vehicle-footer"><button id="deleteVehicle" class="danger-btn hidden">Delete vehicle</button></div>
+<section id="makesPanel" class="panel hidden">
+  <div class="page-heading"><div><p class="eyebrow">MANUFACTURERS</p><h1>Car makes</h1><p class="muted">Each manufacturer has one shared record and logo.</p></div></div>
+  <div class="make-layout">
+    <section class="surface form-panel">
+      <div class="panel-heading"><div><p class="eyebrow">NEW MANUFACTURER</p><h3>Add a make</h3></div></div>
+      <form id="makeForm" class="make-form">
+        <label>Make name<input name="name" placeholder="Hyundai" required></label>
+        <label>Make logo<input name="icon" type="file" accept="image/*"></label>
+        <button class="primary-btn">Add make</button>
+      </form>
+      <p class="helper">Logos are uploaded to the Supabase Storage bucket and their public URL is saved with the make.</p>
     </section>
+    <section class="surface make-records"><div class="panel-heading"><h3>Saved makes</h3><span id="makeCount" class="count-pill">0</span></div><div id="makeList" class="make-list"></div></section>
   </div>
 </section>
 
 <section id="templatesPanel" class="panel hidden">
-  <div class="page-heading"><div><p class="eyebrow">YOUR DESIGN LIBRARY</p><h1>My designs</h1><p class="muted">Use the ready-made designs or add your own HTML + Tailwind template.</p></div></div>
-  <div class="template-layout">
-    <section class="surface template-list-panel"><h2>Saved designs</h2><div id="templateList" class="template-list"></div></section>
-    <section class="surface template-form-panel"><h2>Add a custom design</h2><form id="templateForm" class="template-form">
-      <label>Design name<input name="name" placeholder="Clean modern listing" required></label>
-      <label>Short note<input name="description" placeholder="Optional description"></label>
-      <label>Paste HTML + Tailwind<textarea name="html" rows="16" class="code-input" required placeholder="<main class='...'>&#10;  <h1>&#123;&#123;title1&#125;&#125;</h1>&#10;  <img src='&#123;&#123;image1&#125;&#125;'>&#10;  <h2>&#123;&#123;price&#125;&#125;</h2>&#10;</main>"></textarea></label>
-      <button class="primary-btn">Save design</button>
-    </form><div class="placeholder-help"><b>Simple placeholders</b><p><code>&#123;&#123;title1&#125;&#125;</code>, <code>&#123;&#123;title2&#125;&#125;</code>, <code>&#123;&#123;price&#125;&#125;</code> become editable text fields. <code>&#123;&#123;image1&#125;&#125;</code>, <code>&#123;&#123;image2&#125;&#125;</code> and more become photo spaces. Use any number of image placeholders.</p></div></section>
+  <div class="page-heading"><div><p class="eyebrow">DESIGN LIBRARY</p><h1>Templates</h1><p class="muted">Templates are reusable HTML + Tailwind designs. Placeholders are detected automatically.</p></div><button id="newTemplate" class="primary-btn">＋ New template</button></div>
+  <div class="template-management-grid">
+    <section class="surface records-panel"><div class="panel-heading"><h3>Saved templates</h3><span id="templateCount" class="count-pill">0</span></div><div id="templateList" class="record-list"></div></section>
+    <section class="surface form-panel">
+      <div class="panel-heading"><div><p class="eyebrow">TEMPLATE DESIGN</p><h3 id="templateFormTitle">Add a template</h3></div><span id="templatePlaceholderCount" class="count-pill">0 placeholders</span></div>
+      <form id="templateForm" class="template-form">
+        <input type="hidden" name="id">
+        <label>Template name<input name="name" placeholder="Premium dark listing" required></label>
+        <label>Description<input name="description" placeholder="A short description"></label>
+        <label>HTML + Tailwind<textarea name="html_content" id="templateHtml" rows="22" spellcheck="false" required placeholder="<main class='poster'>&#10;  <h1>&#123;&#123;car.model&#125;&#125;</h1>&#10;  <img src='&#123;&#123;make.icon&#125;&#125;'>&#10;  <img src='&#123;&#123;image.hero&#125;&#125;'>&#10;  <h2>&#123;&#123;text.headline&#125;&#125;</h2>&#10;</main>"></textarea></label>
+        <div class="placeholder-reference">
+          <b>Placeholder reference</b>
+          <div class="token-groups">
+            <div><strong>Car data</strong><code>&#123;&#123;car.model&#125;&#125;</code><code>&#123;&#123;car.year&#125;&#125;</code><code>&#123;&#123;car.fuel_type&#125;&#125;</code><code>&#123;&#123;car.transmission&#125;&#125;</code></div>
+            <div><strong>Make data</strong><code>&#123;&#123;make.name&#125;&#125;</code><code>&#123;&#123;make.icon&#125;&#125;</code></div>
+            <div><strong>Images</strong><code>&#123;&#123;image.hero&#125;&#125;</code><code>&#123;&#123;image.detail&#125;&#125;</code><span>Use inside an img src. Add any number of unique names.</span></div>
+            <div><strong>Editable text</strong><code>&#123;&#123;text.headline&#125;&#125;</code><code>&#123;&#123;text.price&#125;&#125;</code><code>&#123;&#123;text.contact&#125;&#125;</code><span>Any text.* key becomes a poster-specific field.</span></div>
+          </div>
+        </div>
+        <div class="form-footer"><button type="button" id="cancelTemplateEdit" class="quiet-btn">Clear</button><button class="primary-btn">Save template</button></div>
+      </form>
+      <div id="templateDetected" class="detected-schema"><span>Detected placeholders appear here as you type.</span></div>
+    </section>
   </div>
 </section>
+
 <div id="toast" class="toast hidden" role="status"></div>
 </main>
 <script src="/static/app.js"></script>
