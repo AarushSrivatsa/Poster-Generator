@@ -93,15 +93,22 @@ BUILT_IN_TEMPLATES = [
     ("Executive Black", "Luxury dark editorial style with warm gold", "poster_executive_black.html"),
 ]
 with SessionLocal() as seed_db:
-    existing_names = {row[0] for row in seed_db.query(PosterTemplate.name).all()}
-    added_any = False
+    existing_templates = {
+        row.name: row for row in seed_db.query(PosterTemplate).all()
+    }
+    changed_any = False
     for name, description, filename in BUILT_IN_TEMPLATES:
-        if name in existing_names:
-            continue
         markup = (ROOT / "templates" / filename).read_text(encoding="utf-8")
-        seed_db.add(PosterTemplate(name=name, description=description, html=markup))
-        added_any = True
-    if added_any:
+        existing = existing_templates.get(name)
+        if existing is None:
+            seed_db.add(PosterTemplate(name=name, description=description, html=markup))
+            changed_any = True
+        elif existing.html != markup or existing.description != description:
+            # Keep built-in designs current on already-deployed Supabase projects.
+            existing.description = description
+            existing.html = markup
+            changed_any = True
+    if changed_any:
         seed_db.commit()
 
 @app.get("/healthz")
