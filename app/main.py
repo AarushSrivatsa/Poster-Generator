@@ -212,6 +212,8 @@ def owner_count_label(value) -> str:
         count = int(value)
     except (TypeError, ValueError):
         return "Not specified"
+    if count < 1:
+        return "Not specified"
     suffix = "th" if 10 <= count % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(count % 10, "th")
     return f"{count}{suffix} owner"
 
@@ -423,19 +425,19 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
 _TAILWIND_UTILITY_RE = re.compile(
     r"^(?:"
     r"-?(?:m|p)(?:[trblxyse])?-|"
-    r"(?:sm|md|lg|xl|2xl|dark|light|hover|focus|focus-visible|active|disabled|group-hover|peer-checked):|"
+    r"(?:sm|md|lg|xl|2xl|dark|light|hover|focus|focus-visible|active|disabled|group-hover|peer-checked|motion-safe|motion-reduce|print|portrait|landscape):|"
     r"(?:block|inline|inline-block|inline-flex|inline-grid|flex|grid|hidden|contents|flow-root|"
     r"absolute|relative|fixed|sticky|static|isolate|"
     r"items-|justify-|self-|place-|content-|gap-|space-[xy]-|"
+    r"grid-cols-|grid-rows-|col-span-|row-span-|columns-|flex-|basis-|grow$|shrink$|"
     r"w-|h-|size-|min-w-|max-w-|min-h-|max-h-|"
-    r"text-(?:xs|sm|base|lg|[0-9]?xl|left|center|right|justify|start|end|wrap|nowrap|ellipsis|"
-    r"white|black|slate-|gray-|zinc-|neutral-|stone-|red-|orange-|amber-|yellow-|lime-|green-|"
-    r"emerald-|teal-|cyan-|sky-|blue-|indigo-|violet-|purple-|fuchsia-|pink-|rose-)|"
-    r"font-|leading-|tracking-|bg-|from-|via-|to-|border(?:-|$)|rounded(?:-|$)|shadow(?:-|$)|"
-    r"opacity-|z-|top-|right-|bottom-|left-|inset-|object-|overflow-|aspect-|cursor-|"
+    r"text-|font-|leading-|tracking-|bg-|from-|via-|to-|"
+    r"border(?:-|$)|rounded(?:-|$)|shadow(?:-|$)|opacity-|z-|"
+    r"top-|right-|bottom-|left-|inset-|object-|overflow-|aspect-|cursor-|"
     r"select-|pointer-events-|transition(?:-|$)|duration-|ease-|scale-|rotate-|translate-|"
     r"ring(?:-|$)|outline(?:-|$)|sr-only$|not-sr-only$|truncate$|antialiased$|"
     r"whitespace-|break-|decoration-|underline$|no-underline$|uppercase$|lowercase$|capitalize$"
+    r")"
     r")"
 )
 _TAILWIND_COMPILE_LOCK = threading.Lock()
