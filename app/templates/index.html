@@ -323,7 +323,7 @@
           </div>
           <label class="field-label template-paste-label">
             <span class="visually-hidden">Complete HTML template</span>
-            <textarea v-model="templateForm.html_content" @input="scheduleTemplatePreview" rows="13" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste the complete HTML you received from your designer or AI tool here…"></textarea>
+            <textarea v-model="templateForm.html_content" @input="scheduleTemplatePreview" rows="13" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste the complete HTML from your AI designer here. For reliable previews, ask for plain HTML and CSS, not Tailwind utility classes…"></textarea>
           </label>
           <div class="template-detection-row">
             <div v-if="detectedTokens.length" class="template-detection-success"><span>✓</span> [[ detectedTokens.length ]] placeholders detected automatically</div>
