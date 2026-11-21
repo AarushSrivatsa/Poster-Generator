@@ -1,65 +1,76 @@
-# Poster Generator
+# Motor Poster Studio
 
-A vehicle marketing poster studio designed around a fast, visual workflow: choose a vehicle, add photos, pick a design, edit the wording, and print a share-ready poster.
+A FastAPI + Supabase car inventory and poster builder. Store vehicle information once, create reusable HTML/Tailwind poster templates, then generate independent posters with their own image assignments and editable text.
 
-## What is included
+## Data model
 
-- **Fast start:** create a vehicle with make, model, year, and variant.
-- **Visual design gallery:** built-in Studio Minimal, Electric Motion, Executive Black, and the original Midnight Gold layout. Existing Supabase projects receive newly added built-in designs automatically on restart.
-- **One-click poster setup:** choose the recommended design, fill sensible text defaults from the vehicle record, and auto-place uploaded photos into the design's image placeholders.
-- **Live preview:** text and image assignments update the poster preview as you work.
-- **Drag, drop, or tap:** drag a photo onto any image placeholder, or tap a photo and then tap a placeholder (helpful on touch screens).
-- **Template-driven image targets:** image spaces are discovered from the selected HTML. There are no hardcoded front/rear/side/interior positions.
-- **Editable poster copy:** any text placeholder becomes an editable field. Names like \`title1\`, \`title2\`, \`price\`, \`tagline\`, \`caption2\` are displayed with friendlier labels.
-- **Custom designs:** paste arbitrary HTML + Tailwind templates and save them for reuse.
-- **Print / Save PDF:** print the current poster from the browser.
-- **Persistent storage:** Supabase Postgres stores records and templates; Supabase Storage stores photos. No SQLite or Render disk is used.
+- \`CarMake\`: one shared manufacturer record, with its optional public Supabase logo URL.
+- \`CarDetails\`: vehicle details, enums for fuel and transmission, integer year, nullable integer odometer/owner count, and nullable insurance/fitness expiry datetimes (\`NULL\` means Lapsed).
+- \`CarImage\`: many images per car, each with a public Supabase Storage URL and free-text image type.
+- \`PosterTemplate\`: reusable HTML/Tailwind source, automatically detected placeholder schema, optional thumbnail, sort order and built-in flag.
+- \`CarPoster\`: a saved poster instance referencing one car and one template, with its own editable text values and image-placeholder assignments.
 
-## Architecture
+A make can be used by many cars. A car can own many images and many poster instances. A template can be reused by many poster instances. An uploaded car photo can be assigned to multiple image placeholders in one poster.
 
-- FastAPI + SQLAlchemy backend.
-- Supabase Postgres for vehicle records, photo metadata, and saved templates.
-- Supabase Storage for original image files.
-- HTML + CSS + Tailwind-compatible custom poster templates.
-- Render web service; no local upload directory or persistent local filesystem.
+## Template placeholders
 
-## Render environment variables
+Use these tokens in template HTML:
 
-| Variable | Required | Value |
-|---|---:|---|
-| \`DATABASE_URL\` | Yes | Supabase Session pooler PostgreSQL URI, port \`5432\` |
-| \`SUPABASE_URL\` | Yes | Project URL, e.g. \`https://PROJECT_REF.supabase.co\` |
-| \`SUPABASE_SECRET_KEY\` | Yes | Supabase secret API key (\`sb_secret_...\`; server-side only) |
-| \`SUPABASE_STORAGE_BUCKET\` | No | Bucket name; defaults to \`vehicle-photos\` |
+| Token | Behaviour |
+|---|---|
+| \`{{car.model}}\` | Car model |
+| \`{{car.variant}}\` | Car variant |
+| \`{{car.registration_no}}\` | Registration number |
+| \`{{car.fuel_type}}\` | Fuel type |
+| \`{{car.year}}\` | Manufacturing year |
+| \`{{car.transmission}}\` | Transmission |
+| \`{{car.odometer_km}}\` | Odometer or “Unrecorded” |
+| \`{{car.owner_count}}\` | Owner count or “Unrecorded” |
+| \`{{car.insurance_validity}}\` | Expiry month/year or “Lapsed” |
+| \`{{car.fitness_validity}}\` | Expiry year or “Lapsed” |
+| \`{{make.name}}\` | Manufacturer name |
+| \`{{make.icon}}\` | Public Supabase URL of the make logo |
+| \`{{image.hero}}\` | User-assigned car image; any unique suffix is supported |
+| \`{{text.headline}}\` | Editable text stored per poster; any unique suffix is supported |
 
-## Supabase setup
+Image and make tokens should be used inside image \`src\` attributes. Example: \`<img src="{{image.hero}}" alt="">\`.
 
-1. Create a Supabase project.
-2. In Project Settings → API Keys, copy the Project URL and create/copy a Secret key (\`sb_secret_...\`). The legacy \`service_role\` key is also accepted using the old variable name. Never put this key in frontend code or Git.
-3. In Connect → Session pooler, copy the PostgreSQL URI. Replace the password placeholder with your database password. Use port \`5432\`.
-4. In Storage, create a bucket named \`vehicle-photos\` and mark it Public. Poster images are served via public asset URLs; upload and delete operations are performed server-side.
-5. Add \`DATABASE_URL\`, \`SUPABASE_URL\`, and \`SUPABASE_SECRET_KEY\` to Render.
+Template HTML, including decorative inline SVGs and Tailwind classes, stays in \`html_content\`. Decorative icons can be directly authored as SVG and styled with Tailwind; there is no separate icon table. The API derives \`placeholder_schema\` from the tokens whenever a template is created or its HTML is updated.
 
-The app creates its application tables on startup and applies idempotent migrations for the \`vehicle_photos.slot\` and \`vehicles.poster_fields\` columns.
+## CRUD API
 
-## Render deployment
+- Makes: \`GET/POST /api/makes\`, \`PUT/DELETE /api/makes/{id}\`, \`POST /api/makes/{id}/icon\`.
+- Cars: \`GET/POST /api/cars\`, \`GET/PUT/DELETE /api/cars/{id}\`.
+- Car images: \`POST /api/cars/{id}/images\`, \`PATCH/DELETE /api/images/{id}\`.
+- Templates: \`GET/POST /api/templates\`, \`GET/PUT/DELETE /api/templates/{id}\`.
+- Posters: \`GET/POST /api/posters\`, \`GET/PUT/DELETE /api/posters/{id}\`, \`GET /api/posters/{id}/render\`.
 
-1. Create a Web Service from this repository using Docker.
-2. Select the Free instance.
-3. Add the three required environment variables in Render's Environment page.
-4. Deploy the latest commit. \`render.yaml\` describes the service and prompts for secret values.
+The interface supports auto-saving text, live preview refresh, file uploads, drag-and-drop image assignment, tap-to-assign on touch screens, editing image types, and reusing an uploaded image in multiple placeholders.
 
-Do not attach a disk. Vehicle records live in Supabase Postgres and image files live in Supabase Storage. Render Free filesystems are ephemeral.
+## Storage and deployment
 
-## Custom template placeholders
+- Supabase Postgres stores the application records.
+- Supabase Storage bucket (default: \`vehicle-photos\`) stores car images and make logos.
+- The database stores the public Supabase URL for each image/logo.
+- Render runs the FastAPI app. No SQLite, local upload folder or Render disk is used.
 
-Use plain names in HTML + Tailwind templates:
+Required Render environment variables:
 
-- **Text:** \`{{title1}}\`, \`{{title2}}\`, \`{{price}}\`, \`{{tagline}}\`, \`{{description}}\`, \`{{caption1}}\`, or any other text name. Each becomes an editable field in the Studio.
-- **Images:** \`{{image1}}\`, \`{{image2}}\`, \`{{image3}}\`, and any other unique \`image...\` name become photo targets. There is no fixed image count.
-- Put image tokens in \`src\` attributes, e.g. \`<img src="{{image1}}" alt="">\`.
-- Existing designs using \`{{car.make}}\`, \`{{slot.hero}}\`, and \`{{label.hero}}\` remain supported for backwards compatibility.
+| Variable | Required | Purpose |
+|---|---|---|
+| \`DATABASE_URL\` | Yes | Supabase PostgreSQL Session Pooler URI, port 5432 |
+| \`SUPABASE_URL\` | Yes | Supabase project URL |
+| \`SUPABASE_SECRET_KEY\` | Yes | Server-side Supabase secret key |
+| \`SUPABASE_STORAGE_BUCKET\` | No | Defaults to \`vehicle-photos\` |
 
-## Important before public use
+The Storage bucket must be public because the database stores public object URLs for use in posters. Upload and delete operations use the server-side secret key.
 
-The current app is an internal single-operator tool and does not yet include login or per-dealership permissions. Add authentication and access controls before sharing the deployed URL publicly. Keep the Supabase secret key only in Render's private environment variables.
+## Automatic schema reset
+
+On the first deployment of this version, the app creates a persistent \`poster_generator_schema_meta\` marker in Supabase Postgres. When no schema marker exists, it drops the app's old/partial tables (\`vehicles\`, \`vehicle_photos\`, and the previous/partial poster tables), then creates the current tables from the SQLAlchemy models. It records schema version 1 so this reset does **not** repeat on later restarts.
+
+**This one-time reset permanently deletes the old app records and old template records in those tables.** It does not drop unrelated tables or delete old orphaned Storage objects. Back up any old records you need before deploying.
+
+## Important
+
+The app currently has no authentication or per-user permissions. Treat it as a private internal tool until login and authorization are added. Never expose \`SUPABASE_SECRET_KEY\` in browser code or commit it to Git.
