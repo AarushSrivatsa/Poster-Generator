@@ -39,6 +39,7 @@ const app = Vue.createApp({
       photoDropActive: false,
       saveState: "saved",
       posterSaveTimer: null,
+      posterSavePromise: null,
       previewVersion: 0,
       dateLabel: new Date().toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric"})
     };
@@ -453,23 +454,41 @@ const app = Vue.createApp({
       if (!this.activePoster) return;
       clearTimeout(this.posterSaveTimer);
       const currentId = this.activePoster.id;
+
+      // Serialize autosaves so an older request cannot overwrite newer edits.
+      if (this.posterSavePromise) {
+        await this.posterSavePromise;
+        if (this.activePoster && this.activePoster.id === currentId) {
+          return this.savePosterNow();
+        }
+        return;
+      }
+
       const payload = {
         name:this.activePoster.name || "",
         text_values:{...(this.activePoster.text_values || {})},
         image_assignments:{...(this.activePoster.image_assignments || {})}
       };
       this.saveState = "saving";
+      const request = this.api("/api/posters/" + currentId, {method:"PUT", ...this.json(payload)});
+      this.posterSavePromise = request;
       try {
-        const updated = await this.api("/api/posters/" + currentId, {method:"PUT", ...this.json(payload)});
+        const updated = await request;
         if (!this.activePoster || this.activePoster.id !== currentId) return;
         this.activePoster.updated_at = updated.updated_at;
-        this.posters = this.posters.map(item => item.id === currentId ? {...item, name:payload.name, updated_at:updated.updated_at} : item);
+        this.posters = this.posters.map(item =>
+          item.id === currentId
+            ? {...item, name:payload.name, updated_at:updated.updated_at}
+            : item
+        );
         this.saveState = "saved";
         this.previewVersion += 1;
       } catch (error) {
         this.saveState = "error";
         this.handleError(error);
         throw error;
+      } finally {
+        if (this.posterSavePromise === request) this.posterSavePromise = null;
       }
     },
     refreshPreview() {
