@@ -308,9 +308,13 @@ def render_poster(vehicle_id: int, template_id: int, db: Session = Depends(get_d
     markup = template.html
     data = vehicle_dict(vehicle)
     for key, value in data.items():
-        if key != "poster_fields" and not isinstance(value, dict) and "car." + key not in data.get("poster_fields", {}):
+        if key == "poster_fields" or isinstance(value, dict):
+            continue
+        # Explicit Studio text values win over vehicle defaults for matching short placeholders.
+        if key not in data.get("poster_fields", {}):
             markup = re.sub(r"\{\{\s*" + re.escape(key) + r"\s*\}\}", html.escape(str(value or "")), markup)
-            markup = markup.replace("{{car." + key + "}}", html.escape(str(value or "")))
+        # Keep the legacy car.* placeholder syntax working for older saved designs.
+        markup = markup.replace("{{car." + key + "}}", html.escape(str(value or "")))
     for key, value in data.get("poster_fields", {}).items():
         markup = re.sub(r"\{\{\s*" + re.escape(key) + r"\s*\}\}", html.escape(str(value or "")), markup)
     for photo in vehicle.photos:
