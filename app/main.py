@@ -391,9 +391,8 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
 
 app = FastAPI(title="Vehicle Poster Studio", version="2.1.0")
 
-# SQLAlchemy create_all creates missing model tables only. It does NOT drop,
-# truncate, alter, or migrate any existing tables. The new template model uses
-# poster_design_templates so it cannot collide with the previous app's table.
+# Create any model tables that are absent. Existing table structures and
+# records are left unchanged. The template model uses its own new table name.
 Base.metadata.create_all(bind=engine)
 
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
