@@ -1,4 +1,5 @@
 import calendar
+import hashlib
 import html
 import json
 import os
@@ -6,6 +7,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import threading
 import uuid
 from functools import lru_cache
 from datetime import datetime, timezone
@@ -121,9 +123,12 @@ def parse_int(value, field_name: str, nullable: bool = False):
             return None
         raise HTTPException(400, f"{field_name} is required.")
     try:
-        return int(value)
+        parsed = int(value)
     except (TypeError, ValueError):
         raise HTTPException(400, f"{field_name} must be a whole number.")
+    if field_name == "Owner count" and parsed < 1:
+        raise HTTPException(400, "Owner number must be at least 1.")
+    return parsed
 
 
 def parse_validity(value, field_name: str, kind: str) -> datetime | None:
@@ -406,53 +411,124 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
         markup = re.sub(r"</body\s*>", print_bridge + "</body>", markup, count=1, flags=re.IGNORECASE)
     else:
         markup += print_bridge
-    return inject_compiled_tailwind(markup, compile_tailwind_css(template.html_content))
+    if template_uses_tailwind(template.html_content):
+        compiled_css = compile_tailwind_css(template.html_content)
+        if compiled_css:
+            markup = inject_compiled_tailwind(markup, compiled_css)
+    return markup
 
 
-@lru_cache(maxsize=64)
+# Only class lists with Tailwind utility syntax trigger the compiler. The built-in
+# designs use ordinary CSS and should never pay the cost of launching Node.
+_TAILWIND_UTILITY_RE = re.compile(
+    r"^(?:"
+    r"-?(?:m|p)(?:[trblxyse])?-|"
+    r"(?:sm|md|lg|xl|2xl|dark|light|hover|focus|focus-visible|active|disabled|group-hover|peer-checked):|"
+    r"(?:block|inline|inline-block|inline-flex|inline-grid|flex|grid|hidden|contents|flow-root|"
+    r"absolute|relative|fixed|sticky|static|isolate|"
+    r"items-|justify-|self-|place-|content-|gap-|space-[xy]-|"
+    r"w-|h-|size-|min-w-|max-w-|min-h-|max-h-|"
+    r"text-(?:xs|sm|base|lg|[0-9]?xl|left|center|right|justify|start|end|wrap|nowrap|ellipsis|"
+    r"white|black|slate-|gray-|zinc-|neutral-|stone-|red-|orange-|amber-|yellow-|lime-|green-|"
+    r"emerald-|teal-|cyan-|sky-|blue-|indigo-|violet-|purple-|fuchsia-|pink-|rose-)|"
+    r"font-|leading-|tracking-|bg-|from-|via-|to-|border(?:-|$)|rounded(?:-|$)|shadow(?:-|$)|"
+    r"opacity-|z-|top-|right-|bottom-|left-|inset-|object-|overflow-|aspect-|cursor-|"
+    r"select-|pointer-events-|transition(?:-|$)|duration-|ease-|scale-|rotate-|translate-|"
+    r"ring(?:-|$)|outline(?:-|$)|sr-only$|not-sr-only$|truncate$|antialiased$|"
+    r"whitespace-|break-|decoration-|underline$|no-underline$|uppercase$|lowercase$|capitalize$"
+    r")"
+)
+_TAILWIND_COMPILE_LOCK = threading.Lock()
+_TAILWIND_CLI_VERSION = "4.3.5"
+_TAILWIND_CACHE_DIR = Path(tempfile.gettempdir()) / "motor-studio-tailwind-cache"
+
+
+def template_uses_tailwind(markup: str) -> bool:
+    """Detect actual Tailwind directives, CDN usage, or utility classes."""
+    if re.search(
+        r"@(?:tailwind|apply|theme|source|config|utility|variant)\\b|"
+        r"@import\\s+['\\\"]tailwindcss['\\\"]|"
+        r"<style\\b[^>]*\\btype\\s*=\\s*['\\\"]text/tailwindcss['\\\"]|"
+        r"https?://(?:cdn\\.tailwindcss\\.com|cdn\\.jsdelivr\\.net/npm/@tailwindcss/browser@4)",
+        markup,
+        flags=re.IGNORECASE,
+    ):
+        return True
+    for class_value in re.findall(r"\\bclass\\s*=\\s*['\\\"]([^'\\\"]*)['\\\"]", markup, flags=re.IGNORECASE):
+        if any(_TAILWIND_UTILITY_RE.match(token) for token in class_value.split()):
+            return True
+    return False
+
+
+@lru_cache(maxsize=128)
 def compile_tailwind_css(markup: str) -> str:
-    """Compile the utility classes present in this template into production CSS."""
-    # Docker installs Node packages in /app/node_modules; ROOT is /app/app.
+    """Compile Tailwind once per unique template and reuse a content-addressed disk cache."""
     app_root = ROOT.parent
     executable = app_root / "node_modules" / ".bin" / "tailwindcss"
     if not executable.exists():
         raise RuntimeError("Tailwind CSS compiler is missing. Rebuild the app image to install dependencies.")
 
-    inline_tailwind_css = "\n".join(
-        match.group(1)
-        for match in re.finditer(
-            r"<style\b[^>]*\btype\s*=\s*['\"]text/tailwindcss['\"][^>]*>(.*?)</style\s*>",
-            markup,
-            flags=re.IGNORECASE | re.DOTALL,
-        )
-    )
-    with tempfile.TemporaryDirectory(prefix=".poster-tailwind-", dir=ROOT) as temp_dir:
-        workdir = Path(temp_dir)
-        source_file = workdir / "template.html"
-        input_file = workdir / "input.css"
-        output_file = workdir / "output.css"
-        source_file.write_text(markup, encoding="utf-8")
-        input_file.write_text(
-            '@import "tailwindcss" source(none);\n'
-            '@source "./template.html";\n'
-            + inline_tailwind_css,
-            encoding="utf-8",
-        )
+    cache_key = hashlib.sha256(
+        (_TAILWIND_CLI_VERSION + "\\0" + markup).encode("utf-8")
+    ).hexdigest()
+    cache_file = _TAILWIND_CACHE_DIR / (cache_key + ".css")
+
+    # lru_cache is thread-safe for storage, but concurrent misses can still call
+    # the wrapped function more than once. Lock around disk lookup + compilation.
+    with _TAILWIND_COMPILE_LOCK:
         try:
-            result = subprocess.run(
-                [executable, "-i", str(input_file), "-o", str(output_file), "--minify"],
-                cwd=app_root,
-                capture_output=True,
-                text=True,
-                timeout=25,
-                check=False,
+            if cache_file.is_file():
+                return cache_file.read_text(encoding="utf-8")
+        except OSError:
+            pass
+
+        inline_tailwind_css = "\\n".join(
+            match.group(1)
+            for match in re.finditer(
+                r"<style\\b[^>]*\\btype\\s*=\\s*['\\\"]text/tailwindcss['\\\"][^>]*>(.*?)</style\\s*>",
+                markup,
+                flags=re.IGNORECASE | re.DOTALL,
             )
-        except subprocess.TimeoutExpired as exc:
-            raise RuntimeError("Tailwind took too long to compile this template.") from exc
-        if result.returncode != 0 or not output_file.exists():
-            detail = (result.stderr or result.stdout or "Unknown Tailwind compiler error").strip()
-            raise RuntimeError("Could not compile this template's Tailwind classes: " + detail[:500])
-        return output_file.read_text(encoding="utf-8")
+        )
+        # Keep scratch files out of the application tree and avoid touching
+        # Render's ephemeral application filesystem for every preview.
+        with tempfile.TemporaryDirectory(prefix="motor-studio-tailwind-") as temp_dir:
+            workdir = Path(temp_dir)
+            source_file = workdir / "template.html"
+            input_file = workdir / "input.css"
+            output_file = workdir / "output.css"
+            source_file.write_text(markup, encoding="utf-8")
+            input_file.write_text(
+                '@import "tailwindcss" source(none);\\n'
+                '@source "./template.html";\\n'
+                + inline_tailwind_css,
+                encoding="utf-8",
+            )
+            try:
+                result = subprocess.run(
+                    [str(executable), "-i", str(input_file), "-o", str(output_file), "--minify"],
+                    cwd=app_root,
+                    capture_output=True,
+                    text=True,
+                    timeout=15,
+                    check=False,
+                )
+            except subprocess.TimeoutExpired as exc:
+                raise RuntimeError("Tailwind could not finish compiling this template within 15 seconds.") from exc
+            if result.returncode != 0 or not output_file.exists():
+                detail = (result.stderr or result.stdout or "Unknown Tailwind compiler error").strip()
+                raise RuntimeError("Could not compile this template's Tailwind classes: " + detail[:500])
+            compiled_css = output_file.read_text(encoding="utf-8")
+
+        try:
+            _TAILWIND_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            temporary_cache_file = cache_file.with_suffix(".tmp")
+            temporary_cache_file.write_text(compiled_css, encoding="utf-8")
+            os.replace(temporary_cache_file, cache_file)
+        except OSError:
+            # In-memory LRU still accelerates this worker when disk cache is unavailable.
+            pass
+        return compiled_css
 
 
 def inject_compiled_tailwind(markup: str, compiled_css: str) -> str:
