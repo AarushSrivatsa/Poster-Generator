@@ -1,54 +1,27 @@
-<main class="poster-shell relative overflow-hidden bg-[#101416] text-white">
-  <header class="relative z-10 bg-gradient-to-r from-black via-[#202729] to-black px-7 pt-7 pb-5">
-    <div class="flex items-start justify-between gap-4">
-      <div>
-        <p class="text-5xl font-black italic tracking-tight text-[#f4cb68]">FOR SALE</p>
-        <h1 class="mt-1 text-4xl font-black uppercase leading-none">{{ car.make }} {{ car.model }}</h1>
-        <p class="mt-2 text-2xl font-extrabold italic text-[#f3cf78]">{{ car.variant }}</p>
-      </div>
-      <div class="rounded-xl border border-[#e7c36b] px-3 py-2 text-center text-sm font-black uppercase text-[#f4d27f]">★ Best<br>Deal!</div>
-    </div>
-    <div class="mt-4 rounded-md bg-[#e9c36c] px-4 py-2 text-center text-sm font-black uppercase tracking-wide text-[#171717]">{{ car.highlights }}</div>
-  </header>
-
-  <section class="relative">
-    {% if photos|length > 0 %}
-      <img src="{{ photos[0].url }}" alt="{{ photos[0].label }}" class="h-[420px] w-full object-cover">
-    {% else %}
-      <div class="flex h-[420px] items-center justify-center bg-gradient-to-br from-zinc-700 to-zinc-950 text-7xl">🚘</div>
-    {% endif %}
-    <div class="absolute right-5 top-5 max-w-[190px] rotate-3 rounded-lg bg-[#f3d17c] px-4 py-3 text-center text-lg font-black uppercase text-black shadow-xl">{{ car.condition }}</div>
-  </section>
-
-  <section class="grid grid-cols-3 gap-px bg-[#b9964e] text-center">
-    {% for item in specs %}
-    <div class="bg-[#111719] px-2 py-4">
-      <div class="text-2xl text-[#edc96f]">{{ item.icon }}</div>
-      <div class="mt-1 text-lg font-extrabold leading-tight">{{ item.value }}</div>
-      <div class="text-xs font-bold uppercase tracking-wide text-zinc-400">{{ item.label }}</div>
-    </div>
-    {% endfor %}
-  </section>
-
-  <section class="grid grid-cols-3 gap-3 bg-black p-4">
-    {% for photo in photos[1:7] %}
-    <figure class="overflow-hidden rounded-lg border-2 border-[#c6a45b] bg-zinc-900">
-      <img src="{{ photo.url }}" alt="{{ photo.label }}" class="h-32 w-full object-cover">
-      <figcaption class="bg-[#e8c36d] px-1 py-1 text-center text-xs font-black uppercase text-black">{{ photo.label }}</figcaption>
-    </figure>
-    {% endfor %}
-    {% for n in range(6 - (photos[1:7]|length)) %}
-    <div class="flex h-36 items-center justify-center rounded-lg border border-dashed border-zinc-700 text-xs uppercase text-zinc-600">Add vehicle photo</div>
-    {% endfor %}
-  </section>
-
-  <footer class="border-t-4 border-[#d1ad60] bg-[#0a0e0f] p-5">
-    <div class="mb-3 inline-block bg-[#e8c36d] px-4 py-1 text-lg font-black uppercase text-black">Vehicle details</div>
-    <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
-      {% for item in details %}
-      <div><span class="mr-1 text-[#e7c36f]">✓</span><b>{{ item.label }}:</b> {{ item.value }}</div>
-      {% endfor %}
-    </div>
-    <div class="mt-4 border-t border-zinc-700 pt-3 text-right text-lg font-black">By {{ car.seller }}</div>
-  </footer>
-</main>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script src="https://cdn.tailwindcss.com"></script><style>@page{size:A4 portrait;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif}.poster{width:100%;max-width:900px;margin:auto;background:#0d1113;color:white}.gold{color:#f0cb70}.goldbg{background:#e8c36d;color:#171717}.hero{height:360px;object-fit:cover;width:100%}.tile{height:125px;width:100%;object-fit:cover}.spec{background:#111719;border-right:1px solid #9b804b;padding:12px 4px;text-align:center}.photo{border:2px solid #c6a45b;border-radius:10px;overflow:hidden;background:#111}.photo figcaption{font-weight:900;text-transform:uppercase;text-align:center;font-size:12px;padding:5px;background:#e8c36d;color:#111}@media print{.poster{max-width:none;width:210mm;min-height:297mm}}</style></head>
+<body><main class="poster">
+<header class="bg-gradient-to-r from-black via-zinc-800 to-black px-6 pt-6 pb-4">
+<div class="flex justify-between gap-3"><div><div class="text-5xl font-black italic gold">FOR SALE</div><h1 class="text-4xl font-black uppercase leading-none">{{car.make}} {{car.model}}</h1><p class="mt-2 text-2xl font-black italic gold">{{car.variant}}</p></div><div class="self-center rounded-lg border border-yellow-500 px-3 py-2 text-center font-black gold">★ BEST<br>DEAL!</div></div>
+<div class="goldbg mt-4 rounded px-3 py-2 text-center text-sm font-black uppercase">{{car.highlights}}</div></header>
+<section class="relative"><img class="hero" src="{{slot.hero}}" alt="Main vehicle photo"><div class="absolute right-4 top-4 rotate-3 rounded-lg goldbg px-4 py-3 text-center font-black uppercase">{{car.condition}}</div></section>
+<section class="grid grid-cols-6 gap-px bg-yellow-700">
+<div class="spec"><div class="text-2xl gold">⛽</div><b>{{car.fuel}}</b><div class="text-xs text-zinc-400">FUEL TYPE</div></div>
+<div class="spec"><div class="text-2xl gold">⚙</div><b>{{car.transmission}}</b><div class="text-xs text-zinc-400">TRANSMISSION</div></div>
+<div class="spec"><div class="text-2xl gold">▦</div><b>{{car.year}}</b><div class="text-xs text-zinc-400">YEAR</div></div>
+<div class="spec"><div class="text-2xl gold">◉</div><b>{{car.odometer}}</b><div class="text-xs text-zinc-400">ODOMETER</div></div>
+<div class="spec"><div class="text-2xl gold">♙</div><b>{{car.owner}}</b><div class="text-xs text-zinc-400">OWNERSHIP</div></div>
+<div class="spec"><div class="text-2xl gold">✓</div><b>{{car.insurance}}</b><div class="text-xs text-zinc-400">INSURANCE</div></div></section>
+<section class="grid grid-cols-3 gap-2 bg-black p-3">
+<figure class="photo"><img class="tile" src="{{slot.front}}"><figcaption>{{label.front}}</figcaption></figure>
+<figure class="photo"><img class="tile" src="{{slot.side}}"><figcaption>{{label.side}}</figcaption></figure>
+<figure class="photo"><img class="tile" src="{{slot.rear}}"><figcaption>{{label.rear}}</figcaption></figure>
+<figure class="photo"><img class="tile" src="{{slot.interior}}"><figcaption>{{label.interior}}</figcaption></figure>
+<figure class="photo"><img class="tile" src="{{slot.extra1}}"><figcaption>{{label.extra1}}</figcaption></figure>
+<figure class="photo"><img class="tile" src="{{slot.extra2}}"><figcaption>{{label.extra2}}</figcaption></figure></section>
+<footer class="border-t-4 border-yellow-600 bg-[#090d0e] p-5"><div class="goldbg inline-block px-4 py-1 font-black uppercase">Vehicle details</div><div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+<div>✓ Model: {{car.make}} {{car.model}}</div><div>✓ Year: {{car.year}}</div><div>✓ Tax validity: {{car.tax_validity}}</div>
+<div>✓ Reg No: {{car.registration}}</div><div>✓ Owner: {{car.owner}}</div><div>✓ Fitness: {{car.fitness_validity}}</div>
+<div>✓ Variant: {{car.variant}}</div><div>✓ Transmission: {{car.transmission}}</div><div>✓ Fuel: {{car.fuel}}</div>
+<div>✓ Insurance: {{car.insurance}} {{car.insurance_expiry}}</div></div><div class="mt-4 border-t border-zinc-700 pt-3 text-right text-lg font-black">By {{car.seller}}</div></footer>
+</main></body></html>
