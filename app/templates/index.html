@@ -34,7 +34,7 @@
     <div class="create-action"><button id="createPoster" class="primary-btn" disabled>Create poster →</button></div>
   </section>
 
-  <div class="subheading"><div><p class="eyebrow">SAVED WORK</p><h2>Recent posters</h2></div><span id="posterCount" class="count-pill">0 posters</span></div>
+  <div class="subheading section-toolbar"><div><p class="eyebrow">SAVED WORK</p><h2>Recent posters</h2></div><div class="toolbar-actions"><input id="posterSearch" class="search-field" type="search" placeholder="Search posters…" aria-label="Search posters"><span id="posterCount" class="count-pill">0 posters</span></div></div>
   <div id="posterList" class="poster-list"><div class="empty-card">Your saved posters will appear here.</div></div>
 
   <section id="posterEditor" class="poster-editor hidden">
@@ -79,7 +79,7 @@
 <section id="carsPanel" class="panel hidden">
   <div class="page-heading"><div><p class="eyebrow">INVENTORY</p><h1>Cars</h1><p class="muted">Store each car once. Posters reuse these details.</p></div><button id="newCar" class="primary-btn">＋ Add car</button></div>
   <div class="management-grid">
-    <aside class="surface records-panel"><div class="panel-heading"><h3>Your cars</h3><span id="carCount" class="count-pill">0</span></div><div id="carList" class="record-list"></div></aside>
+    <aside class="surface records-panel"><div class="panel-heading"><div><p class="eyebrow">INVENTORY</p><h3>Your cars</h3></div><span id="carCount" class="count-pill">0 cars</span></div><input id="carSearch" class="search-field" type="search" placeholder="Search make, model or reg. no." aria-label="Search cars"><div id="carList" class="record-list"></div></aside>
     <section class="surface form-panel">
       <div class="panel-heading"><div><p class="eyebrow">CAR DETAILS</p><h3 id="carFormTitle">Add a car</h3></div></div>
       <form id="carForm" class="form-grid">
@@ -133,16 +133,16 @@
         <label>Make logo<input name="icon" type="file" accept="image/*"></label>
         <button class="primary-btn">Add make</button>
       </form>
-      <p class="helper">Logos are uploaded to the Supabase Storage bucket and their public URL is saved with the make.</p>
+      <p class="helper">Add the logo once. It will be available whenever you use this manufacturer.</p>
     </section>
-    <section class="surface make-records"><div class="panel-heading"><h3>Saved makes</h3><span id="makeCount" class="count-pill">0</span></div><div id="makeList" class="make-list"></div></section>
+    <section class="surface make-records"><div class="panel-heading"><div><p class="eyebrow">MANUFACTURER DIRECTORY</p><h3>Saved makes</h3></div><span id="makeCount" class="count-pill">0 makes</span></div><input id="makeSearch" class="search-field" type="search" placeholder="Search manufacturers…" aria-label="Search makes"><div id="makeList" class="make-list"></div></section>
   </div>
 </section>
 
 <section id="templatesPanel" class="panel hidden">
   <div class="page-heading"><div><p class="eyebrow">DESIGN LIBRARY</p><h1>Templates</h1><p class="muted">Templates are reusable HTML + Tailwind designs. Placeholders are detected automatically.</p></div><button id="newTemplate" class="primary-btn">＋ New template</button></div>
   <div class="template-management-grid">
-    <section class="surface records-panel"><div class="panel-heading"><h3>Saved templates</h3><span id="templateCount" class="count-pill">0</span></div><div id="templateList" class="record-list"></div></section>
+    <section class="surface records-panel"><div class="panel-heading"><div><p class="eyebrow">DESIGN LIBRARY</p><h3>Saved templates</h3></div><span id="templateCount" class="count-pill">0 templates</span></div><input id="templateSearch" class="search-field" type="search" placeholder="Search templates…" aria-label="Search templates"><div id="templateList" class="record-list"></div></section>
     <section class="surface form-panel">
       <div class="panel-heading"><div><p class="eyebrow">TEMPLATE DESIGN</p><h3 id="templateFormTitle">Add a template</h3></div><span id="templatePlaceholderCount" class="count-pill">0 placeholders</span></div>
       <form id="templateForm" class="template-form">
