@@ -446,15 +446,15 @@ _TAILWIND_CACHE_DIR = Path(tempfile.gettempdir()) / "motor-studio-tailwind-cache
 def template_uses_tailwind(markup: str) -> bool:
     """Detect actual Tailwind directives, CDN usage, or utility classes."""
     if re.search(
-        r"@(?:tailwind|apply|theme|source|config|utility|variant)\\b|"
-        r"@import\\s+['\\\"]tailwindcss['\\\"]|"
-        r"<style\\b[^>]*\\btype\\s*=\\s*['\\\"]text/tailwindcss['\\\"]|"
-        r"https?://(?:cdn\\.tailwindcss\\.com|cdn\\.jsdelivr\\.net/npm/@tailwindcss/browser@4)",
+        r"@(?:tailwind|apply|theme|source|config|utility|variant)\b|"
+        r"@import\s+['\\"]tailwindcss['\\"]|"
+        r"<style\b[^>]*\btype\s*=\s*['\\"]text/tailwindcss['\\"]|"
+        r"https?://(?:cdn\.tailwindcss\.com|cdn\.jsdelivr\.net/npm/@tailwindcss/browser@4)",
         markup,
         flags=re.IGNORECASE,
     ):
         return True
-    for class_value in re.findall(r"\\bclass\\s*=\\s*['\\\"]([^'\\\"]*)['\\\"]", markup, flags=re.IGNORECASE):
+    for class_value in re.findall(r"\bclass\s*=\s*['\\"]([^'\\"]*)['\\"]", markup, flags=re.IGNORECASE):
         if any(_TAILWIND_UTILITY_RE.match(token) for token in class_value.split()):
             return True
     return False
@@ -469,7 +469,7 @@ def compile_tailwind_css(markup: str) -> str:
         raise RuntimeError("Tailwind CSS compiler is missing. Rebuild the app image to install dependencies.")
 
     cache_key = hashlib.sha256(
-        (_TAILWIND_CLI_VERSION + "\\0" + markup).encode("utf-8")
+        (_TAILWIND_CLI_VERSION + "\0" + markup).encode("utf-8")
     ).hexdigest()
     cache_file = _TAILWIND_CACHE_DIR / (cache_key + ".css")
 
@@ -482,10 +482,10 @@ def compile_tailwind_css(markup: str) -> str:
         except OSError:
             pass
 
-        inline_tailwind_css = "\\n".join(
+        inline_tailwind_css = "\n".join(
             match.group(1)
             for match in re.finditer(
-                r"<style\\b[^>]*\\btype\\s*=\\s*['\\\"]text/tailwindcss['\\\"][^>]*>(.*?)</style\\s*>",
+                r"<style\b[^>]*\btype\s*=\s*['\\"]text/tailwindcss['\\"][^>]*>(.*?)</style\s*>",
                 markup,
                 flags=re.IGNORECASE | re.DOTALL,
             )
@@ -499,8 +499,8 @@ def compile_tailwind_css(markup: str) -> str:
             output_file = workdir / "output.css"
             source_file.write_text(markup, encoding="utf-8")
             input_file.write_text(
-                '@import "tailwindcss" source(none);\\n'
-                '@source "./template.html";\\n'
+                '@import "tailwindcss" source(none);\n'
+                '@source "./template.html";\n'
                 + inline_tailwind_css,
                 encoding="utf-8",
             )
