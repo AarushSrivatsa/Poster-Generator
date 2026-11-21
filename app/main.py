@@ -21,19 +21,19 @@ ALLOWED_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp
 MAX_UPLOAD_BYTES = 12 * 1024 * 1024
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
-SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+SUPABASE_SECRET_KEY = os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "vehicle-photos")
 
-if not SUPABASE_URL.startswith("https://") or not SUPABASE_SERVICE_ROLE_KEY:
+if not SUPABASE_URL.startswith("https://") or not SUPABASE_SECRET_KEY:
     raise RuntimeError(
-        "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required. "
+        "SUPABASE_URL and SUPABASE_SECRET_KEY are required (legacy SUPABASE_SERVICE_ROLE_KEY is also accepted). "
         "Configure Supabase Postgres and Storage before starting the app."
     )
 
 def storage_headers(content_type: str | None = None) -> dict[str, str]:
     headers = {
-        "apikey": SUPABASE_SERVICE_ROLE_KEY,
-        "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+        "apikey": SUPABASE_SECRET_KEY,
+        "Authorization": f"Bearer {SUPABASE_SECRET_KEY}",
     }
     if content_type:
         headers["Content-Type"] = content_type
