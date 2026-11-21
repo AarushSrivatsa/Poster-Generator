@@ -1,12 +1,51 @@
 <!doctype html>
-<html lang="en" data-template-version="2"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Trackline Sport</title>
+<html lang="en" data-template-version="3">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Electric Motion</title>
 <style>
-@page{size:A4 portrait;margin:0}*{box-sizing:border-box}body{margin:0;background:#080d13;color:#f4f7f8;font-family:Arial,Helvetica,sans-serif}.poster{max-width:900px;min-height:1125px;margin:auto;background:#0b1118;overflow:hidden;position:relative;padding:34px 40px}.poster:before{content:"";position:absolute;inset:0;background:linear-gradient(145deg,transparent 30%,#00e0c322 30.1%,transparent 30.8%),radial-gradient(circle at 90% 10%,#0a837e44,transparent 35%)}.top,.intro,.hero,.offer,.stats,.footer{position:relative}.top{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1c4548;padding-bottom:18px}.brand{font-size:10px;letter-spacing:.32em;font-weight:900;color:#51e1d1}.top img{max-width:88px;max-height:45px;object-fit:contain}.intro{padding:33px 0 24px}.kicker{font-size:10px;color:#51e1d1;letter-spacing:.3em;font-weight:900}.title{font-size:clamp(50px,8vw,88px);line-height:.86;letter-spacing:-.07em;font-weight:900;text-transform:uppercase;margin:14px 0 10px}.sub{font-size:17px;color:#9eafb9;letter-spacing:.08em}.hero{height:430px;overflow:hidden;background:linear-gradient(135deg,#213a40,#101923);border:1px solid #51e1d155;clip-path:polygon(0 0,100% 0,100% 91%,93% 100%,0 100%)}.hero img,.detail img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1}.ph{position:absolute;inset:0;display:grid;place-items:center;color:#51e1d188;font-size:10px;letter-spacing:.22em;font-weight:900}.offer{display:flex;justify-content:space-between;align-items:center;gap:20px;margin:23px 0;padding:17px 20px;background:#51e1d1;color:#061312}.offer small{font-size:9px;letter-spacing:.22em;font-weight:900}.price{font-size:36px;font-weight:900;margin-top:4px}.tagline{font-size:12px;line-height:1.4;text-align:right;max-width:250px;font-weight:700}.stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #27565a;border-bottom:1px solid #27565a}.stat{text-align:center;padding:18px 5px;border-right:1px solid #27565a}.stat:last-child{border:0}.stat small{display:block;color:#51e1d1;font-size:8px;letter-spacing:.17em;margin-bottom:8px}.stat b{font-size:11px}.footer{display:flex;justify-content:space-between;gap:15px;padding-top:22px}.contact{font-size:14px;color:#51e1d1;font-weight:900}.reg{font-size:10px;color:#8798a4;text-align:right}@media print{.poster{width:210mm;min-height:297mm;max-width:none}}@media(max-width:560px){.poster{padding:24px 20px}.hero{height:330px}.title{font-size:49px}.offer{padding:14px}.price{font-size:29px}.stat{padding:13px 3px}.stat b{font-size:9px}}
-</style></head><body><main class="poster">
-<header class="top"><div class="brand">TRACKLINE&nbsp; / &nbsp;PERFORMANCE DIVISION</div><img src="{{make.icon}}" alt="{{make.name}}"></header>
-<section class="intro"><div class="kicker">{{text.eyebrow}}</div><h1 class="title">{{car.make}}<br>{{car.model}}</h1><div class="sub">{{car.variant}} · {{car.year}}</div></section>
-<section class="hero"><div class="ph">DROP IN YOUR BEST ANGLE</div><img src="{{image.hero}}" alt=""></section>
-<section class="offer"><div><small>MAKE IT YOUR NEXT MOVE</small><div class="price">{{text.price}}</div></div><div class="tagline">{{text.tagline}}</div></section>
-<section class="stats"><div class="stat"><small>POWER</small><b>{{car.fuel_type}}</b></div><div class="stat"><small>SHIFT</small><b>{{car.transmission}}</b></div><div class="stat"><small>RUN</small><b>{{car.odometer_km}} km</b></div><div class="stat"><small>OWNERS</small><b>{{car.owner_count}}</b></div></section>
-<footer class="footer"><strong class="contact">{{text.contact}}</strong><span class="reg">{{car.registration_no}} · FITNESS {{car.fitness_validity}}</span></footer>
+@page{size:A4 portrait;margin:0}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%;background:#071118;color:#f4f8f8;font-family:Arial,Helvetica,sans-serif}
+.poster{width:100%;max-width:900px;min-height:1123px;margin:auto;padding:32px 36px 28px;background:radial-gradient(circle at 100% 0%,#075d5a 0,transparent 30%),#08131b;overflow:hidden}
+.top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #22575a;padding-bottom:15px}
+.brand{font-size:9px;letter-spacing:.32em;font-weight:900;color:#6ef1d5}
+.top img{max-width:84px;max-height:40px;object-fit:contain}
+.head{display:flex;align-items:end;justify-content:space-between;gap:18px;padding:25px 0 18px}
+.kicker{font-size:9px;letter-spacing:.28em;color:#6ef1d5;font-weight:900;text-transform:uppercase}
+h1{font-size:57px;line-height:.85;letter-spacing:-.075em;text-transform:uppercase;margin:9px 0 8px;font-weight:900}
+.sub{font-size:12px;color:#9db4b8;letter-spacing:.12em;text-transform:uppercase}
+.price{background:#72efd4;color:#061714;padding:12px 15px;font-size:28px;font-weight:900;white-space:nowrap;clip-path:polygon(0 0,100% 0,100% 82%,90% 100%,0 100%)}
+.price small{display:block;font-size:8px;letter-spacing:.2em;margin-bottom:3px}
+.gallery{display:grid;grid-template-columns:1.35fr 1fr 1fr;grid-template-rows:170px 150px;gap:8px;padding:2px 0 18px}
+.photo{position:relative;overflow:hidden;min-width:0;background:#17323a;border:1px solid #1c6061;clip-path:polygon(0 0,100% 0,100% 92%,94% 100%,0 100%)}
+.photo img{position:relative;z-index:1;width:100%;height:100%;display:block;object-fit:cover}
+.photo span{position:absolute;inset:0;display:grid;place-items:center;color:#6ef1d588;font-size:8px;letter-spacing:.18em;font-weight:900;text-transform:uppercase}
+.photo.hero{grid-row:1/3}
+.photo.hero img{object-position:center}
+.offer{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid #22575a;border-bottom:1px solid #22575a;padding:15px 0}
+.offer .label{font-size:8px;letter-spacing:.22em;font-weight:900;color:#6ef1d5}
+.tagline{font-size:12px;color:#a8bfc0;text-align:right;max-width:290px;line-height:1.45}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);margin:19px 0 18px;background:#0e2229;border:1px solid #1c5558}
+.stat{text-align:center;padding:14px 4px;border-right:1px solid #1c5558}
+.stat:last-child{border:0}
+.stat small{display:block;color:#6ef1d5;font-size:7px;letter-spacing:.15em;font-weight:900;margin-bottom:7px}
+.stat b{font-size:10px}
+.footer{display:flex;justify-content:space-between;align-items:end;gap:15px;padding-top:15px;border-top:1px solid #22575a}
+.contact{font-size:13px;color:#6ef1d5;font-weight:900}
+.meta{font-size:8px;color:#8aa0a5;text-align:right;line-height:1.6}
+@media print{html,body{background:#08131b}.poster{width:210mm;min-height:297mm;max-width:none}}
+@media(max-width:600px){.poster{padding:23px 18px}h1{font-size:42px}.head{align-items:start}.price{font-size:22px;padding:10px}.gallery{grid-template-rows:125px 115px;gap:6px}.stat{padding:11px 2px}.stat b{font-size:8px}}
+</style></head>
+<body><main class="poster">
+<header class="top"><div class="brand">VOLT&nbsp; / &nbsp;THE DRIVE, REDEFINED</div><img src="{{make.icon}}" alt="{{make.name}}"></header>
+<section class="head"><div><div class="kicker">{{text.eyebrow}}</div><h1>{{car.make}}<br>{{car.model}}</h1><div class="sub">{{car.variant}} · {{car.year}}</div></div><div class="price"><small>DRIVE AWAY</small>{{text.price}}</div></section>
+<section class="gallery">
+<div class="photo hero"><span>01 / Main angle</span><img src="{{image.hero}}" alt="Main vehicle photo"></div>
+<div class="photo"><span>02 / Front</span><img src="{{image.angle}}" alt="Front angle"></div>
+<div class="photo"><span>03 / Rear</span><img src="{{image.rear}}" alt="Rear view"></div>
+<div class="photo"><span>04 / Interior</span><img src="{{image.interior}}" alt="Interior"></div>
+<div class="photo"><span>05 / Details</span><img src="{{image.detail}}" alt="Vehicle detail"></div>
+</section>
+<section class="offer"><div><div class="label">BUILT FOR YOUR NEXT CHAPTER</div><div class="tagline" style="text-align:left">{{text.tagline}}</div></div><div class="label">READY WHEN YOU ARE&nbsp; ↗</div></section>
+<section class="stats"><div class="stat"><small>YEAR</small><b>{{car.year}}</b></div><div class="stat"><small>ENERGY</small><b>{{car.fuel_type}}</b></div><div class="stat"><small>GEARBOX</small><b>{{car.transmission}}</b></div><div class="stat"><small>DRIVEN</small><b>{{car.odometer_km}} km</b></div><div class="stat"><small>OWNERSHIP</small><b>{{car.owner_count}}</b></div></section>
+<footer class="footer"><strong class="contact">{{text.contact}}</strong><span class="meta">{{car.registration_no}}<br>INSURANCE {{car.insurance_validity}} · FITNESS {{car.fitness_validity}}</span></footer>
 </main></body></html>
