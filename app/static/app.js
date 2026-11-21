@@ -30,6 +30,7 @@ const app = Vue.createApp({
       editingTemplateId: null,
       templateForm: {name:"", description:"", html_content:""},
       templateStarterId: null,
+      templateNameTouched: false,
       placeholderGroups: [
         {title:"Vehicle information",description:"Automatically filled from the vehicle record.",items:[
           {token:"{{car.make}}",label:"Manufacturer"},{token:"{{car.model}}",label:"Model"},{token:"{{car.variant}}",label:"Variant"},
@@ -391,6 +392,7 @@ const app = Vue.createApp({
       this.editingTemplateId = template?.id || null;
       const starter = template ? null : (this.starterTemplates[0] || this.templates[0] || null);
       this.templateStarterId = starter?.id || null;
+      this.templateNameTouched = false;
       this.templateForm = template
         ? {name:template.name, description:template.description || "", html_content:template.html_content}
         : {
@@ -406,6 +408,7 @@ const app = Vue.createApp({
     chooseTemplateStarter(starter) {
       if (!starter || !starter.html_content) return;
       this.templateStarterId = starter.id;
+      if (!this.templateNameTouched) this.templateForm.name = this.uniqueTemplateName(starter.name + " Custom");
       this.templateForm.html_content = starter.html_content;
       this.templateForm.description = starter.description || "A custom vehicle poster design.";
       this.scheduleTemplatePreview();
