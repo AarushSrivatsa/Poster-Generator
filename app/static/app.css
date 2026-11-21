@@ -48,3 +48,49 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 .photo-remove-btn{position:absolute;top:7px;right:7px;width:27px;height:27px;border:1px solid #ffffff44;border-radius:50%;background:#080d14df;color:#ffb1b1;font-size:19px;line-height:1}
 .photo-empty-note{padding:13px;border:1px dashed #ffffff22;border-radius:10px;color:#8290a0;font-size:10px}
 @media(max-width:600px){.car-photo-manager-head{flex-direction:column}.car-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Refined CRUD workspace */
+.search-field{width:100%;min-height:43px;margin:12px 0 6px;padding:0 13px;border:1px solid #344253;border-radius:10px;background:#0a1119;color:#f5f7fa;font:500 12px 'DM Sans',sans-serif;outline:none}
+.search-field::placeholder{color:#718093}
+.search-field:focus{border-color:var(--gold);box-shadow:0 0 0 3px #d8ad4f1b}
+.section-toolbar{align-items:center}
+.toolbar-actions{display:flex;align-items:center;gap:10px}
+.toolbar-actions .search-field{width:min(310px,36vw);margin:0}
+.records-panel>.search-field{margin-top:14px}
+.record-list{max-height:670px;overflow:auto;padding-right:2px}
+.record-row{min-height:65px;transition:border-color .16s,background .16s,transform .16s}
+.record-row:hover{border-color:#edc66d66;background:#edc66d0b;transform:translateY(-1px)}
+.record-row:focus-visible,.primary-btn:focus-visible,.quiet-btn:focus-visible,.danger-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.make-card{transition:border-color .16s,transform .16s}
+.make-card:hover{border-color:#edc66d66;transform:translateY(-1px)}
+.make-card>div{min-width:0}
+.make-card button{display:inline-block;margin-right:10px}
+.make-card button:hover,.record-actions button:hover{color:#fff}
+.form-panel>.panel-heading{padding-bottom:13px;border-bottom:1px solid var(--line)}
+.form-grid{row-gap:15px}
+.form-grid label,.make-form label,.template-form label{gap:8px}
+.form-grid input,.form-grid select,.make-form input,.template-form input{min-height:48px}
+.validity-field{padding:12px;border:1px solid #ffffff15;border-radius:12px;background:#0b131c}
+.car-photo-manager{background:#0c141e;border:1px solid #ffffff12;border-radius:14px;padding:17px;margin-top:8px}
+.car-photo-dropzone{min-height:130px}
+.car-photo-card{transition:border-color .15s,transform .15s}
+.car-photo-card:hover{border-color:#edc66d66;transform:translateY(-1px)}
+.template-management-grid .records-panel{position:sticky;top:94px}
+.template-management-grid .record-row{padding:14px}
+.poster-card{transition:border-color .15s,transform .15s}
+.poster-card:hover{border-color:#edc66d55;transform:translateY(-1px)}
+.poster-card-actions button{padding:7px 3px}
+@media(max-width:850px){
+  .section-toolbar{align-items:flex-start;flex-direction:column}
+  .toolbar-actions{width:100%}
+  .toolbar-actions .search-field{width:100%;flex:1}
+  .template-management-grid .records-panel{position:static}
+  .record-list{max-height:none}
+}
+@media(max-width:520px){
+  .toolbar-actions{align-items:stretch;flex-direction:column}
+  .toolbar-actions .search-field{width:100%}
+  .form-footer{flex-wrap:wrap}
+  .form-footer>*{flex:1}
+}
