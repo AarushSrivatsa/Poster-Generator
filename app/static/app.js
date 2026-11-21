@@ -427,7 +427,7 @@ const app = Vue.createApp({
     async copyPlaceholderGuide() {
       const guide = [
         "MOTOR STUDIO — VEHICLE POSTER PLACEHOLDERS",
-        "Create a complete HTML/CSS vehicle poster. Use these exact placeholders and keep the braces unchanged. Do not invent vehicle details.",
+        "Create a complete HTML/CSS vehicle poster using plain HTML and normal CSS only. Do not use Tailwind or Bootstrap utility classes. Put all styling in a style tag. Use these exact placeholders and keep the braces unchanged. Do not invent vehicle details.",
         "",
         "VEHICLE INFORMATION (automatically filled):",
         "{{car.make}} — make",
