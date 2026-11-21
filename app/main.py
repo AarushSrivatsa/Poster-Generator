@@ -407,7 +407,7 @@ def compile_tailwind_css(markup: str) -> str:
             flags=re.IGNORECASE | re.DOTALL,
         )
     )
-    # Keep temporary sources under the app root so Node package resolution can\n    # find the locally installed Tailwind packages from the temp directory.\n    with tempfile.TemporaryDirectory(prefix=".poster-tailwind-", dir=ROOT) as temp_dir:
+    # Keep temporary sources under the app root so Node can resolve Tailwind.\n    with tempfile.TemporaryDirectory(prefix=".poster-tailwind-", dir=ROOT) as temp_dir:
         workdir = Path(temp_dir)
         source_file = workdir / "template.html"
         input_file = workdir / "input.css"
