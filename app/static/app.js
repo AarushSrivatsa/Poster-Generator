@@ -29,6 +29,11 @@ const app = Vue.createApp({
       templateDialogOpen: false,
       editingTemplateId: null,
       templateForm: {name:"", description:"", html_content:""},
+      templatePreviewHtml: "",
+      templatePreviewLoading: false,
+      templatePreviewError: "",
+      templatePreviewTimer: null,
+      templatePreviewRequestId: 0,
       posterCreateOpen: false,
       posterDraft: {car_id:null, template_id:null},
       activePoster: null,
@@ -353,10 +358,54 @@ const app = Vue.createApp({
       this.templateForm = template
         ? {name:template.name, description:template.description || "", html_content:template.html_content}
         : {name:"", description:"", html_content:""};
+      this.templatePreviewHtml = "";
+      this.templatePreviewError = "";
       this.templateDialogOpen = true;
+      this.refreshTemplatePreview();
     },
     closeTemplateDialog() {
+      clearTimeout(this.templatePreviewTimer);
       this.templateDialogOpen = false;
+      this.templatePreviewHtml = "";
+      this.templatePreviewError = "";
+    },
+    scheduleTemplatePreview() {
+      clearTimeout(this.templatePreviewTimer);
+      this.templatePreviewTimer = setTimeout(() => this.refreshTemplatePreview(), 650);
+    },
+    async refreshTemplatePreview() {
+      clearTimeout(this.templatePreviewTimer);
+      if (!this.templateForm.html_content.trim()) {
+        this.templatePreviewHtml = "";
+        this.templatePreviewError = "";
+        this.templatePreviewLoading = false;
+        return;
+      }
+      const requestId = ++this.templatePreviewRequestId;
+      this.templatePreviewLoading = true;
+      this.templatePreviewError = "";
+      try {
+        const response = await fetch("/api/templates/preview", {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({html_content:this.templateForm.html_content})
+        });
+        const html = await response.text();
+        if (!response.ok) {
+          let message = html || "Unable to render this template.";
+          try { message = JSON.parse(html).detail || message; } catch (_) {}
+          throw new Error(message);
+        }
+        if (requestId !== this.templatePreviewRequestId || !this.templateDialogOpen) return;
+        this.templatePreviewHtml = html;
+      } catch (error) {
+        if (requestId === this.templatePreviewRequestId) {
+          this.templatePreviewHtml = "";
+          this.templatePreviewError = error.message || "Unable to render this template.";
+        }
+      } finally {
+        if (requestId === this.templatePreviewRequestId) this.templatePreviewLoading = false;
+      }
     },
     async saveTemplate() {
       this.busy = "template";
@@ -609,6 +658,7 @@ const app = Vue.createApp({
   },
   beforeUnmount() {
     window.removeEventListener("message", this._frameDropHandler);
+    clearTimeout(this.templatePreviewTimer);
     clearTimeout(this.toastTimer);
     clearTimeout(this.posterSaveTimer);
     this.clearPendingPhotos();
