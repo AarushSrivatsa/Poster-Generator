@@ -315,8 +315,8 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
         "transmission": enum_value(car.transmission),
         "odometer_km": str(car.odometer_km) if car.odometer_km is not None else "Unrecorded",
         "owner_count": str(car.owner_count) if car.owner_count is not None else "Unrecorded",
-        "insurance_validity": datetime_value(car.insurance_validity) or "Lapsed",
-        "fitness_validity": datetime_value(car.fitness_validity) or "Lapsed",
+        "insurance_validity": car.insurance_validity.strftime("%m/%Y") if car.insurance_validity else "Lapsed",
+        "fitness_validity": car.fitness_validity.strftime("%Y") if car.fitness_validity else "Lapsed",
         "make": car.make.name if car.make else "",
     }
     make_values = {
@@ -428,11 +428,7 @@ with SessionLocal() as seed_db:
                 sort_order=order,
                 is_builtin=True,
             ))
-        elif existing.is_builtin:
-            existing.description = description
-            existing.html_content = markup
-            existing.placeholder_schema = schema
-            existing.sort_order = order
+        # Existing built-ins are left untouched so user edits survive restarts.
     seed_db.commit()
 
 
