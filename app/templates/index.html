@@ -84,13 +84,8 @@
         <div v-else class="poster-grid">
           <article v-for="poster in filteredPosters" :key="poster.id" class="poster-card">
             <button class="poster-art" @click="openPoster(poster.id)" :aria-label="'Open '+poster.name">
-              <img v-if="templateFor(poster.template_id)?.thumbnail_url" :src="templateFor(poster.template_id).thumbnail_url" alt="">
-              <div v-else class="poster-art-placeholder">
-                <span class="art-kicker">MOTOR STUDIO</span>
-                <strong>[[ carTitle(poster.car_id) ]]</strong>
-                <span class="art-line"></span>
-                <small>[[ templateFor(poster.template_id)?.name || 'Vehicle poster' ]]</small>
-              </div>
+              <img v-if="templateFor(poster.template_id)?.thumbnail_url" :src="templateFor(poster.template_id).thumbnail_url" alt="" loading="lazy" decoding="async">
+              <iframe v-else class="poster-card-frame" :src="'/api/posters/'+poster.id+'/render'" :title="poster.name || carTitle(poster.car_id)" loading="lazy" tabindex="-1" sandbox="allow-scripts"></iframe>
               <span class="poster-open-label">Open design ↗</span>
             </button>
             <div class="poster-card-body">
