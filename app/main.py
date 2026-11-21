@@ -13,7 +13,6 @@ from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, Upload
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
@@ -387,46 +386,15 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
 
 
 # =====================================================
-# ONE-TIME SCHEMA RESET + CREATE
+# NON-DESTRUCTIVE TABLE CREATION
 # =====================================================
 
-app = FastAPI(title="Vehicle Poster Studio", version="2.0.0")
+app = FastAPI(title="Vehicle Poster Studio", version="2.1.0")
 
-with engine.begin() as connection:
-    connection.execute(text(
-        """
-        CREATE TABLE IF NOT EXISTS poster_generator_schema_meta (
-            version INTEGER PRIMARY KEY,
-            applied_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )
-        """
-    ))
-    installed_version = connection.execute(text(
-        "SELECT MAX(version) FROM poster_generator_schema_meta"
-    )).scalar()
-
-    if installed_version is None or installed_version < 1:
-        # Explicit one-time reset of the legacy app tables and any partially
-        # created new tables. The migration marker is kept outside this list.
-        connection.execute(text(
-            """
-            DROP TABLE IF EXISTS
-                car_posters,
-                car_images,
-                car_details,
-                car_makes,
-                poster_templates,
-                vehicle_photos,
-                vehicles
-            CASCADE
-            """
-        ))
-        Base.metadata.create_all(bind=connection)
-        connection.execute(text(
-            "INSERT INTO poster_generator_schema_meta (version) VALUES (1) ON CONFLICT DO NOTHING"
-        ))
-    else:
-        Base.metadata.create_all(bind=connection)
+# SQLAlchemy create_all creates missing model tables only. It does NOT drop,
+# truncate, alter, or migrate any existing tables. The new template model uses
+# poster_design_templates so it cannot collide with the previous app's table.
+Base.metadata.create_all(bind=engine)
 
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 views = Jinja2Templates(directory=ROOT / "templates")
