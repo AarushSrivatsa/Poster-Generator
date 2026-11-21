@@ -595,10 +595,13 @@ const app = Vue.createApp({
       this.activeCar = null;
       this.activeTemplate = null;
     },
+    savePosterSafely() {
+      this.savePosterNow().catch(() => {});
+    },
     schedulePosterSave() {
       this.saveState = "saving";
       clearTimeout(this.posterSaveTimer);
-      this.posterSaveTimer = setTimeout(() => this.savePosterNow(), 450);
+      this.posterSaveTimer = setTimeout(() => this.savePosterSafely(), 450);
     },
     async savePosterNow() {
       if (!this.activePoster) return;
