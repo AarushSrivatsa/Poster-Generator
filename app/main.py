@@ -85,15 +85,23 @@ with engine.begin() as connection:
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 views = Jinja2Templates(directory=ROOT / "templates")
 
-# Seed the built-in template once. Future templates are saved in Supabase Postgres.
+# Seed built-in designs by name so existing Supabase projects receive new designs too.
+BUILT_IN_TEMPLATES = [
+    ("Midnight Gold", "Bold black and gold dealership layout", "default_poster.html"),
+    ("Studio Minimal", "Clean editorial look with generous space", "poster_studio_minimal.html"),
+    ("Electric Motion", "High-energy dark design with neon accents", "poster_electric_motion.html"),
+    ("Executive Black", "Luxury dark editorial style with warm gold", "poster_executive_black.html"),
+]
 with SessionLocal() as seed_db:
-    if seed_db.query(PosterTemplate).count() == 0:
-        starter = (ROOT / "templates" / "default_poster.html").read_text(encoding="utf-8")
-        seed_db.add(PosterTemplate(
-            name="Midnight Gold",
-            description="Bold black and gold dealership layout",
-            html=starter,
-        ))
+    existing_names = {row[0] for row in seed_db.query(PosterTemplate.name).all()}
+    added_any = False
+    for name, description, filename in BUILT_IN_TEMPLATES:
+        if name in existing_names:
+            continue
+        markup = (ROOT / "templates" / filename).read_text(encoding="utf-8")
+        seed_db.add(PosterTemplate(name=name, description=description, html=markup))
+        added_any = True
+    if added_any:
         seed_db.commit()
 
 @app.get("/healthz")
