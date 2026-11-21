@@ -447,3 +447,74 @@ body{color:#e7eee8}
   .template-preview-canvas{height:55vh;min-height:290px}
   .template-preview-heading{align-items:flex-start;flex-direction:column}
 }
+
+
+/* Visual-first template creation and clearer photo assignment. */
+.template-start-panel{
+  margin:0 0 16px;padding:14px;border:1px solid #35483b;border-radius:12px;
+  background:linear-gradient(135deg,#17271d,#111b15);
+}
+.template-help-heading,.placeholder-library-heading{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;
+}
+.template-help-heading>div,.placeholder-library-heading>div{display:flex;flex-direction:column;gap:4px}
+.template-help-heading strong,.placeholder-library-heading strong{font-size:12px;color:#e3eee5}
+.template-help-heading small,.placeholder-library-heading small{font-size:9px;line-height:1.5;color:#9baa9e}
+.template-help-heading>span,.placeholder-library-heading>span{
+  flex:0 0 auto;color:#88cfa1;font-size:8px;font-weight:900;letter-spacing:.15em;
+}
+.template-starter-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+.template-starter-card{
+  min-width:0;padding:0;overflow:hidden;text-align:left;border:1px solid #35483b;border-radius:9px;
+  background:#0e1711;color:#dce9df;transition:border-color .15s,transform .15s,background .15s;
+}
+.template-starter-card:hover{transform:translateY(-2px);border-color:#639778}
+.template-starter-card.selected{border-color:#86d6a4;background:#172c1e;box-shadow:0 0 0 1px #86d6a455}
+.template-starter-preview{height:118px;position:relative;overflow:hidden;background:#080f0b;pointer-events:none}
+.template-starter-preview iframe{
+  position:absolute;inset:0 auto auto 0;width:420px;height:520px;transform:scale(.38);
+  transform-origin:top left;border:0;pointer-events:none;background:#fff;
+}
+.template-starter-copy{display:flex;flex-direction:column;gap:5px;padding:9px}
+.template-starter-copy b{font-size:9px;line-height:1.25}
+.template-starter-copy small{min-height:27px;color:#91a095;font-size:8px;line-height:1.35}
+.template-starter-copy i{font-size:8px;font-style:normal;font-weight:800;color:#84d09e}
+.placeholder-library{
+  margin:14px 0;padding:15px;border:1px solid #34463a;border-radius:11px;background:#101a14;
+}
+.placeholder-library-heading{margin-bottom:13px}
+.placeholder-library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.placeholder-group{min-width:0;padding:11px;border:1px solid #2e4034;border-radius:9px;background:#141f18}
+.placeholder-group h3{margin:0 0 4px;color:#dce9df;font-size:10px;font-weight:800}
+.placeholder-group>p{margin:0 0 9px;color:#91a095;font-size:8px;line-height:1.45}
+.placeholder-copy-row{
+  width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto 34px;align-items:center;gap:7px;
+  padding:6px 7px;border:0;border-top:1px solid #26362c;background:transparent;text-align:left;
+}
+.placeholder-copy-row:hover{background:#1c2e22}
+.placeholder-copy-row>span{min-width:0;color:#becdc1;font-size:8px}
+.placeholder-copy-row code{
+  padding:3px 5px;border-radius:4px;background:#20372a;color:#a7dfba;font-size:7px;white-space:nowrap;
+}
+.placeholder-copy-row>small{color:#83c99e;font-size:7px;font-weight:800;text-align:right}
+.placeholder-group .placeholder-tip{margin:8px 0 0;padding-top:7px;border-top:1px dashed #34483a;color:#9ab6a0}
+.placeholder-library-foot{margin:11px 0 0;color:#9eafa2;font-size:8px;line-height:1.55}
+.editor-image{outline:2px solid transparent;outline-offset:1px;transition:outline-color .12s,transform .12s}
+.editor-image.selected{outline-color:#86d6a4;transform:translateY(-1px)}
+.editor-image-selected{
+  position:absolute;top:4px;left:4px;padding:3px 5px;border-radius:4px;background:#1e7048e8;
+  color:#fff;font-size:7px;font-weight:900;letter-spacing:.04em;
+}
+.image-slot-button{cursor:pointer}
+.template-picker-frame{width:62px;height:50px;flex:0 0 auto;border:0;border-radius:6px;background:#0b120d;pointer-events:none}
+@media(max-width:850px){
+  .template-starter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .template-starter-card:nth-child(n+4){display:none}
+}
+@media(max-width:580px){
+  .template-starter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .template-starter-card:nth-child(n+3){display:none}
+  .placeholder-library-grid{grid-template-columns:1fr}
+  .template-help-heading,.placeholder-library-heading{align-items:flex-start}
+  .placeholder-copy-row{grid-template-columns:minmax(0,1fr) auto 30px}
+}
