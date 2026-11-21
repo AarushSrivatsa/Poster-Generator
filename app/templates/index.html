@@ -239,6 +239,7 @@
           <div class="form-section-title"><span>01</span><div><h3>Vehicle details</h3><p>Basic information and specifications.</p></div></div>
           <div class="form-grid">
             <label class="field-label">Make<select class="form-select" v-model="carForm.make_id" required><option value="">Choose manufacturer</option><option v-for="make in makes" :key="make.id" :value="String(make.id)">[[ make.name ]]</option></select></label>
+            <div v-if="!makes.length" class="form-inline-help"><span>No manufacturers yet. Add one before saving this vehicle.</span><button type="button" class="btn btn-small btn-outline" @click="openMakeDialog()">Add manufacturer</button></div>
             <label class="field-label">Model<input class="form-control" v-model="carForm.model" placeholder="e.g. Creta" required></label>
             <label class="field-label">Variant<input class="form-control" v-model="carForm.variant" placeholder="e.g. SX(O) 1.5 Diesel"></label>
             <label class="field-label">Registration number<input class="form-control" v-model="carForm.registration_no" placeholder="e.g. TS09AB1234" required></label>
@@ -352,7 +353,7 @@
     <section class="app-modal app-modal-wide" role="dialog" aria-modal="true" aria-labelledby="createPosterTitle">
       <header class="app-modal-header"><div><div class="overline">NEW DESIGN</div><h2 id="createPosterTitle">Create a poster</h2><p>Choose the vehicle and template to start with.</p></div><button class="app-modal-close" @click="posterCreateOpen=false">×</button></header>
       <div class="picker-section"><div class="picker-title"><h3>1. Choose a vehicle</h3><span>[[ cars.length ]] available</span></div>
-        <div v-if="!cars.length" class="empty-inline">Add a vehicle before creating a poster.</div>
+        <div v-if="!cars.length" class="empty-inline poster-create-empty">Add a vehicle before creating a poster.<button type="button" class="btn btn-small btn-outline" @click="posterCreateOpen=false;openCarDialog()">Add vehicle</button></div>
         <div class="picker-grid">
           <button v-for="car in cars" :key="car.id" class="picker-card" :class="{selected:Number(posterDraft.car_id)===car.id}" @click="posterDraft.car_id=car.id">
             <img v-if="car.images?.length" :src="car.images[0].image_url" alt=""><span v-else class="picker-placeholder">▣</span>
