@@ -264,3 +264,186 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .template-source-details[open] summary{margin-bottom:12px}
 .template-source-details .template-code-label{margin-top:10px}
 .template-picker-frame{width:52px;height:50px;flex:0 0 auto;border:0;border-radius:6px;background:#eef1ec;pointer-events:none}
+
+/* Dark workspace theme — Bootstrap provides components; these tokens theme Motor Studio. */
+:root{
+  color-scheme:dark;
+  --ink:#e7eee8;
+  --muted:#9aa79d;
+  --line:#29382f;
+  --paper:#141d17;
+  --canvas:#0c130f;
+  --green:#75c397;
+  --green-dark:#5eaa80;
+  --green-soft:#172b20;
+  --amber:#e1b963;
+  --red:#e17b72;
+  --shadow:0 18px 50px rgba(0,0,0,.28);
+  --bs-body-bg:#0c130f;
+  --bs-body-color:#e7eee8;
+  --bs-border-color:#34443a;
+  --bs-secondary-color:#9aa79d;
+  --bs-tertiary-bg:#17221b;
+  --bs-primary:#75c397;
+  --bs-primary-rgb:117,195,151;
+}
+html,body{background:#0c130f;color:#e7eee8}
+body{color:#e7eee8}
+.app-shell,.main-area,.editor-page{background:#0c130f}
+.sidebar{background:#101914;border-color:#29382f}
+.brand{color:#edf4ee}
+.brand-symbol{background:#286347;color:#f1fff5}
+.brand-copy small,.sidebar-label,.overline{color:#89988d}
+.nav-item{color:#a9b5ab}
+.nav-icon{color:#8b9b8e}
+.nav-item:hover{background:#1a271f;color:#eef6ef}
+.nav-item.active{background:#1a3425;color:#8bd3a8}
+.nav-count{color:#819186}
+.sidebar-note{background:#17221b;border-color:#2a3a30}
+.sidebar-note b{color:#dce8de}
+.sidebar-note small,.sidebar-foot{color:#8e9b90}
+.topbar{background:rgba(16,25,20,.94);border-color:#29382f}
+.breadcrumb{color:#86958a}
+.breadcrumb strong{color:#e0e9e1}
+.topbar-date{color:#909e93}
+.avatar{background:#20362a;color:#94d4aa}
+.page-heading h1{color:#eff5ef}
+.page-heading p,.section-toolbar p{color:#9aa79d}
+.section-toolbar h2{color:#e5eee7}
+.stat,.poster-card,.vehicle-card,.template-card,.make-card,.empty-state,.loading-state,.empty-inline{background:#141d17;border-color:#29382f;color:#dce7de}
+.stat-label,.result-count{color:#9ca99f}
+.stat strong{color:#e7f1e9}
+.search-box{background:#111a14;border-color:#35453a;color:#95a397}
+.search-box input{color:#e7eee8}
+.search-box input::placeholder{color:#748378}
+.empty-illustration{background:#1c3527;color:#83c99f}
+.empty-state h3{color:#e7efe8}
+.empty-state p{color:#a0aca2}
+.poster-art{background:#1a261e}
+.poster-art-placeholder{background:linear-gradient(135deg,#1b3326,#0d1711);color:#e5eee7}
+.poster-card-title h3,.template-card-body h3{color:#e3ece4}
+.poster-card-title p,.template-card-body p{color:#9ca99f}
+.poster-card-meta{border-color:#29372e;color:#8f9c91}
+.icon-button{background:#18231c;border-color:#34443a;color:#acb8ad}
+.icon-button:hover{border-color:#864f4c;background:#2b1c1a;color:#f08b80}
+.vehicle-image{background:#19241d}
+.vehicle-image-empty{color:#829187}
+.photo-count{background:#09110dcc;color:#f2f7f2}
+.vehicle-make{color:#a9b5aa}
+.vehicle-make img,.make-initial{background:#253229}
+.make-initial{color:#90d1a5}
+.vehicle-card-body h3{color:#eef5ee}
+.vehicle-variant{color:#9da99f}
+.vehicle-tags span,.template-badge{background:#202d24;color:#b0bdb1}
+.vehicle-card-footer{border-color:#2b392f;color:#bdc9be}
+.make-logo{background:#1a261e;border-color:#314136;color:#a1dcb3}
+.make-info h3{color:#e5eee6}
+.make-info p{color:#99a69b}
+.template-preview{background:#18241c}
+.template-preview-fallback{background:linear-gradient(145deg,#263c2d,#18241c);color:#e3eee5}
+.template-preview-fallback span,.template-preview-fallback small{color:#a5b8a8}
+.template-card-footer{border-color:#2b392f}
+.text-action{color:#8bd0a5}
+.danger-text{color:#ed8980}
+.editor-page{background:#0c130f}
+.editor-topbar{background:#111a14;border-color:#29382f}
+.back-button{color:#b4c1b6}
+.editor-heading strong{color:#e7efe8}
+.editor-heading small{color:#97a499}
+.save-indicator{color:#b0c2b4}
+.editor-layout{background:#0c130f}
+.inspector-section,.editor-preview-area{background:#141d17;border-color:#29382f}
+.inspector-heading h2{color:#e6eee7}
+.field-label{color:#becabf}
+.field-label input,.field-label select,.field-label textarea,
+.form-control,.form-select{
+  color:#e8f0e9;
+  background-color:#101a14;
+  border-color:#37483d;
+}
+.field-label input::placeholder,.field-label textarea::placeholder,
+.form-control::placeholder{color:#77877b}
+.field-label input:focus,.field-label select:focus,.field-label textarea:focus,
+.form-control:focus,.form-select:focus{
+  color:#f0f6f1;background-color:#111d16;border-color:#69ad83;
+  box-shadow:0 0 0 .2rem rgba(105,173,131,.17);
+}
+.form-select{--bs-form-select-bg-img:var(--bs-form-select-bg-img)}
+.field-unit,.inspector-hint{color:#92a095}
+.mini-count{background:#223229;color:#b5c5b7}
+.mini-upload{background:#17231b;border-color:#3d5944}
+.mini-upload b{color:#d5e2d7}
+.mini-upload small{color:#93a195}
+.placeholder-heading{border-color:#2b392f}
+.placeholder-heading b{color:#cbd8cd}
+.placeholder-heading small{color:#9ba99e}
+.image-slot-button{background:#111a14;border-color:#3b4d40;color:#c0cdc2}
+.image-slot-button.filled{border-color:#5e8e6b}
+.image-slot-button.dragging{background:#1e3929;border-color:#85d2a0}
+.slot-plus,.image-slot-button small{color:#9aab9c}
+.editor-preview-area{background:#141d17}
+.preview-toolbar{border-color:#29382f}
+.preview-toolbar strong{color:#d8e4da}
+.preview-toolbar small{color:#91a095}
+.preview-stage{background:#0b110d}
+.preview-stage iframe{background:#fff}
+.app-modal-backdrop{background:rgba(2,7,4,.78)}
+.app-modal{background:#141d17;border-color:#34443a;box-shadow:0 28px 90px rgba(0,0,0,.56)}
+.app-modal-header{border-color:#2b392f}
+.app-modal-header h2{color:#eff5ef}
+.app-modal-header p{color:#9ba99e}
+.app-modal-close{background:#243128;color:#c1d0c4}
+.app-modal-close:hover{background:#304234;color:#fff}
+.form-section-title h3{color:#dce8de}
+.form-section-title p{color:#9aa89c}
+.form-section-title>span{background:#20392a;color:#8bd0a5}
+.field-label input,.field-label select,.field-label textarea{border-color:#37483d;background:#101a14;color:#e8f0e9}
+.validity-control select,.validity-control input{background:#101a14;color:#e8f0e9}
+.photo-dropzone{background:#17231b;border-color:#47614c;color:#a9b8ac}
+.photo-dropzone strong{color:#dce8dd}
+.photo-dropzone small{color:#91a093}
+.photo-tile{background:#151f18;border-color:#35443a}
+.photo-tile-bottom input{background:#101a14;border-color:#394a3f;color:#dce8de}
+.photo-tile-bottom input::placeholder{color:#839287}
+.photo-empty{border-color:#38483d;color:#9ca99f}
+.app-modal-footer{border-color:#2b392f}
+.make-logo-preview{background:#17221b;border-color:#2b392f;color:#9eaca1}
+.template-meta-grid .field-label{color:#c1cec3}
+.template-preview-heading strong{color:#e1ece3}
+.template-preview-heading small{color:#9ca99f}
+.template-preview-canvas{background:#0a110d;border-color:#35443a}
+.template-preview-message{color:#aab7ac}
+.template-preview-error{color:#f08b81}
+.template-source-details{background:#111a14;border-color:#35443a}
+.template-source-details summary{color:#a5d7b5}
+.template-source-details .subtle-note{color:#9ba99e}
+.placeholder-panel{background:#17221b;border-color:#35443a}
+.placeholder-panel-title{color:#c4d1c6}
+.placeholder-panel-title span,.subtle-note{color:#96a498}
+.token-list code{background:#20372a;color:#a7dfba}
+.picker-title h3{color:#d9e5da}
+.picker-title span{color:#9aa89d}
+.picker-card{background:#151f18;border-color:#35443a;color:#e3ece4}
+.picker-card.selected{background:#1c3525;border-color:#75bd8f}
+.picker-card-copy b{color:#e4eee6}
+.picker-card-copy small{color:#a0aca2}
+.picker-placeholder,.template-picker-placeholder{background:#202d24;color:#a5b6a8}
+.picker-card>i{color:#8bd3a5}
+.toast-message{background:#24573b;color:#f0fff3;box-shadow:0 12px 35px rgba(0,0,0,.4)}
+.btn-outline{background:#18231c;border-color:#3b4b40;color:#d1ded3}
+.btn-outline:hover{background:#202e24;border-color:#66836d;color:#f1f8f2}
+.btn-ghost{background:#17211a;border-color:#3a493e;color:#c0ccc2}
+.btn-ghost:hover{background:#202d24;color:#edf5ee}
+.btn-primary{background:#28734d;color:#f5fff7}
+.btn-primary:hover:not(:disabled){background:#34885d}
+.btn-text{color:#90d3a7}
+.btn:focus-visible,.nav-item:focus-visible,.text-action:focus-visible{outline:2px solid #82c99a;outline-offset:2px}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#101812}
+::-webkit-scrollbar-thumb{background:#34463a;border:2px solid #101812;border-radius:10px}
+::selection{background:#315b40;color:#fff}
+@media(max-width:580px){
+  .app-modal{background:#141d17}
+  .template-preview-canvas{height:55vh;min-height:290px}
+  .template-preview-heading{align-items:flex-start;flex-direction:column}
+}
