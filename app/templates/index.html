@@ -317,7 +317,7 @@
           <div class="template-paste-heading">
             <div>
               <span class="template-step">01</span>
-              <div><strong>Paste your complete HTML design</strong><small>One paste only. Keep the {{...}} placeholders exactly as written.</small></div>
+              <div><strong>Paste your complete HTML design</strong><small>One paste only. Keep every double-brace field token exactly as written.</small></div>
             </div>
             <span class="template-paste-required">Required</span>
           </div>
@@ -331,7 +331,7 @@
             <button v-if="templateForm.html_content.trim()" type="button" class="text-action" @click="refreshTemplatePreview" :disabled="templatePreviewLoading">[[ templatePreviewLoading ? 'Updating…' : 'Update preview' ]]</button>
           </div>
           <div v-if="detectedTokens.length" class="template-detected-tokens">
-            <code v-for="token in detectedTokens" :key="token">[[ '{{' + token + '}}' ]]</code>
+            <code v-for="token in detectedTokens" :key="token">[[ '{' + '{' + token + '}' + '}' ]]</code>
           </div>
         </section>
 
