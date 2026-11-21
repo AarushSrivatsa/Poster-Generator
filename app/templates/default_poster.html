@@ -1,12 +1,53 @@
 <!doctype html>
-<html lang="en" data-template-version="2"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Midnight Gold</title>
+<html lang="en" data-template-version="3">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Midnight Gold</title>
 <style>
-@page{size:A4 portrait;margin:0}*{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:#101113;color:#f5f0e6}.poster{width:100%;max-width:900px;min-height:1125px;margin:auto;background:#101113;position:relative;overflow:hidden;padding:38px 42px 30px}.poster:before{content:"";position:absolute;inset:0 0 auto;height:570px;background:radial-gradient(ellipse at 70% 20%,#6f512b55,transparent 55%);pointer-events:none}.head,.intro,.hero,.details,.foot{position:relative}.head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #8d754c;padding-bottom:18px}.wordmark{font-size:10px;letter-spacing:.35em;font-weight:800;color:#d6b878}.head img{max-width:100px;max-height:48px;object-fit:contain}.intro{padding:34px 0 25px}.eyebrow{color:#d6b878;font-size:10px;letter-spacing:.28em;font-weight:800;text-transform:uppercase}.title{font-size:clamp(48px,8vw,88px);line-height:.88;letter-spacing:-.065em;text-transform:uppercase;margin:15px 0 12px;font-weight:900}.sub{font-size:17px;color:#b8b0a1;letter-spacing:.08em}.hero{height:440px;background:linear-gradient(140deg,#41413b,#171817);overflow:hidden}.hero img,.small img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1}.placeholder{position:absolute;inset:0;display:grid;place-items:center;color:#d6b87899;font-size:10px;letter-spacing:.25em;font-weight:700}.priceband{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:23px 0;border-bottom:1px solid #8d754c}.price-label{font-size:9px;letter-spacing:.25em;color:#d6b878;font-weight:800}.price{font-size:38px;font-weight:900;margin-top:5px}.tagline{max-width:280px;text-align:right;color:#c6bda9;font:italic 14px/1.5 Georgia,serif}.specs{display:grid;grid-template-columns:repeat(4,1fr);margin:24px 0;background:#1c1d1c;border:1px solid #51452f}.spec{text-align:center;padding:17px 7px;border-right:1px solid #51452f}.spec:last-child{border:0}.spec small{display:block;color:#c5a66a;font-size:8px;letter-spacing:.2em;margin-bottom:8px}.spec b{font-size:12px;color:#f5f0e6}.foot{display:flex;justify-content:space-between;align-items:center;gap:15px;border-top:1px solid #51452f;padding-top:20px}.contact{font-size:14px;font-weight:800;color:#d6b878}.reg{font-size:10px;color:#a69d8b;text-align:right;letter-spacing:.08em}@media print{.poster{width:210mm;min-height:297mm;max-width:none}}@media(max-width:560px){.poster{padding:25px 22px}.hero{height:330px}.title{font-size:48px}.spec{padding:13px 3px}.spec b{font-size:10px}}
-</style></head><body><main class="poster">
-<header class="head"><div class="wordmark">MOTOR HOUSE&nbsp; / &nbsp;CERTIFIED SELECTION</div><img src="{{make.icon}}" alt="{{make.name}}"></header>
-<section class="intro"><div class="eyebrow">{{text.eyebrow}}</div><h1 class="title">{{car.make}}<br>{{car.model}}</h1><div class="sub">{{car.variant}} &nbsp;·&nbsp; {{car.year}}</div></section>
-<section class="hero"><div class="placeholder">YOUR VEHICLE PHOTOGRAPH</div><img src="{{image.hero}}" alt="{{car.make}} {{car.model}}"></section>
-<section class="priceband"><div><div class="price-label">INVESTMENT</div><div class="price">{{text.price}}</div></div><div class="tagline">{{text.tagline}}</div></section>
-<section class="specs"><div class="spec"><small>FUEL</small><b>{{car.fuel_type}}</b></div><div class="spec"><small>TRANSMISSION</small><b>{{car.transmission}}</b></div><div class="spec"><small>ODOMETER</small><b>{{car.odometer_km}} km</b></div><div class="spec"><small>OWNERS</small><b>{{car.owner_count}}</b></div></section>
-<footer class="foot"><strong class="contact">{{text.contact}}</strong><span class="reg">{{car.registration_no}} &nbsp;·&nbsp; INSURANCE {{car.insurance_validity}}</span></footer>
+@page{size:A4 portrait;margin:0}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%;background:#080c11;color:#f4efe5;font-family:Arial,Helvetica,sans-serif}
+.poster{width:100%;max-width:900px;min-height:1123px;margin:auto;padding:34px 38px 30px;background:radial-gradient(ellipse at 88% 0%,#4a3825 0,transparent 32%),#0b1016;overflow:hidden}
+.mast{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #66543c;padding-bottom:15px}
+.wordmark{font-size:9px;letter-spacing:.34em;font-weight:800;color:#d9bd84}
+.mast img{max-width:94px;max-height:42px;object-fit:contain}
+.heading{display:flex;align-items:end;justify-content:space-between;gap:20px;padding:26px 0 20px}
+.kicker{font-size:9px;letter-spacing:.25em;color:#d7b979;font-weight:800;text-transform:uppercase}
+h1{font-size:58px;line-height:.88;letter-spacing:-.065em;text-transform:uppercase;margin:10px 0 8px;font-weight:900}
+.variant{font-size:13px;letter-spacing:.12em;color:#b7b0a3;text-transform:uppercase}
+.price{text-align:right;white-space:nowrap;color:#f3e8d2;font-size:31px;font-weight:900;letter-spacing:-.04em}
+.price small{display:block;color:#d7b979;font-size:8px;letter-spacing:.25em;margin-bottom:5px}
+.tagline{font:italic 12px/1.45 Georgia,serif;color:#bcb09d;max-width:185px;margin-top:7px}
+.gallery{display:grid;grid-template-columns:1.42fr 1fr 1fr;grid-template-rows:155px 155px;gap:9px;padding:4px 0 18px}
+.photo{position:relative;min-width:0;overflow:hidden;background:linear-gradient(145deg,#343b3d,#151b20);border:1px solid #4b4235}
+.photo img{position:relative;z-index:1;width:100%;height:100%;display:block;object-fit:cover}
+.photo span{position:absolute;inset:0;display:grid;place-items:center;color:#d4b77b88;font-size:8px;letter-spacing:.2em;font-weight:800;text-transform:uppercase}
+.photo.hero{grid-row:1/3}
+.photo.hero img{object-position:center}
+.strip{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;border-top:1px solid #66543c;border-bottom:1px solid #66543c}
+.strip .tagline{margin:0;max-width:330px}
+.specs{display:grid;grid-template-columns:repeat(5,1fr);margin:20px 0 18px;background:#171d22;border:1px solid #393b38}
+.spec{text-align:center;padding:14px 5px;border-right:1px solid #393b38}
+.spec:last-child{border:0}
+.spec small{display:block;color:#d7b979;font-size:7px;letter-spacing:.15em;font-weight:800;margin-bottom:7px}
+.spec b{font-size:10px;font-weight:700;color:#f4efe5}
+.foot{display:flex;justify-content:space-between;align-items:end;gap:14px;border-top:1px solid #393b38;padding-top:15px}
+.contact{font-size:13px;font-weight:900;color:#e2c68e}
+.legal{font-size:8px;color:#8e918d;text-align:right;line-height:1.6;letter-spacing:.06em}
+@media print{html,body{background:#0b1016}.poster{width:210mm;min-height:297mm;max-width:none}}
+@media(max-width:600px){.poster{padding:24px 20px}h1{font-size:43px}.heading{align-items:start}.price{font-size:24px}.gallery{grid-template-rows:120px 120px;gap:6px}.spec{padding:11px 2px}.spec b{font-size:8px}.strip{align-items:start}}
+</style></head>
+<body><main class="poster">
+<header class="mast"><div class="wordmark">MOTOR HOUSE&nbsp; / &nbsp;CURATED MOTORING</div><img src="{{make.icon}}" alt="{{make.name}}"></header>
+<section class="heading"><div><div class="kicker">{{text.eyebrow}}</div><h1>{{car.make}}<br>{{car.model}}</h1><div class="variant">{{car.variant}} &nbsp;·&nbsp; {{car.year}}</div></div><div><div class="price"><small>ASKING PRICE</small>{{text.price}}</div><div class="tagline">{{text.tagline}}</div></div></section>
+<section class="gallery">
+<div class="photo hero"><span>Main photo</span><img src="{{image.hero}}" alt="Main vehicle photo"></div>
+<div class="photo"><span>Front angle</span><img src="{{image.angle}}" alt="Front three-quarter view"></div>
+<div class="photo"><span>Rear view</span><img src="{{image.rear}}" alt="Rear view"></div>
+<div class="photo"><span>Interior</span><img src="{{image.interior}}" alt="Interior"></div>
+<div class="photo"><span>Detail</span><img src="{{image.detail}}" alt="Vehicle detail"></div>
+</section>
+<div class="strip"><div class="kicker">THE DETAILS MATTER</div><div class="tagline">{{text.tagline}}</div></div>
+<section class="specs">
+<div class="spec"><small>FUEL</small><b>{{car.fuel_type}}</b></div><div class="spec"><small>GEARBOX</small><b>{{car.transmission}}</b></div><div class="spec"><small>ODOMETER</small><b>{{car.odometer_km}} km</b></div><div class="spec"><small>OWNERSHIP</small><b>{{car.owner_count}}</b></div><div class="spec"><small>YEAR</small><b>{{car.year}}</b></div>
+</section>
+<footer class="foot"><strong class="contact">{{text.contact}}</strong><span class="legal">{{car.registration_no}}<br>INSURANCE {{car.insurance_validity}} · FITNESS {{car.fitness_validity}}</span></footer>
 </main></body></html>
