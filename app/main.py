@@ -1,4 +1,5 @@
 import html
+import json
 import os
 import re
 import uuid
@@ -77,6 +78,9 @@ with engine.begin() as connection:
     connection.execute(text(
         "ALTER TABLE vehicle_photos ADD COLUMN IF NOT EXISTS slot VARCHAR(40) NOT NULL DEFAULT ''"
     ))
+    connection.execute(text(
+        "ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS poster_fields TEXT NOT NULL DEFAULT '{}'"
+    ))
 
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 views = Jinja2Templates(directory=ROOT / "templates")
@@ -106,7 +110,12 @@ def vehicle_dict(vehicle: Vehicle) -> dict:
         "transmission", "fuel", "odometer", "insurance", "insurance_expiry",
         "tax_validity", "fitness_validity", "seller", "condition", "highlights",
     )
-    return {field: getattr(vehicle, field) for field in fields}
+    data = {field: getattr(vehicle, field) for field in fields}
+    try:
+        data["poster_fields"] = json.loads(vehicle.poster_fields or "{}")
+    except (TypeError, ValueError):
+        data["poster_fields"] = {}
+    return data
 
 def photo_dict(photo: VehiclePhoto) -> dict:
     return {
@@ -136,7 +145,9 @@ def list_vehicles(db: Session = Depends(get_db)):
 @app.post("/api/vehicles")
 def create_vehicle(payload: dict, db: Session = Depends(get_db)):
     allowed = set(Vehicle.__table__.columns.keys()) - {"id", "created_at"}
-    data = {key: str(value)[:300] for key, value in payload.items() if key in allowed and value is not None}
+    data = {key: str(value)[:300] for key, value in payload.items() if key in allowed and key != "poster_fields" and value is not None}
+    if isinstance(payload.get("poster_fields"), dict):
+        data["poster_fields"] = json.dumps({str(k)[:60]: str(v)[:1000] for k, v in payload["poster_fields"].items()})
     if not data.get("make") or not data.get("model"):
         raise HTTPException(400, "Make and model are required")
     vehicle = Vehicle(**data)
@@ -150,10 +161,12 @@ def update_vehicle(vehicle_id: int, payload: dict, db: Session = Depends(get_db)
     vehicle = db.get(Vehicle, vehicle_id)
     if not vehicle:
         raise HTTPException(404, "Vehicle not found")
-    allowed = set(Vehicle.__table__.columns.keys()) - {"id", "created_at"}
+    allowed = set(Vehicle.__table__.columns.keys()) - {"id", "created_at", "poster_fields"}
     for key, value in payload.items():
         if key in allowed and value is not None:
             setattr(vehicle, key, str(value)[:300])
+    if isinstance(payload.get("poster_fields"), dict):
+        vehicle.poster_fields = json.dumps({str(k)[:60]: str(v)[:1000] for k, v in payload["poster_fields"].items()})
     db.commit()
     db.refresh(vehicle)
     return vehicle_dict(vehicle)
@@ -285,17 +298,18 @@ def render_poster(vehicle_id: int, template_id: int, db: Session = Depends(get_d
         raise HTTPException(404, "Vehicle or template not found")
 
     markup = template.html
-    for key, value in vehicle_dict(vehicle).items():
-        markup = markup.replace("{{car." + key + "}}", html.escape(str(value or "")))
-
+    data = vehicle_dict(vehicle)
+    for key, value in data.items():
+        if key != "poster_fields" and not isinstance(value, dict):
+            markup = re.sub(r"\{\{\s*" + re.escape(key) + r"\s*\}\}", html.escape(str(value or "")), markup)
+            markup = markup.replace("{{car." + key + "}}", html.escape(str(value or "")))
+    for key, value in data.get("poster_fields", {}).items():
+        markup = re.sub(r"\{\{\s*" + re.escape(key) + r"\s*\}\}", html.escape(str(value or "")), markup)
     for photo in vehicle.photos:
         if photo.slot:
-            markup = markup.replace("{{slot." + photo.slot + "}}", html.escape(storage_object_url(photo.filename)))
+            url = html.escape(storage_object_url(photo.filename), quote=True)
+            markup = re.sub(r"\{\{\s*" + re.escape(photo.slot) + r"\s*\}\}", url, markup)
+            markup = markup.replace("{{slot." + photo.slot + "}}", url)
             markup = markup.replace("{{label." + photo.slot + "}}", html.escape(photo.label))
-
-    markup = re.sub(
-        r"\{\{(?:car\.[a-zA-Z_]+|slot\.[a-zA-Z0-9_-]+|label\.[a-zA-Z0-9_-]+)\}\}",
-        "",
-        markup,
-    )
+    markup = re.sub(r"\{\{\s*[a-zA-Z0-9_.-]+\s*\}\}", "", markup)
     return HTMLResponse(markup)
