@@ -29,6 +29,28 @@ const app = Vue.createApp({
       templateDialogOpen: false,
       editingTemplateId: null,
       templateForm: {name:"", description:"", html_content:""},
+      templateStarterId: null,
+      placeholderGroups: [
+        {title:"Vehicle information",description:"Automatically filled from the vehicle record.",items:[
+          {token:"{{car.make}}",label:"Manufacturer"},{token:"{{car.model}}",label:"Model"},{token:"{{car.variant}}",label:"Variant"},
+          {token:"{{car.year}}",label:"Year"},{token:"{{car.registration_no}}",label:"Registration number"},{token:"{{car.fuel_type}}",label:"Fuel type"},
+          {token:"{{car.transmission}}",label:"Transmission"},{token:"{{car.odometer_km}}",label:"Kilometres driven"},
+          {token:"{{car.owner_count}}",label:"Ownership (1st, 2nd, 3rd…)"},{token:"{{car.insurance_validity}}",label:"Insurance validity"},
+          {token:"{{car.fitness_validity}}",label:"Fitness validity"}
+        ]},
+        {title:"Manufacturer branding",description:"Use the name as text and the logo as an image source.",items:[
+          {token:"{{make.name}}",label:"Manufacturer name"},{token:"{{make.icon}}",label:"Manufacturer logo"}
+        ]},
+        {title:"Vehicle photos",description:"Each unique photo token creates a photo placement the customer can fill.",items:[
+          {token:"{{image.hero}}",label:"Main photo"},{token:"{{image.angle}}",label:"Front / side angle"},
+          {token:"{{image.rear}}",label:"Rear view"},{token:"{{image.interior}}",label:"Interior"},
+          {token:"{{image.detail}}",label:"Dashboard / detail"}
+        ],tip:"You can add more photo areas with any name, such as {{image.dashboard}}."},
+        {title:"Editable poster text",description:"These become fields the customer can fill separately on each poster.",items:[
+          {token:"{{text.eyebrow}}",label:"Small heading"},{token:"{{text.price}}",label:"Selling price"},
+          {token:"{{text.tagline}}",label:"Short description"},{token:"{{text.contact}}",label:"Contact information"}
+        ],tip:"You can add more text fields with any name, such as {{text.offer}} or {{text.phone}}."}
+      ],
       templatePreviewHtml: "",
       templatePreviewLoading: false,
       templatePreviewError: "",
@@ -75,6 +97,9 @@ const app = Vue.createApp({
     filteredTemplates() {
       const q = this.templateSearch.trim().toLowerCase();
       return this.templates.filter(template => [template.name,template.description].join(" ").toLowerCase().includes(q));
+    },
+    starterTemplates() {
+      return this.templates.filter(template => template.is_builtin);
     },
     filteredPosters() {
       const q = this.posterSearch.trim().toLowerCase();
@@ -353,25 +378,70 @@ const app = Vue.createApp({
         this.notify("Manufacturer deleted.");
       } catch (error) { this.handleError(error); }
     },
+    uniqueTemplateName(baseName) {
+      const base = (baseName || "My design").trim();
+      let candidate = base;
+      let suffix = 2;
+      while (this.templates.some(item => item.name.toLowerCase() === candidate.toLowerCase())) {
+        candidate = base + " " + suffix++;
+      }
+      return candidate;
+    },
     openTemplateDialog(template) {
       this.editingTemplateId = template?.id || null;
+      const starter = template ? null : (this.starterTemplates[0] || this.templates[0] || null);
+      this.templateStarterId = starter?.id || null;
       this.templateForm = template
         ? {name:template.name, description:template.description || "", html_content:template.html_content}
-        : {name:"", description:"", html_content:""};
+        : {
+            name:this.uniqueTemplateName(starter ? starter.name + " Custom" : "My new design"),
+            description:starter?.description || "A custom vehicle poster design.",
+            html_content:starter?.html_content || ""
+          };
       this.templatePreviewHtml = "";
       this.templatePreviewError = "";
       this.templateDialogOpen = true;
       this.refreshTemplatePreview();
     },
+    chooseTemplateStarter(starter) {
+      if (!starter || !starter.html_content) return;
+      this.templateStarterId = starter.id;
+      this.templateForm.html_content = starter.html_content;
+      this.templateForm.description = starter.description || "A custom vehicle poster design.";
+      this.scheduleTemplatePreview();
+      this.notify("Design starting point changed.");
+    },
+    async copyPlaceholder(token) {
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(token);
+        } else {
+          const field = document.createElement("textarea");
+          field.value = token;
+          field.setAttribute("readonly", "");
+          field.style.position = "fixed";
+          field.style.opacity = "0";
+          document.body.appendChild(field);
+          field.select();
+          const copied = document.execCommand("copy");
+          field.remove();
+          if (!copied) throw new Error("Clipboard access is unavailable.");
+        }
+        this.notify("Copied " + token);
+      } catch (error) {
+        this.notify("Could not copy automatically. Open Advanced editing to copy the token.");
+      }
+    },
     closeTemplateDialog() {
       clearTimeout(this.templatePreviewTimer);
       this.templateDialogOpen = false;
+      this.templateStarterId = null;
       this.templatePreviewHtml = "";
       this.templatePreviewError = "";
     },
     scheduleTemplatePreview() {
       clearTimeout(this.templatePreviewTimer);
-      this.templatePreviewTimer = setTimeout(() => this.refreshTemplatePreview(), 650);
+      this.templatePreviewTimer = setTimeout(() => this.refreshTemplatePreview(), 420);
     },
     async refreshTemplatePreview() {
       clearTimeout(this.templatePreviewTimer);
@@ -408,6 +478,10 @@ const app = Vue.createApp({
       }
     },
     async saveTemplate() {
+      if (!this.templateForm.html_content.trim()) {
+        this.notify("Choose a starting design before saving this template.");
+        return;
+      }
       this.busy = "template";
       try {
         const payload = {name:this.templateForm.name.trim(), description:this.templateForm.description.trim(), html_content:this.templateForm.html_content};
