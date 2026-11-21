@@ -324,4 +324,14 @@ def render_poster(vehicle_id: int, template_id: int, db: Session = Depends(get_d
             markup = markup.replace("{{slot." + photo.slot + "}}", url)
             markup = markup.replace("{{label." + photo.slot + "}}", html.escape(photo.label))
     markup = re.sub(r"\{\{\s*[a-zA-Z0-9_.-]+\s*\}\}", "", markup)
+    # The preview iframe is sandboxed, so use a narrow message bridge for printing.
+    print_bridge = (
+        "<script>window.addEventListener('message',function(event){"
+        "if(event.source===window.parent&&event.data&&event.data.type==='POSTER_STUDIO_PRINT'){"
+        "window.focus();window.print();}});</script>"
+    )
+    if re.search(r"</body\s*>", markup, flags=re.IGNORECASE):
+        markup = re.sub(r"</body\s*>", print_bridge + "</body>", markup, count=1, flags=re.IGNORECASE)
+    else:
+        markup += print_bridge
     return HTMLResponse(markup)
