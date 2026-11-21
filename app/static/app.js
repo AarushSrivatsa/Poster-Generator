@@ -270,6 +270,12 @@ const app = Vue.createApp({
         owner_count:this.carForm.owner_count || null,
         ...this.expiryPayload()
       };
+      const duplicateRegistration = this.cars.some(car =>
+        String(car.registration_no || "").trim().toUpperCase() === payload.registration_no.toUpperCase()
+        && car.id !== this.editingCarId
+      );
+      if (duplicateRegistration) return this.notify("That registration number is already saved. Check the vehicle record.");
+
       if (!payload.insurance_validity || payload.insurance_validity === "") return this.notify("Choose an insurance expiry month or mark it lapsed.");
       if (!payload.fitness_validity || payload.fitness_validity === "") return this.notify("Choose a fitness expiry year or mark it lapsed.");
 
@@ -352,6 +358,11 @@ const app = Vue.createApp({
       this.makeDialogOpen = false;
     },
     async saveMake() {
+      const cleanName = this.makeForm.name.trim().toLowerCase();
+      const duplicateMake = this.makes.some(make =>
+        make.name.trim().toLowerCase() === cleanName && make.id !== this.editingMakeId
+      );
+      if (duplicateMake) return this.notify("That manufacturer is already in your list.");
       this.busy = "make";
       try {
         let make = this.editingMakeId
@@ -489,6 +500,14 @@ const app = Vue.createApp({
       this.busy = "template";
       try {
         const payload = {name:this.templateForm.name.trim(), description:this.templateForm.description.trim(), html_content:this.templateForm.html_content};
+        const duplicateName = this.templates.some(template =>
+          template.name.trim().toLowerCase() === payload.name.toLowerCase()
+          && template.id !== this.editingTemplateId
+        );
+        if (duplicateName) {
+          this.busy = "";
+          return this.notify("A template with that name already exists. Choose another name.");
+        }
         if (this.editingTemplateId) {
           await this.api("/api/templates/" + this.editingTemplateId, {method:"PUT", ...this.json(payload)});
         } else {
@@ -502,7 +521,7 @@ const app = Vue.createApp({
     },
     async duplicateTemplate(template) {
       const payload = {
-        name:template.name + " Copy",
+        name:this.uniqueTemplateName(template.name + " Copy"),
         description:template.description || "",
         html_content:template.html_content
       };
@@ -564,13 +583,17 @@ const app = Vue.createApp({
         this.view = "editor";
       } catch (error) { this.handleError(error); }
     },
-    leaveEditor() {
-      this.savePosterNow().catch(() => {}).finally(() => {
-        this.view = "posters";
-        this.activePoster = null;
-        this.activeCar = null;
-        this.activeTemplate = null;
-      });
+    async leaveEditor() {
+      try {
+        await this.savePosterNow();
+      } catch (_) {
+        this.notify("Your changes could not be saved. The poster is still open—retry before leaving.");
+        return;
+      }
+      this.view = "posters";
+      this.activePoster = null;
+      this.activeCar = null;
+      this.activeTemplate = null;
     },
     schedulePosterSave() {
       this.saveState = "saving";
