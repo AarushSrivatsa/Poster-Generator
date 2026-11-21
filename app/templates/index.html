@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
@@ -162,10 +163,9 @@
         <div v-if="!filteredTemplates.length" class="empty-inline">[[ templates.length ? 'No templates match your search.' : 'No templates found.' ]]</div>
         <div v-else class="template-grid">
           <article v-for="template in filteredTemplates" :key="template.id" class="template-card">
-            <button class="template-preview" @click="openTemplateDialog(template)">
-              <img v-if="template.thumbnail_url" :src="template.thumbnail_url" alt="">
-              <div v-else class="template-preview-fallback"><span>DESIGN [[ String(template.id).padStart(2,'0') ]]</span><strong>[[ template.name ]]</strong><small>[[ (template.placeholder_schema?.images || []).length ]] image areas · [[ (template.placeholder_schema?.text || []).length ]] text fields</small></div>
-            </button>
+            <div class="template-preview" role="button" tabindex="0" @click="openTemplateDialog(template)" @keydown.enter.prevent="openTemplateDialog(template)">
+              <iframe :src="'/api/templates/'+template.id+'/preview'" :title="template.name+' visual preview'" loading="lazy" sandbox="allow-scripts" tabindex="-1"></iframe>
+            </div>
             <div class="template-card-body">
               <div><h3>[[ template.name ]]</h3><p>[[ template.description || 'Custom vehicle poster design' ]]</p></div>
               <div class="template-card-footer">
@@ -236,7 +236,7 @@
 
   <!-- Vehicle form -->
   <div v-if="carDialogOpen" class="app-modal-backdrop" @click.self="closeCarDialog">
-    <section class="modal app-modal-wide" role="dialog" aria-modal="true" aria-labelledby="carDialogTitle">
+    <section class="app-modal app-modal-wide" role="dialog" aria-modal="true" aria-labelledby="carDialogTitle">
       <header class="app-modal-header"><div><div class="overline">VEHICLE RECORD</div><h2 id="carDialogTitle">[[ editingCarId ? 'Edit vehicle' : 'Add a vehicle' ]]</h2><p>Save the details and every photo together.</p></div><button class="app-modal-close" @click="closeCarDialog" aria-label="Close">×</button></header>
       <form @submit.prevent="saveCar">
         <div class="form-section">
@@ -285,7 +285,7 @@
 
   <!-- Make form -->
   <div v-if="makeDialogOpen" class="app-modal-backdrop" @click.self="closeMakeDialog">
-    <section class="modal app-modal-medium" role="dialog" aria-modal="true" aria-labelledby="makeDialogTitle">
+    <section class="app-modal app-modal-medium" role="dialog" aria-modal="true" aria-labelledby="makeDialogTitle">
       <header class="app-modal-header"><div><div class="overline">MANUFACTURER</div><h2 id="makeDialogTitle">[[ editingMakeId ? 'Edit manufacturer' : 'Add manufacturer' ]]</h2><p>Name and logo are shared across all its vehicles.</p></div><button class="app-modal-close" @click="closeMakeDialog">×</button></header>
       <form @submit.prevent="saveMake" class="modal-form">
         <label class="field-label">Manufacturer name<input class="form-control" v-model="makeForm.name" placeholder="e.g. Hyundai" required></label>
@@ -298,7 +298,7 @@
 
   <!-- Template form -->
   <div v-if="templateDialogOpen" class="app-modal-backdrop" @click.self="closeTemplateDialog">
-    <section class="modal app-modal-template" role="dialog" aria-modal="true" aria-labelledby="templateDialogTitle">
+    <section class="app-modal app-modal-template" role="dialog" aria-modal="true" aria-labelledby="templateDialogTitle">
       <header class="app-modal-header"><div><div class="overline">DESIGN LIBRARY</div><h2 id="templateDialogTitle">[[ editingTemplateId ? 'Edit template' : 'Create template' ]]</h2><p>See the finished design first. The source is available in advanced settings.</p></div><button class="app-modal-close" @click="closeTemplateDialog">×</button></header>
       <form @submit.prevent="saveTemplate">
         <div class="form-grid template-meta-grid">
@@ -330,7 +330,7 @@
 
   <!-- Create poster -->
   <div v-if="posterCreateOpen" class="app-modal-backdrop" @click.self="posterCreateOpen=false">
-    <section class="modal app-modal-wide" role="dialog" aria-modal="true" aria-labelledby="createPosterTitle">
+    <section class="app-modal app-modal-wide" role="dialog" aria-modal="true" aria-labelledby="createPosterTitle">
       <header class="app-modal-header"><div><div class="overline">NEW DESIGN</div><h2 id="createPosterTitle">Create a poster</h2><p>Choose the vehicle and template to start with.</p></div><button class="app-modal-close" @click="posterCreateOpen=false">×</button></header>
       <div class="picker-section"><div class="picker-title"><h3>1. Choose a vehicle</h3><span>[[ cars.length ]] available</span></div>
         <div v-if="!cars.length" class="empty-inline">Add a vehicle before creating a poster.</div>
@@ -356,6 +356,7 @@
 
   <div v-if="toastMessage" class="toast-message" role="status">[[ toastMessage ]]</div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"></script>
 <script src="/static/app.js"></script>
