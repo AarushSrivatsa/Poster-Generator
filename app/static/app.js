@@ -69,7 +69,7 @@ const app = Vue.createApp({
       posterSaveTimer: null,
       posterSavePromise: null,
       previewVersion: 0,
-      dateLabel: new Date().toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric"})
+
     };
   },
   computed: {
@@ -131,6 +131,9 @@ const app = Vue.createApp({
       const response = await fetch(url, options || {});
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
+        if (response.status >= 500) {
+          throw new Error("Something went wrong on our side. Please try again.");
+        }
         throw new Error(payload.detail || response.statusText || "Request failed");
       }
       if (response.status === 204) return {};
@@ -485,8 +488,9 @@ const app = Vue.createApp({
         this.templatePreviewHtml = html;
       } catch (error) {
         if (requestId === this.templatePreviewRequestId) {
+          console.warn("Template preview could not be rendered:", error);
           this.templatePreviewHtml = "";
-          this.templatePreviewError = error.message || "Unable to render this template.";
+          this.templatePreviewError = "We couldn't show this preview. Your design is still here. Try refreshing, or choose another starting design.";
         }
       } finally {
         if (requestId === this.templatePreviewRequestId) this.templatePreviewLoading = false;
