@@ -1,7 +1,11 @@
 import html
+import os
 import re
 import uuid
 from pathlib import Path
+from urllib.parse import quote
+
+import httpx
 
 from fastapi import FastAPI, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse
@@ -19,6 +23,53 @@ UPLOAD_DIR = DATA_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 ALLOWED = {"image/jpeg", "image/png", "image/webp"}
 MAX_UPLOAD = 12 * 1024 * 1024
+
+SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "vehicle-photos")
+USE_SUPABASE_STORAGE = bool(SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY)
+
+if bool(SUPABASE_URL) != bool(SUPABASE_SERVICE_ROLE_KEY):
+    raise RuntimeError("Set both SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to enable Supabase Storage.")
+
+def storage_headers(content_type: str | None = None):
+    headers = {
+        "apikey": SUPABASE_SERVICE_ROLE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+    }
+    if content_type:
+        headers["Content-Type"] = content_type
+    return headers
+
+def storage_object_url(key: str):
+    bucket = quote(SUPABASE_STORAGE_BUCKET, safe="")
+    object_key = quote(key, safe="/")
+    return f"{SUPABASE_URL}/storage/v1/object/public/{bucket}/{object_key}"
+
+async def store_photo(key: str, content: bytes, content_type: str):
+    bucket = quote(SUPABASE_STORAGE_BUCKET, safe="")
+    object_key = quote(key, safe="/")
+    url = f"{SUPABASE_URL}/storage/v1/object/{bucket}/{object_key}"
+    async with httpx.AsyncClient(timeout=60) as client:
+        response = await client.post(
+            url,
+            headers={**storage_headers(content_type), "x-upsert": "false"},
+            content=content,
+        )
+    if response.is_error:
+        raise HTTPException(502, f"Supabase Storage upload failed: {response.text[:300]}")
+
+def remove_photo(key: str):
+    if USE_SUPABASE_STORAGE:
+        bucket = quote(SUPABASE_STORAGE_BUCKET, safe="")
+        url = f"{SUPABASE_URL}/storage/v1/object/{bucket}"
+        response = httpx.delete(
+            url, headers=storage_headers(), json={"prefixes": [key]}, timeout=30
+        )
+        if response.is_error:
+            raise RuntimeError(f"Supabase Storage delete failed: {response.text[:300]}")
+    else:
+        (UPLOAD_DIR / key).unlink(missing_ok=True)
 
 app = FastAPI(title="Poster Studio", version="1.0.0")
 Base.metadata.create_all(bind=engine)
@@ -52,7 +103,8 @@ def vehicle_dict(v: Vehicle):
     )}
 
 def photo_dict(p: VehiclePhoto):
-    return {"id":p.id,"url":f"/uploads/{p.filename}","label":p.label,"slot":p.slot,"sort_order":p.sort_order}
+    url = storage_object_url(p.filename) if USE_SUPABASE_STORAGE else f"/uploads/{p.filename}"
+    return {"id":p.id,"url":url,"label":p.label,"slot":p.slot,"sort_order":p.sort_order}
 
 @app.get("/api/vehicles")
 def list_vehicles(db: Session = Depends(get_db)):
@@ -84,8 +136,8 @@ def delete_vehicle(vehicle_id: int, db: Session = Depends(get_db)):
     v = db.query(Vehicle).options(selectinload(Vehicle.photos)).filter_by(id=vehicle_id).first()
     if not v: raise HTTPException(404, "Vehicle not found")
     for p in v.photos:
-        try: (UPLOAD_DIR/p.filename).unlink(missing_ok=True)
-        except OSError: pass
+        try: remove_photo(p.filename)
+        except Exception: pass
     db.delete(v); db.commit()
     return {"ok":True}
 
@@ -99,8 +151,13 @@ async def upload_photos(vehicle_id: int, files: list[UploadFile] = File(...), db
         content = await file.read()
         if len(content) > MAX_UPLOAD: raise HTTPException(413, "Each image must be 12 MB or smaller")
         ext = {"image/jpeg":".jpg","image/png":".png","image/webp":".webp"}[file.content_type]
-        name = f"{uuid.uuid4().hex}{ext}"
-        (UPLOAD_DIR/name).write_bytes(content)
+        name = f"{vehicle_id}/{uuid.uuid4().hex}{ext}"
+        if USE_SUPABASE_STORAGE:
+            await store_photo(name, content, file.content_type)
+        else:
+            local_path = UPLOAD_DIR / name
+            local_path.parent.mkdir(parents=True, exist_ok=True)
+            local_path.write_bytes(content)
         photo = VehiclePhoto(vehicle_id=vehicle_id,filename=name,label=Path(file.filename or "Vehicle view").stem[:80])
         db.add(photo); db.flush()
         added.append(photo_dict(photo))
@@ -121,7 +178,7 @@ def update_photo(photo_id: int, payload: dict, db: Session = Depends(get_db)):
 def delete_photo(photo_id: int, db: Session = Depends(get_db)):
     p = db.get(VehiclePhoto, photo_id)
     if not p: raise HTTPException(404, "Photo not found")
-    (UPLOAD_DIR/p.filename).unlink(missing_ok=True)
+    remove_photo(p.filename)
     db.delete(p); db.commit()
     return {"ok":True}
 
