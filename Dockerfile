@@ -11,7 +11,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-RUN npm install --global @tailwindcss/cli@4.3.5 --no-audit --no-fund \
+RUN npm install --no-save --no-package-lock tailwindcss@4.3.5 @tailwindcss/cli@4.3.5 --no-audit --no-fund \
     && npm cache clean --force
 
 COPY requirements.txt .
