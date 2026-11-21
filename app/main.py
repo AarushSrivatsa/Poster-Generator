@@ -447,14 +447,14 @@ def template_uses_tailwind(markup: str) -> bool:
     """Detect actual Tailwind directives, CDN usage, or utility classes."""
     if re.search(
         r"@(?:tailwind|apply|theme|source|config|utility|variant)\b|"
-        r"@import\s+['\\"]tailwindcss['\\"]|"
-        r"<style\b[^>]*\btype\s*=\s*['\\"]text/tailwindcss['\\"]|"
+        r"""@import\s+['"]tailwindcss['"]|"""
+        r"""<style\b[^>]*\btype\s*=\s*['"]text/tailwindcss['"]|"""
         r"https?://(?:cdn\.tailwindcss\.com|cdn\.jsdelivr\.net/npm/@tailwindcss/browser@4)",
         markup,
         flags=re.IGNORECASE,
     ):
         return True
-    for class_value in re.findall(r"\bclass\s*=\s*['\\"]([^'\\"]*)['\\"]", markup, flags=re.IGNORECASE):
+    for class_value in re.findall(r"""\bclass\s*=\s*['"]([^'"]*)['"]""", markup, flags=re.IGNORECASE):
         if any(_TAILWIND_UTILITY_RE.match(token) for token in class_value.split()):
             return True
     return False
@@ -485,7 +485,7 @@ def compile_tailwind_css(markup: str) -> str:
         inline_tailwind_css = "\n".join(
             match.group(1)
             for match in re.finditer(
-                r"<style\b[^>]*\btype\s*=\s*['\\"]text/tailwindcss['\\"][^>]*>(.*?)</style\s*>",
+                r"""<style\b[^>]*\btype\s*=\s*['"]text/tailwindcss['"][^>]*>(.*?)</style\s*>""",
                 markup,
                 flags=re.IGNORECASE | re.DOTALL,
             )
