@@ -325,6 +325,8 @@ const app = Vue.createApp({
         let make = this.editingMakeId
           ? await this.api("/api/makes/" + this.editingMakeId, {method:"PUT", ...this.json({name:this.makeForm.name.trim()})})
           : await this.api("/api/makes", {method:"POST", ...this.json({name:this.makeForm.name.trim()})});
+        // Keep the record in edit mode if a newly added logo upload needs retry.
+        this.editingMakeId = make.id;
         if (this.makeLogoFile) {
           const body = new FormData();
           body.append("file", this.makeLogoFile);
@@ -435,7 +437,7 @@ const app = Vue.createApp({
       } catch (error) { this.handleError(error); }
     },
     leaveEditor() {
-      this.savePosterNow().finally(() => {
+      this.savePosterNow().catch(() => {}).finally(() => {
         this.view = "posters";
         this.activePoster = null;
         this.activeCar = null;
