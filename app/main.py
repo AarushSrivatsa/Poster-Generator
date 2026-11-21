@@ -200,6 +200,17 @@ def humanize_key(key: str) -> str:
     return re.sub(r"[_-]+", " ", key).strip().title()
 
 
+def owner_count_label(value) -> str:
+    if value is None:
+        return "Not specified"
+    try:
+        count = int(value)
+    except (TypeError, ValueError):
+        return "Not specified"
+    suffix = "th" if 10 <= count % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(count % 10, "th")
+    return f"{count}{suffix} owner"
+
+
 def extract_placeholder_schema(markup: str) -> dict:
     car_fields, make_fields, image_keys, text_keys = [], [], [], []
     for match in TOKEN_RE.finditer(markup):
@@ -225,7 +236,13 @@ def extract_placeholder_schema(markup: str) -> dict:
         "car": car_fields,
         "make": make_fields,
         "images": [
-            {"key": key, "label": humanize_key(key), "required": False}
+            {"key": key, "label": {
+                "hero": "Main photo",
+                "angle": "Front angle",
+                "rear": "Rear view",
+                "interior": "Interior",
+                "detail": "Dashboard / detail",
+            }.get(key, humanize_key(key)), "required": False}
             for key in image_keys
         ],
         "text": [
@@ -319,7 +336,7 @@ def render_poster_html(template: PosterTemplate, poster: CarPoster, car: CarDeta
         "year": str(car.year),
         "transmission": enum_value(car.transmission),
         "odometer_km": str(car.odometer_km) if car.odometer_km is not None else "Unrecorded",
-        "owner_count": str(car.owner_count) if car.owner_count is not None else "Unrecorded",
+        "owner_count": owner_count_label(car.owner_count),
         "insurance_validity": car.insurance_validity.strftime("%m/%Y") if car.insurance_validity else "Lapsed",
         "fitness_validity": car.fitness_validity.strftime("%Y") if car.fitness_validity else "Lapsed",
         "make": car.make.name if car.make else "",
@@ -542,11 +559,11 @@ app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 views = Jinja2Templates(directory=ROOT / "templates")
 
 BUILT_IN_TEMPLATES = [
-    ("Midnight Gold", "Dramatic black-and-gold premium showroom layout", "default_poster.html", 10),
-    ("Studio Minimal", "Refined editorial layout with oversized typography", "poster_studio_minimal.html", 20),
-    ("Electric Motion", "High-energy performance design with electric teal accents", "poster_electric_motion.html", 30),
-    ("Executive Black", "Heritage grand-touring design with warm ivory details", "poster_executive_black.html", 40),
-    ("City Select", "Bold photo-first dealership advert for everyday listings", "poster_urban_sale.html", 50),
+    ("Midnight Gold", "Premium dark layout with a five-photo vehicle gallery", "default_poster.html", 10),
+    ("Studio Minimal", "Editorial light layout with a five-photo vehicle gallery", "poster_studio_minimal.html", 20),
+    ("Electric Motion", "Sport-inspired high-contrast layout with five photo placements", "poster_electric_motion.html", 30),
+    ("Executive Black", "Classic luxury layout with five photo placements", "poster_executive_black.html", 40),
+    ("City Select", "Bold dealership layout with a five-photo vehicle gallery", "poster_urban_sale.html", 50),
 ]
 
 with SessionLocal() as seed_db:
@@ -566,8 +583,8 @@ with SessionLocal() as seed_db:
                 sort_order=order,
                 is_builtin=True,
             ))
-        elif existing.is_builtin and 'data-template-version="2"' not in (existing.html_content or ""):
-            # One-time refresh of the original built-in presets. User-created templates are untouched.
+        elif existing.is_builtin and 'data-template-version="3"' not in (existing.html_content or ""):
+            # One-time refresh of built-in presets. User-created templates are untouched.
             existing.description = description
             existing.html_content = markup
             existing.placeholder_schema = schema
