@@ -1,172 +1,347 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Motor Poster Studio</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/app.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f4">
+  <title>Motor Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
-<header class="app-header">
-  <a class="brand" href="#"><span class="brand-mark">M</span><span><b>MOTOR STUDIO</b><small>Vehicle posters, without the fuss.</small></span></a>
-  <nav class="top-nav">
-    <button class="nav-tab active" data-tab="posters">Posters</button>
-    <button class="nav-tab" data-tab="cars">Cars</button>
-    <button class="nav-tab" data-tab="makes">Makes</button>
-    <button class="nav-tab" data-tab="templates">Templates</button>
-  </nav>
-</header>
+<div id="app" v-cloak>
+  <div class="app-shell" v-if="view !== 'editor'">
+    <aside class="sidebar">
+      <a class="brand" href="#" @click.prevent="navigate('posters')">
+        <span class="brand-symbol">M</span>
+        <span class="brand-copy"><strong>motor studio</strong><small>Vehicle creative workspace</small></span>
+      </a>
 
-<main class="app-main">
-<section id="postersPanel" class="panel">
-  <div class="page-heading">
-    <div><p class="eyebrow">MAKE SOMETHING THAT SELLS</p><h1>Your posters</h1><p class="muted">Choose a car, choose a design, and make it yours.</p></div>
-    <button id="startNewPoster" class="primary-btn">＋ Create poster</button>
-  </div>
+      <div class="sidebar-label">WORKSPACE</div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button :class="['nav-item', {active:view==='posters'}]" @click="navigate('posters')">
+          <span class="nav-icon">▧</span><span>Posters</span><span class="nav-count">[[ posters.length ]]</span>
+        </button>
+        <button :class="['nav-item', {active:view==='cars'}]" @click="navigate('cars')">
+          <span class="nav-icon">▣</span><span>Vehicles</span><span class="nav-count">[[ cars.length ]]</span>
+        </button>
+        <button :class="['nav-item', {active:view==='makes'}]" @click="navigate('makes')">
+          <span class="nav-icon">◈</span><span>Manufacturers</span><span class="nav-count">[[ makes.length ]]</span>
+        </button>
+        <button :class="['nav-item', {active:view==='templates'}]" @click="navigate('templates')">
+          <span class="nav-icon">▤</span><span>Templates</span><span class="nav-count">[[ templates.length ]]</span>
+        </button>
+      </nav>
 
-  <section class="surface create-strip">
-    <div class="create-step"><span>01</span><div><b>Choose a car</b><small>Select an existing car record</small></div></div>
-    <div id="posterCarChoices" class="choice-row"><span class="muted">Add a car in Cars to get started.</span></div>
-    <div class="create-step"><span>02</span><div><b>Choose a design</b><small>Pick a template</small></div></div>
-    <div id="posterTemplateChoices" class="template-choice-row"><span class="muted">Templates will appear here.</span></div>
-    <div class="create-action"><button id="createPoster" class="primary-btn" disabled>Create poster →</button></div>
-  </section>
-
-  <div class="subheading section-toolbar"><div><p class="eyebrow">SAVED WORK</p><h2>Recent posters</h2></div><div class="toolbar-actions"><input id="posterSearch" class="search-field" type="search" placeholder="Search posters…" aria-label="Search posters"><span id="posterCount" class="count-pill">0 posters</span></div></div>
-  <div id="posterList" class="poster-list"><div class="empty-card">Your saved posters will appear here.</div></div>
-
-  <section id="posterEditor" class="poster-editor hidden">
-    <div class="editor-titlebar">
-      <div><p class="eyebrow">POSTER EDITOR</p><h2 id="activePosterTitle">Untitled poster</h2><span id="activePosterSubtitle" class="muted"></span></div>
-      <div class="editor-actions">
-        <span id="saveStatus" class="save-status"><i></i> All changes saved</span>
-        <button id="duplicatePoster" class="quiet-btn">Duplicate</button>
-        <button id="deletePoster" class="danger-btn">Delete</button>
-        <button id="printPoster" class="primary-btn">Print / Save PDF ↗</button>
+      <div class="sidebar-bottom">
+        <div class="sidebar-note">
+          <span class="note-dot"></span>
+          <div><b>Your workspace</b><small>Vehicle details, designs and saved posters.</small></div>
+        </div>
+        <div class="sidebar-foot">MOTOR STUDIO <span>•</span> 1.0</div>
       </div>
-    </div>
-    <div class="studio-grid">
-      <aside class="surface edit-panel">
-        <div class="panel-heading"><div><p class="eyebrow">PERSONALISE</p><h3>Poster text</h3></div><span class="panel-icon">Aa</span></div>
-        <p class="helper">Car information fills itself. These are the words you can change.</p>
-        <label class="poster-name-field">Poster name<input id="posterName" placeholder="e.g. Thar social post"></label>
-        <div id="posterTextFields" class="poster-text-fields"><div class="empty-card">Choose a poster to edit its text.</div></div>
-      </aside>
+    </aside>
 
-      <section class="surface canvas-panel">
-        <div class="canvas-heading"><div><p class="eyebrow">LIVE CANVAS</p><h3>Preview</h3></div><span class="live-status"><i></i> LIVE</span></div>
-        <div class="canvas-wrap"><iframe id="posterFrame" title="Live poster preview" sandbox="allow-scripts allow-modals" class="poster-frame"></iframe><div id="canvasEmpty" class="canvas-empty"><div class="empty-art">✳</div><b>Your poster preview</b><span>Create or open a poster to see it here.</span></div></div>
-        <div class="canvas-footer"><span>Changes are saved automatically and reflected here.</span><button id="refreshPoster" class="text-btn">Refresh preview ↻</button></div>
+    <main class="main-area">
+      <header class="topbar">
+        <div class="breadcrumb"><span>Workspace</span><i>/</i><strong>[[ pageTitle ]]</strong></div>
+        <div class="topbar-right">
+          <span class="topbar-date">[[ dateLabel ]]</span>
+          <span class="avatar">MS</span>
+        </div>
+      </header>
+
+      <section v-if="view==='posters'" class="page-content">
+        <div class="page-heading">
+          <div><div class="overline">YOUR CREATIVE WORKSPACE</div><h1>Posters</h1><p>Turn your vehicle inventory into polished marketing material.</p></div>
+          <button class="btn btn-primary" @click="openPosterCreate"><span class="btn-plus">＋</span> New poster</button>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat"><span class="stat-label">Saved posters</span><strong>[[ posters.length ]]</strong></div>
+          <div class="stat"><span class="stat-label">Vehicles</span><strong>[[ cars.length ]]</strong></div>
+          <div class="stat"><span class="stat-label">Design templates</span><strong>[[ templates.length ]]</strong></div>
+        </div>
+
+        <div class="section-toolbar">
+          <div><h2>Recent posters</h2><p>Open a design to continue editing or export it.</p></div>
+          <div class="toolbar-right">
+            <label class="search-box"><span>⌕</span><input v-model="posterSearch" type="search" placeholder="Search posters"></label>
+            <span class="result-count">[[ filteredPosters.length ]] items</span>
+          </div>
+        </div>
+
+        <div v-if="loading" class="loading-state">Loading your workspace…</div>
+        <div v-else-if="!posters.length" class="empty-state">
+          <div class="empty-illustration">▧</div><h3>Your first poster starts here</h3>
+          <p>Add a vehicle, choose a template, and create your first design.</p>
+          <button class="btn btn-primary" @click="openPosterCreate">Create a poster</button>
+          <button v-if="!cars.length" class="btn btn-text" @click="openCarDialog()">Add a vehicle first</button>
+        </div>
+        <div v-else-if="!filteredPosters.length" class="empty-inline">No posters match that search.</div>
+        <div v-else class="poster-grid">
+          <article v-for="poster in filteredPosters" :key="poster.id" class="poster-card">
+            <button class="poster-art" @click="openPoster(poster.id)" :aria-label="'Open '+poster.name">
+              <img v-if="templateFor(poster.template_id)?.thumbnail_url" :src="templateFor(poster.template_id).thumbnail_url" alt="">
+              <div v-else class="poster-art-placeholder">
+                <span class="art-kicker">MOTOR STUDIO</span>
+                <strong>[[ carTitle(poster.car_id) ]]</strong>
+                <span class="art-line"></span>
+                <small>[[ templateFor(poster.template_id)?.name || 'Vehicle poster' ]]</small>
+              </div>
+              <span class="poster-open-label">Open design ↗</span>
+            </button>
+            <div class="poster-card-body">
+              <div class="poster-card-title"><div><h3>[[ poster.name || templateFor(poster.template_id)?.name || 'Untitled poster' ]]</h3><p>[[ carTitle(poster.car_id) ]]</p></div><button class="icon-button" title="Delete poster" @click="deletePoster(poster)">×</button></div>
+              <div class="poster-card-meta"><span>[[ templateFor(poster.template_id)?.name || 'Template' ]]</span><span>Updated [[ formatDate(poster.updated_at || poster.created_at) ]]</span></div>
+            </div>
+          </article>
+        </div>
       </section>
 
-      <aside class="surface media-panel">
-        <div class="panel-heading"><div><p class="eyebrow">CAR PHOTOS</p><h3>Image library</h3></div><span id="imageCount" class="count-pill">0 images</span></div>
-        <label id="imageUploadZone" class="upload-zone">
-          <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple hidden>
-          <span class="upload-plus">＋</span><b>Drop photos here</b><span>or <u>browse files</u></span><small>JPG · PNG · WEBP · AVIF · 12 MB each</small>
-        </label>
-        <div class="media-subhead"><b>Uploaded photos</b><small>Drag or tap to select</small></div>
-        <div id="imageLibrary" class="image-library"><div class="empty-card">Upload photos for this car.</div></div>
-        <div class="media-subhead slots-title"><div><b>Image placeholders</b><small>Drop a photo into any space. Reuse photos if needed.</small></div></div>
-        <div id="imageSlots" class="image-slots"><div class="empty-card">Image spaces are detected from the selected template.</div></div>
-      </aside>
-    </div>
-  </section>
-</section>
+      <section v-if="view==='cars'" class="page-content">
+        <div class="page-heading">
+          <div><div class="overline">INVENTORY</div><h1>Vehicles</h1><p>Keep vehicle information and photos together. Reuse them across posters.</p></div>
+          <button class="btn btn-primary" @click="openCarDialog()"><span class="btn-plus">＋</span> Add vehicle</button>
+        </div>
+        <div class="section-toolbar">
+          <div><h2>Vehicle inventory</h2><p>[[ cars.length ]] saved vehicles</p></div>
+          <label class="search-box"><span>⌕</span><input v-model="carSearch" type="search" placeholder="Search make, model or registration"></label>
+        </div>
+        <div v-if="!filteredCars.length" class="empty-state compact">
+          <div class="empty-illustration">▣</div><h3>[[ cars.length ? 'No matching vehicles' : 'No vehicles yet' ]]</h3>
+          <p>[[ cars.length ? 'Try another search term.' : 'Add a vehicle with its details and photos in one step.' ]]</p>
+          <button v-if="!cars.length" class="btn btn-primary" @click="openCarDialog()">Add your first vehicle</button>
+        </div>
+        <div v-else class="vehicle-grid">
+          <article v-for="car in filteredCars" :key="car.id" class="vehicle-card">
+            <div class="vehicle-image" @click="openCarDialog(car)">
+              <img v-if="car.images && car.images.length" :src="car.images[0].image_url" :alt="car.make?.name+' '+car.model">
+              <div v-else class="vehicle-image-empty"><span>▣</span><small>No vehicle photo</small></div>
+              <span class="photo-count">[[ (car.images || []).length ]] photos</span>
+            </div>
+            <div class="vehicle-card-body">
+              <div class="vehicle-make"><img v-if="car.make?.icon_url" :src="car.make.icon_url" alt=""><span v-else class="make-initial">[[ (car.make?.name || '?').slice(0,1) ]]</span><span>[[ car.make?.name || 'Unknown make' ]]</span></div>
+              <h3>[[ car.model ]]</h3><p class="vehicle-variant">[[ car.variant || 'Variant not specified' ]]</p>
+              <div class="vehicle-tags"><span>[[ car.year ]]</span><span>[[ car.fuel_type ]]</span><span>[[ car.transmission ]]</span></div>
+              <div class="vehicle-card-footer"><span>[[ car.registration_no ]]</span><button class="btn btn-small btn-outline" @click="openCarDialog(car)">Edit details</button></div>
+            </div>
+          </article>
+        </div>
+      </section>
 
-<section id="carsPanel" class="panel hidden">
-  <div class="page-heading"><div><p class="eyebrow">INVENTORY</p><h1>Cars</h1><p class="muted">Store each car once. Posters reuse these details.</p></div><button id="newCar" class="primary-btn">＋ Add car</button></div>
-  <div class="management-grid">
-    <aside class="surface records-panel"><div class="panel-heading"><div><p class="eyebrow">INVENTORY</p><h3>Your cars</h3></div><span id="carCount" class="count-pill">0 cars</span></div><input id="carSearch" class="search-field" type="search" placeholder="Search make, model or reg. no." aria-label="Search cars"><div id="carList" class="record-list"></div></aside>
-    <section class="surface form-panel">
-      <div class="panel-heading"><div><p class="eyebrow">CAR DETAILS</p><h3 id="carFormTitle">Add a car</h3></div></div>
-      <form id="carForm" class="form-grid">
-        <input type="hidden" name="id">
-        <label>Make<select name="make_id" id="carMakeSelect" required><option value="">Choose make</option></select></label>
-        <label>Model<input name="model" placeholder="Creta" required></label>
-        <label>Variant<input name="variant" placeholder="SX(O) 1.5 Diesel"></label>
-        <label>Registration number<input name="registration_no" placeholder="TS09AB1234" required></label>
-        <label>Fuel type<select name="fuel_type" id="fuelSelect" required></select></label>
-        <label>Year<select name="year" id="yearSelect" required></select></label>
-        <label>Transmission<select name="transmission" id="transmissionSelect" required></select></label>
-        <label>Odometer (km)<input name="odometer_km" type="number" step="1" placeholder="Leave empty if unrecorded"></label>
-        <label>Number of owners<input name="owner_count" type="number" step="1" placeholder="Leave empty if unrecorded"></label>
-        <div class="validity-field">
-          <label>Insurance validity<select id="insuranceMode"><option value="lapsed">Lapsed</option><option value="date">Valid until</option></select></label>
-          <label id="insuranceDateWrap" class="conditional-field hidden">Expiry month<input id="insuranceDate" type="month"></label>
+      <section v-if="view==='makes'" class="page-content">
+        <div class="page-heading">
+          <div><div class="overline">MANUFACTURER DIRECTORY</div><h1>Manufacturers</h1><p>Manage shared make records and their logos.</p></div>
+          <button class="btn btn-primary" @click="openMakeDialog()"><span class="btn-plus">＋</span> Add manufacturer</button>
         </div>
-        <div class="validity-field">
-          <label>Fitness validity<select id="fitnessMode"><option value="lapsed">Lapsed</option><option value="date">Valid until</option></select></label>
-          <label id="fitnessDateWrap" class="conditional-field hidden">Expiry year<select id="fitnessDate"></select></label>
+        <div class="section-toolbar">
+          <div><h2>All manufacturers</h2><p>One shared record per brand.</p></div>
+          <label class="search-box"><span>⌕</span><input v-model="makeSearch" type="search" placeholder="Search manufacturers"></label>
         </div>
-      
-        <section class="car-photo-manager" aria-label="Car photos">
-          <div class="car-photo-manager-head">
-            <div><p class="eyebrow">PHOTOS FOR THIS CAR</p><h3>Vehicle photos</h3><p class="muted">Add photos here and save them together with the vehicle. You can label each photo and use it later in any poster.</p></div>
-            <span class="photo-save-note">Saved per car</span>
+        <div v-if="!filteredMakes.length" class="empty-inline">[[ makes.length ? 'No manufacturers match your search.' : 'No manufacturers yet. Add one to start building your inventory.' ]]</div>
+        <div v-else class="make-grid">
+          <article v-for="make in filteredMakes" :key="make.id" class="make-card">
+            <div class="make-logo"><img v-if="make.icon_url" :src="make.icon_url" :alt="make.name"><span v-else>[[ make.name.slice(0,1) ]]</span></div>
+            <div class="make-info"><h3>[[ make.name ]]</h3><p>[[ cars.filter(car => car.make_id===make.id).length ]] vehicles</p></div>
+            <div class="make-actions"><button class="btn btn-small btn-outline" @click="openMakeDialog(make)">Edit</button><button class="icon-button" title="Delete manufacturer" @click="deleteMake(make)">×</button></div>
+          </article>
+        </div>
+      </section>
+
+      <section v-if="view==='templates'" class="page-content">
+        <div class="page-heading">
+          <div><div class="overline">DESIGN LIBRARY</div><h1>Templates</h1><p>Reusable HTML and Tailwind layouts. Each template defines its own image and text placeholders.</p></div>
+          <button class="btn btn-primary" @click="openTemplateDialog()"><span class="btn-plus">＋</span> New template</button>
+        </div>
+        <div class="section-toolbar">
+          <div><h2>Available designs</h2><p>Choose a design when creating a poster.</p></div>
+          <label class="search-box"><span>⌕</span><input v-model="templateSearch" type="search" placeholder="Search templates"></label>
+        </div>
+        <div v-if="!filteredTemplates.length" class="empty-inline">[[ templates.length ? 'No templates match your search.' : 'No templates found.' ]]</div>
+        <div v-else class="template-grid">
+          <article v-for="template in filteredTemplates" :key="template.id" class="template-card">
+            <button class="template-preview" @click="openTemplateDialog(template)">
+              <img v-if="template.thumbnail_url" :src="template.thumbnail_url" alt="">
+              <div v-else class="template-preview-fallback"><span>DESIGN [[ String(template.id).padStart(2,'0') ]]</span><strong>[[ template.name ]]</strong><small>[[ (template.placeholder_schema?.images || []).length ]] image areas · [[ (template.placeholder_schema?.text || []).length ]] text fields</small></div>
+            </button>
+            <div class="template-card-body">
+              <div><h3>[[ template.name ]]</h3><p>[[ template.description || 'Custom vehicle poster design' ]]</p></div>
+              <div class="template-card-footer">
+                <span class="template-badge">[[ template.is_builtin ? 'Built-in' : 'Custom' ]]</span>
+                <div class="template-actions">
+                  <button class="text-action" @click="duplicateTemplate(template)">Duplicate</button>
+                  <button class="text-action" @click="openTemplateDialog(template)">Edit</button>
+                  <button v-if="!template.is_builtin" class="text-action danger-text" @click="deleteTemplate(template)">Delete</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <main v-else class="editor-page">
+    <header class="editor-topbar">
+      <button class="back-button" @click="leaveEditor">← <span>All posters</span></button>
+      <div class="editor-heading"><strong>[[ activePoster?.name || activeTemplate?.name || 'Poster editor' ]]</strong><small>[[ carTitle(activeCar?.id) ]] · [[ activeTemplate?.name ]]</small></div>
+      <div class="editor-top-actions"><span :class="['save-indicator', 'state-'+saveState]"><i></i>[[ saveStateLabel ]]</span><button class="btn btn-outline" @click="duplicateActivePoster">Duplicate</button><button class="btn btn-primary" @click="printPoster">Export / PDF ↗</button></div>
+    </header>
+    <div class="editor-layout">
+      <aside class="editor-inspector">
+        <div class="inspector-section">
+          <div class="inspector-heading"><div><div class="overline">CONTENT</div><h2>Text and details</h2></div></div>
+          <label class="field-label">Poster name<input v-model="activePoster.name" @input="schedulePosterSave" placeholder="Give this poster a name"></label>
+          <div v-if="activeTextFields.length" class="dynamic-fields">
+            <label v-for="field in activeTextFields" :key="field.key" class="field-label">
+              [[ field.label || field.key ]]
+              <textarea v-if="field.multiline" v-model="activePoster.text_values[field.key]" @input="schedulePosterSave" rows="3" :placeholder="'Write '+(field.label || field.key).toLowerCase()+'…'"></textarea>
+              <input v-else v-model="activePoster.text_values[field.key]" @input="schedulePosterSave" :placeholder="'Write '+(field.label || field.key).toLowerCase()+'…'">
+            </label>
           </div>
-          <label id="carPhotoDropZone" class="car-photo-dropzone">
-            <input id="carPhotoInput" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple hidden>
-            <span class="car-photo-add-icon">＋</span>
-            <b>Drop car photos here</b>
-            <span>or <u>browse files</u></span>
-            <small>JPG · PNG · WEBP · AVIF · up to 12 MB each</small>
+          <p v-else class="inspector-hint">This design has no editable text fields.</p>
+        </div>
+        <div class="inspector-section photos-inspector">
+          <div class="inspector-heading"><div><div class="overline">VEHICLE PHOTOS</div><h2>Image library</h2></div><span class="mini-count">[[ activeCar?.images?.length || 0 ]]</span></div>
+          <label class="mini-upload" @dragover.prevent="photoDropActive=true" @dragleave="photoDropActive=false" @drop.prevent="dropEditorPhotos($event)" :class="{dragging:photoDropActive}">
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple @change="uploadEditorPhotos($event.target.files);$event.target.value=''">
+            <span>＋</span><b>Add photos to vehicle</b><small>Photos remain attached to this vehicle.</small>
           </label>
-          <div id="carSavedPhotos" class="car-saved-photos"></div>
-          <div id="carPhotoDrafts" class="car-photo-drafts"><p class="photo-empty-note">No photos selected yet. Add as many as you need.</p></div>
-        </section>
-</form>
-      <div class="form-footer"><button id="cancelCarEdit" class="quiet-btn">Clear</button><button id="deleteCar" class="danger-btn hidden">Delete car</button><button id="saveCar" class="primary-btn">Save car</button></div>
-    </section>
-  </div>
-</section>
-
-<section id="makesPanel" class="panel hidden">
-  <div class="page-heading"><div><p class="eyebrow">MANUFACTURERS</p><h1>Car makes</h1><p class="muted">Each manufacturer has one shared record and logo.</p></div></div>
-  <div class="make-layout">
-    <section class="surface form-panel">
-      <div class="panel-heading"><div><p class="eyebrow">NEW MANUFACTURER</p><h3>Add a make</h3></div></div>
-      <form id="makeForm" class="make-form">
-        <label>Make name<input name="name" placeholder="Hyundai" required></label>
-        <label>Make logo<input name="icon" type="file" accept="image/*"></label>
-        <button class="primary-btn">Add make</button>
-      </form>
-      <p class="helper">Add the logo once. It will be available whenever you use this manufacturer.</p>
-    </section>
-    <section class="surface make-records"><div class="panel-heading"><div><p class="eyebrow">MANUFACTURER DIRECTORY</p><h3>Saved makes</h3></div><span id="makeCount" class="count-pill">0 makes</span></div><input id="makeSearch" class="search-field" type="search" placeholder="Search manufacturers…" aria-label="Search makes"><div id="makeList" class="make-list"></div></section>
-  </div>
-</section>
-
-<section id="templatesPanel" class="panel hidden">
-  <div class="page-heading"><div><p class="eyebrow">DESIGN LIBRARY</p><h1>Templates</h1><p class="muted">Templates are reusable HTML + Tailwind designs. Placeholders are detected automatically.</p></div><button id="newTemplate" class="primary-btn">＋ New template</button></div>
-  <div class="template-management-grid">
-    <section class="surface records-panel"><div class="panel-heading"><div><p class="eyebrow">DESIGN LIBRARY</p><h3>Saved templates</h3></div><span id="templateCount" class="count-pill">0 templates</span></div><input id="templateSearch" class="search-field" type="search" placeholder="Search templates…" aria-label="Search templates"><div id="templateList" class="record-list"></div></section>
-    <section class="surface form-panel">
-      <div class="panel-heading"><div><p class="eyebrow">TEMPLATE DESIGN</p><h3 id="templateFormTitle">Add a template</h3></div><span id="templatePlaceholderCount" class="count-pill">0 placeholders</span></div>
-      <form id="templateForm" class="template-form">
-        <input type="hidden" name="id">
-        <label>Template name<input name="name" placeholder="Premium dark listing" required></label>
-        <label>Description<input name="description" placeholder="A short description"></label>
-        <label>HTML + Tailwind<textarea name="html_content" id="templateHtml" rows="22" spellcheck="false" required placeholder="<main class='poster'>&#10;  <h1>&#123;&#123;car.model&#125;&#125;</h1>&#10;  <img src='&#123;&#123;make.icon&#125;&#125;'>&#10;  <img src='&#123;&#123;image.hero&#125;&#125;'>&#10;  <h2>&#123;&#123;text.headline&#125;&#125;</h2>&#10;</main>"></textarea></label>
-        <div class="placeholder-reference">
-          <b>Placeholder reference</b>
-          <div class="token-groups">
-            <div><strong>Car data</strong><code>&#123;&#123;car.model&#125;&#125;</code><code>&#123;&#123;car.year&#125;&#125;</code><code>&#123;&#123;car.fuel_type&#125;&#125;</code><code>&#123;&#123;car.transmission&#125;&#125;</code></div>
-            <div><strong>Make data</strong><code>&#123;&#123;make.name&#125;&#125;</code><code>&#123;&#123;make.icon&#125;&#125;</code></div>
-            <div><strong>Images</strong><code>&#123;&#123;image.hero&#125;&#125;</code><code>&#123;&#123;image.detail&#125;&#125;</code><span>Use inside an img src. Add any number of unique names.</span></div>
-            <div><strong>Editable text</strong><code>&#123;&#123;text.headline&#125;&#125;</code><code>&#123;&#123;text.price&#125;&#125;</code><code>&#123;&#123;text.contact&#125;&#125;</code><span>Any text.* key becomes a poster-specific field.</span></div>
+          <div class="editor-image-grid">
+            <article v-for="image in (activeCar?.images || [])" :key="image.id" class="editor-image" draggable="true" @dragstart="startImageDrag($event,image)">
+              <img :src="image.image_url" :alt="image.image_type">
+              <span class="editor-image-name">[[ image.image_type ]]</span>
+              <button class="editor-image-remove" title="Remove photo from vehicle" @click="deleteEditorImage(image)">×</button>
+            </article>
+          </div>
+          <div class="placeholder-heading"><b>Template image areas</b><small>Drop a photo, or select one above and tap an area.</small></div>
+          <div class="slot-grid">
+            <button v-for="slot in activeImageSlots" :key="slot.key" class="image-slot-button" @dragover.prevent="slotDropKey=slot.key" @dragleave="slotDropKey=''" @drop.prevent="dropImageOnSlot($event,slot.key)" @click="assignSelectedImage(slot.key)" :class="{filled:!!activePoster.image_assignments[slot.key],dragging:slotDropKey===slot.key}">
+              <img v-if="assignedImage(slot.key)" :src="assignedImage(slot.key).image_url" alt="">
+              <span v-else class="slot-plus">＋</span>
+              <span class="slot-caption">[[ slot.label || slot.key ]]</span>
+              <small>[[ assignedImage(slot.key) ? 'Assigned' : 'Drop photo' ]]</small>
+            </button>
           </div>
         </div>
-        <div class="form-footer"><button type="button" id="cancelTemplateEdit" class="quiet-btn">Clear</button><button class="primary-btn">Save template</button></div>
+      </aside>
+      <section class="editor-preview-area">
+        <div class="preview-toolbar"><div><span class="preview-live-dot"></span><strong>Live preview</strong><small>Changes save automatically</small></div><button class="text-action" @click="refreshPreview">Refresh ↻</button></div>
+        <div class="preview-stage"><iframe id="posterFrame" :key="previewVersion" :src="previewUrl" title="Live poster preview" sandbox="allow-scripts allow-modals"></iframe></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Vehicle form -->
+  <div v-if="carDialogOpen" class="modal-backdrop" @click.self="closeCarDialog">
+    <section class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="carDialogTitle">
+      <header class="modal-header"><div><div class="overline">VEHICLE RECORD</div><h2 id="carDialogTitle">[[ editingCarId ? 'Edit vehicle' : 'Add a vehicle' ]]</h2><p>Save the details and every photo together.</p></div><button class="modal-close" @click="closeCarDialog" aria-label="Close">×</button></header>
+      <form @submit.prevent="saveCar">
+        <div class="form-section">
+          <div class="form-section-title"><span>01</span><div><h3>Vehicle details</h3><p>Basic information and specifications.</p></div></div>
+          <div class="form-grid">
+            <label class="field-label">Make<select v-model="carForm.make_id" required><option value="">Choose manufacturer</option><option v-for="make in makes" :key="make.id" :value="String(make.id)">[[ make.name ]]</option></select></label>
+            <label class="field-label">Model<input v-model="carForm.model" placeholder="e.g. Creta" required></label>
+            <label class="field-label">Variant<input v-model="carForm.variant" placeholder="e.g. SX(O) 1.5 Diesel"></label>
+            <label class="field-label">Registration number<input v-model="carForm.registration_no" placeholder="e.g. TS09AB1234" required></label>
+            <label class="field-label">Fuel type<select v-model="carForm.fuel_type" required><option value="">Choose fuel type</option><option v-for="fuel in fuelTypes" :key="fuel">[[ fuel ]]</option></select></label>
+            <label class="field-label">Year<select v-model="carForm.year" required><option value="">Choose year</option><option v-for="year in years" :key="year" :value="String(year)">[[ year ]]</option></select></label>
+            <label class="field-label">Transmission<select v-model="carForm.transmission" required><option value="">Choose transmission</option><option v-for="type in transmissionTypes" :key="type">[[ type ]]</option></select></label>
+            <label class="field-label">Odometer <span class="field-unit">KM · leave empty if unrecorded</span><input v-model="carForm.odometer_km" type="number" step="1" placeholder="e.g. 42,500"></label>
+            <label class="field-label">Number of owners <span class="field-unit">Leave empty if unrecorded</span><input v-model="carForm.owner_count" type="number" step="1" placeholder="e.g. 2"></label>
+            <div class="field-label"><span>Insurance validity</span><div class="validity-control"><select v-model="carForm.insurance_mode"><option value="lapsed">Lapsed</option><option value="date">Valid until</option></select><input v-if="carForm.insurance_mode==='date'" v-model="carForm.insurance_date" type="month" aria-label="Insurance expiry month"></div></div>
+            <div class="field-label"><span>Fitness validity</span><div class="validity-control"><select v-model="carForm.fitness_mode"><option value="lapsed">Lapsed</option><option value="date">Valid until</option></select><select v-if="carForm.fitness_mode==='date'" v-model="carForm.fitness_year" aria-label="Fitness expiry year"><option value="">Choose year</option><option v-for="year in years" :key="year" :value="String(year)">[[ year ]]</option></select></div></div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-section-title"><span>02</span><div><h3>Vehicle photos</h3><p>Choose as many as you need. Add a useful label to each photo.</p></div></div>
+          <label class="photo-dropzone" @dragover.prevent="carPhotoDragging=true" @dragleave="carPhotoDragging=false" @drop.prevent="addCarPhotos($event.dataTransfer.files);carPhotoDragging=false" :class="{dragging:carPhotoDragging}">
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple @change="addCarPhotos($event.target.files);$event.target.value=''">
+            <span class="drop-icon">＋</span><strong>Drop vehicle photos here</strong><span>or <u>browse files</u></span><small>JPG, PNG, WEBP or AVIF · up to 12 MB each</small>
+          </label>
+          <div v-if="editingCarImages.length" class="photo-group"><div class="photo-group-label">Saved photos · [[ editingCarImages.length ]]</div><div class="photo-grid">
+            <article v-for="image in editingCarImages" :key="image.id" class="photo-tile">
+              <img :src="image.image_url" :alt="image.image_type">
+              <div class="photo-tile-bottom"><input v-model="image.image_type" @change="saveImageType(image)" aria-label="Photo description"><button type="button" @click="removeSavedCarImage(image)" title="Remove photo">×</button></div>
+            </article>
+          </div></div>
+          <div v-if="pendingPhotos.length" class="photo-group"><div class="photo-group-label">Ready to save · [[ pendingPhotos.length ]]</div><div class="photo-grid">
+            <article v-for="photo in pendingPhotos" :key="photo.id" class="photo-tile pending-tile">
+              <img :src="photo.previewUrl" :alt="photo.file.name">
+              <div class="photo-tile-bottom"><input v-model="photo.imageType" aria-label="Photo description" placeholder="e.g. Front left"><button type="button" @click="removePendingPhoto(photo)" title="Remove selected photo">×</button></div>
+            </article>
+          </div></div>
+          <div v-if="!editingCarImages.length && !pendingPhotos.length" class="photo-empty">No photos selected yet.</div>
+        </div>
+        <footer class="modal-footer">
+          <button type="button" class="btn btn-ghost" @click="closeCarDialog">Cancel</button>
+          <button type="submit" class="btn btn-primary" :disabled="busy==='car'">[[ busy==='car' ? 'Saving…' : (editingCarId ? 'Save changes' : 'Save vehicle') ]]</button>
+        </footer>
       </form>
-      <div id="templateDetected" class="detected-schema"><span>Detected placeholders appear here as you type.</span></div>
     </section>
   </div>
-</section>
 
-<div id="toast" class="toast hidden" role="status"></div>
-</main>
+  <!-- Make form -->
+  <div v-if="makeDialogOpen" class="modal-backdrop" @click.self="closeMakeDialog">
+    <section class="modal modal-medium" role="dialog" aria-modal="true" aria-labelledby="makeDialogTitle">
+      <header class="modal-header"><div><div class="overline">MANUFACTURER</div><h2 id="makeDialogTitle">[[ editingMakeId ? 'Edit manufacturer' : 'Add manufacturer' ]]</h2><p>Name and logo are shared across all its vehicles.</p></div><button class="modal-close" @click="closeMakeDialog">×</button></header>
+      <form @submit.prevent="saveMake" class="modal-form">
+        <label class="field-label">Manufacturer name<input v-model="makeForm.name" placeholder="e.g. Hyundai" required></label>
+        <label class="field-label">Logo <input type="file" accept="image/*" @change="chooseMakeLogo"></label>
+        <div v-if="makeLogoPreview" class="make-logo-preview"><img :src="makeLogoPreview" alt="Logo preview"><span>Selected logo</span></div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" @click="closeMakeDialog">Cancel</button><button class="btn btn-primary" type="submit" :disabled="busy==='make'">[[ busy==='make' ? 'Saving…' : (editingMakeId ? 'Save changes' : 'Add manufacturer') ]]</button></div>
+      </form>
+    </section>
+  </div>
+
+  <!-- Template form -->
+  <div v-if="templateDialogOpen" class="modal-backdrop" @click.self="closeTemplateDialog">
+    <section class="modal modal-template" role="dialog" aria-modal="true" aria-labelledby="templateDialogTitle">
+      <header class="modal-header"><div><div class="overline">DESIGN TEMPLATE</div><h2 id="templateDialogTitle">[[ editingTemplateId ? 'Edit template' : 'Create template' ]]</h2><p>Paste your HTML and Tailwind. Placeholders are detected automatically.</p></div><button class="modal-close" @click="closeTemplateDialog">×</button></header>
+      <form @submit.prevent="saveTemplate">
+        <div class="form-grid template-meta-grid">
+          <label class="field-label">Template name<input v-model="templateForm.name" placeholder="e.g. Premium dark listing" required></label>
+          <label class="field-label">Description<input v-model="templateForm.description" placeholder="A short description"></label>
+        </div>
+        <label class="field-label template-code-label">HTML + Tailwind<textarea v-model="templateForm.html_content" rows="16" spellcheck="false" placeholder="<main class='poster'>&#10;  <h1>&#123;&#123;car.model&#125;&#125;</h1>&#10;  <img src='&#123;&#123;make.icon&#125;&#125;'>&#10;  <img src='&#123;&#123;image.hero&#125;&#125;'>&#10;  <h2>&#123;&#123;text.headline&#125;&#125;</h2>&#10;</main>"></textarea></label>
+        <div class="placeholder-panel"><div class="placeholder-panel-title"><b>Detected placeholders</b><span>[[ detectedTokens.length ]] found</span></div><div v-if="detectedTokens.length" class="token-list"><code v-for="token in detectedTokens" :key="token">[[ token ]]</code></div><p v-else class="subtle-note">Use car.*, make.*, image.* and text.* placeholders in your HTML.</p></div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" @click="closeTemplateDialog">Cancel</button><button type="submit" class="btn btn-primary" :disabled="busy==='template'">[[ busy==='template' ? 'Saving…' : 'Save template' ]]</button></div>
+      </form>
+    </section>
+  </div>
+
+  <!-- Create poster -->
+  <div v-if="posterCreateOpen" class="modal-backdrop" @click.self="posterCreateOpen=false">
+    <section class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="createPosterTitle">
+      <header class="modal-header"><div><div class="overline">NEW DESIGN</div><h2 id="createPosterTitle">Create a poster</h2><p>Choose the vehicle and template to start with.</p></div><button class="modal-close" @click="posterCreateOpen=false">×</button></header>
+      <div class="picker-section"><div class="picker-title"><h3>1. Choose a vehicle</h3><span>[[ cars.length ]] available</span></div>
+        <div v-if="!cars.length" class="empty-inline">Add a vehicle before creating a poster.</div>
+        <div class="picker-grid">
+          <button v-for="car in cars" :key="car.id" class="picker-card" :class="{selected:Number(posterDraft.car_id)===car.id}" @click="posterDraft.car_id=car.id">
+            <img v-if="car.images?.length" :src="car.images[0].image_url" alt=""><span v-else class="picker-placeholder">▣</span>
+            <span class="picker-card-copy"><b>[[ car.make?.name ]] [[ car.model ]]</b><small>[[ car.year ]] · [[ car.registration_no ]]</small></span><i>✓</i>
+          </button>
+        </div>
+      </div>
+      <div class="picker-section"><div class="picker-title"><h3>2. Choose a template</h3><span>[[ templates.length ]] available</span></div>
+        <div v-if="!templates.length" class="empty-inline">Add a template before creating a poster.</div>
+        <div class="picker-grid template-picker">
+          <button v-for="template in templates" :key="template.id" class="picker-card template-picker-card" :class="{selected:Number(posterDraft.template_id)===template.id}" @click="posterDraft.template_id=template.id">
+            <img v-if="template.thumbnail_url" :src="template.thumbnail_url" alt=""><span v-else class="template-picker-placeholder">Aa</span>
+            <span class="picker-card-copy"><b>[[ template.name ]]</b><small>[[ template.description || 'Vehicle design' ]]</small></span><i>✓</i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-ghost" @click="posterCreateOpen=false">Cancel</button><button class="btn btn-primary" :disabled="!posterDraft.car_id || !posterDraft.template_id || busy==='poster'" @click="createPoster">[[ busy==='poster' ? 'Creating…' : 'Create poster' ]]</button></div>
+    </section>
+  </div>
+
+  <div v-if="toastMessage" class="toast-message" role="status">[[ toastMessage ]]</div>
+</div>
+<script src="https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"></script>
 <script src="/static/app.js"></script>
-</body></html>
+</body>
+</html>
