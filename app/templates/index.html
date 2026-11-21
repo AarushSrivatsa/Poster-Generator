@@ -1,67 +1,17 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Poster Studio — Car Listing Designer</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/app.css">
-</head>
-<body class="min-h-screen bg-[#0b0e12] text-slate-100">
-  <header class="sticky top-0 z-30 border-b border-white/10 bg-[#0b0e12]/95 backdrop-blur">
-    <div class="mx-auto flex max-w-[1500px] items-center justify-between px-5 py-4">
-      <a class="flex items-center gap-3" href="/"><span class="grid h-10 w-10 place-items-center rounded-xl bg-amber-300 text-xl text-black">✳</span><span><b class="block font-display text-lg">POSTER STUDIO</b><small class="text-xs text-slate-500">Vehicle listings, beautifully presented</small></span></a>
-      <div class="flex items-center gap-2"><span class="hidden text-xs text-slate-500 sm:block">DRAG · DROP · DESIGN</span><span class="h-2 w-2 rounded-full bg-emerald-400"></span></div>
-    </div>
-  </header>
-  <main class="mx-auto max-w-[1500px] px-4 py-7 sm:px-6">
-    <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
-      <div><p class="eyebrow">YOUR LISTING WORKFLOW</p><h1 class="font-display text-3xl font-bold sm:text-4xl">Build a poster that <span class="text-amber-300">sells.</span></h1><p class="mt-2 text-sm text-slate-400">Save vehicle details once. Experiment with templates whenever you like.</p></div>
-      <button id="newVehicle" class="primary-btn">＋ Add vehicle</button>
-    </div>
-    <div class="mb-6 flex flex-wrap gap-2">
-      <button class="tab active" data-tab="vehicle">01 · Vehicle</button><button class="tab" data-tab="photos">02 · Photo placement</button><button class="tab" data-tab="poster">03 · Poster studio</button><button class="tab" data-tab="templates">04 · Templates</button>
-    </div>
-    <section id="vehiclePanel" class="panel grid gap-5 lg:grid-cols-[270px_1fr]">
-      <aside class="surface p-4"><div class="mb-3 flex items-center justify-between"><h2 class="font-bold">Your vehicles</h2><span id="vehicleCount" class="count">0</span></div><div id="vehicleList" class="space-y-2"><p class="text-sm text-slate-500">Loading vehicles…</p></div></aside>
-      <div class="surface p-5 sm:p-7">
-        <div class="mb-5 flex items-center justify-between"><div><p class="eyebrow">VEHICLE RECORD</p><h2 class="text-xl font-bold">Vehicle details</h2></div><button id="saveVehicle" class="primary-btn">Save details</button></div>
-        <form id="vehicleForm" class="grid gap-4 sm:grid-cols-2">
-          <input type="hidden" name="id">
-          <label>Make<input name="make" placeholder="Mahindra" required></label>
-          <label>Model<input name="model" placeholder="Thar" required></label>
-          <label>Variant (optional)<input name="variant" placeholder="LX 4x4"></label>
-          <label>Year (optional)<input name="year" placeholder="2022"></label>
-        </form>
-        <div class="mt-5 flex justify-end"><button id="deleteVehicle" class="danger-btn hidden">Delete vehicle</button></div>
-      </div>
-    </section>
-
-    <section id="photosPanel" class="panel hidden"><div class="grid gap-5 lg:grid-cols-[300px_1fr]">
-      <aside class="surface p-5"><p class="eyebrow">YOUR PHOTOS</p><h2 class="mb-1 text-xl font-bold">Photo library</h2><p class="mb-4 text-sm text-slate-400">Drop as many photos as you need. Drag them onto any image placeholder.</p>
-      <label id="uploadZone" class="upload-zone"><span class="text-3xl">＋</span><b>Drop photos here</b><span class="text-xs text-slate-500">or click to browse</span><input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden></label><div id="photoLibrary" class="mt-4 grid grid-cols-2 gap-3"></div></aside>
-      <div class="surface p-5"><p class="eyebrow">AUTO-DETECTED FROM TEMPLATE</p><h2 class="text-xl font-bold">Drop photos into your design</h2><p class="mb-4 text-sm text-slate-400">Image slots appear automatically. No fixed number or predefined views.</p><div id="slotBoard" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3"></div></div>
-    </div></section>
-
-    <section id="posterPanel" class="panel hidden">
-      <div class="grid gap-5 xl:grid-cols-[minmax(280px,360px)_1fr]">
-        <aside class="surface space-y-5 p-5">
-          <div><p class="eyebrow">DESIGN SETTINGS</p><h2 class="text-xl font-bold">Poster studio</h2></div>
-          <label>Choose template<select id="templateSelect"></select></label>
-          <div><p class="eyebrow">EDIT YOUR CONTENT</p><div id="contentFields" class="space-y-3"></div></div><div class="rounded-xl border border-white/10 bg-white/[.03] p-3"><b class="text-sm">Quick tip</b><p class="mt-1 text-xs leading-5 text-slate-400">Drag photos into image slots. Text updates in the live preview as you type.</p></div>
-          <button id="openPhotos" class="secondary-btn w-full">＋ Add / arrange photos</button><button id="refreshPreview" class="secondary-btn w-full">Refresh preview ↗</button><button id="printPoster" class="secondary-btn w-full">Print / Save as PDF</button>
-        </aside>
-        <div class="surface min-w-0 p-3 sm:p-5"><div class="mb-3 flex items-center justify-between"><b>Live poster preview</b><span class="text-xs text-slate-500">Preview frame</span></div><iframe id="posterFrame" title="Poster preview" sandbox="allow-scripts allow-modals" class="preview-frame"></iframe></div>
-      </div>
-    </section>
-
-    <section id="templatesPanel" class="panel hidden grid gap-5 lg:grid-cols-[1fr_1fr]">
-      <div class="surface p-5"><p class="eyebrow">TEMPLATE LIBRARY</p><h2 class="mb-2 text-xl font-bold">Saved templates</h2><p class="mb-4 text-sm text-slate-400">Add HTML + Tailwind templates generated by an AI assistant. Use the placeholder reference on the right.</p><div id="templateList" class="space-y-2"></div></div>
-      <div class="surface p-5"><p class="eyebrow">MAKE IT YOURS</p><h2 class="mb-4 text-xl font-bold">Add a template</h2><form id="templateForm" class="space-y-3"><label>Template name<input name="name" required placeholder="Premium black & gold"></label><label>Short description<input name="description" placeholder="Bold dealership listing layout"></label><label>HTML + Tailwind<textarea name="html" required rows="12" class="code-input" placeholder="<main class='bg-black text-white'>&#10;  <h1>&#123;&#123;car.make&#125;&#125; &#123;&#123;car.model&#125;&#125;</h1>&#10;  <img src='&#123;&#123;slot.hero&#125;&#125;'>&#10;</main>"></textarea></label><button class="primary-btn w-full">Save template</button></form>
-        <div class="mt-5 rounded-xl border border-white/10 bg-black/20 p-4"><b class="text-sm">Simple placeholders</b><p class="mt-2 text-xs leading-5 text-slate-400">Use <code>&#123;&#123;image1&#125;&#125;</code>, <code>&#123;&#123;image2&#125;&#125;</code> for photos and <code>&#123;&#123;title1&#125;&#125;</code>, <code>&#123;&#123;title2&#125;&#125;</code>, <code>&#123;&#123;price&#125;&#125;</code> for editable text. Add as many as your design needs.</p></div>
-      </div>
-    </section>
-    <div id="toast" class="toast hidden"></div>
-  </main>
-  <script src="/static/app.js"></script>
-</body></html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Poster Studio</title><script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/static/app.css"></head>
+<body><header class="app-header"><a class="brand" href="/"><span class="brand-mark">✳</span><span><b>POSTER STUDIO</b><small>Make listings people stop scrolling for.</small></span></a><nav class="top-nav"><button class="nav-tab active" data-tab="studio">Studio</button><button class="nav-tab" data-tab="vehicle">Vehicles</button><button class="nav-tab" data-tab="templates">Templates</button></nav><button id="newVehicle" class="primary-btn">＋ New vehicle</button></header>
+<main class="app-main">
+<section id="studioPanel" class="panel"><div class="studio-heading"><div><p class="eyebrow">YOUR WORKSPACE</p><h1>Make your next <span>listing stand out.</span></h1><p class="muted">Edit the words, drop in photos, watch the poster update.</p></div><div class="studio-actions"><button id="refreshPreview" class="quiet-btn">↻ Refresh</button><button id="printPoster" class="primary-btn">Print / Save PDF ↗</button></div></div>
+<div class="toolbar"><div class="toolbar-group"><span class="toolbar-label">VEHICLE</span><div id="vehicleChips" class="chip-list"></div></div><div class="toolbar-group"><span class="toolbar-label">DESIGN</span><div id="templateChoices" class="template-chips"></div></div></div>
+<div class="workspace"><aside class="editor-panel surface"><div class="panel-heading"><div><p class="eyebrow">POSTER COPY</p><h2>Words & details</h2></div><span class="step-number">01</span></div><p class="helper">Change a field and the poster updates after saving.</p><div id="contentFields" class="content-fields"><p class="muted">Choose a template to get started.</p></div></aside>
+<section class="preview-panel surface"><div class="preview-top"><div><p class="eyebrow">LIVE CANVAS</p><h2>Poster preview</h2></div><span class="live-indicator"><i></i> LIVE</span></div><div class="preview-wrap"><iframe id="posterFrame" title="Live poster preview" sandbox="allow-scripts allow-modals" class="preview-frame"></iframe><div id="previewEmpty" class="preview-empty">Save a vehicle and choose a template to see your poster.</div></div></section>
+<aside class="photo-panel surface"><div class="panel-heading"><div><p class="eyebrow">IMAGE LIBRARY</p><h2>Photos</h2></div><span class="step-number">02</span></div><p class="helper">Drop files here, then drag a photo onto an image target.</p><label id="uploadZone" class="upload-zone"><input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden><span class="upload-icon">＋</span><b>Drop photos to upload</b><span>or <u>browse files</u></span><small>JPG · PNG · WEBP · up to 12 MB each</small></label>
+<div class="library-heading"><b>Your uploaded photos</b><span id="photoCount">0 photos</span></div><div id="photoLibrary" class="photo-library"><p class="muted">Your photos will appear here.</p></div>
+<div class="slot-heading"><div><b>Image placeholders</b><p>Drop a thumbnail into any box below.</p></div></div><div id="slotBoard" class="slot-board"><p class="muted">Choose a template with image placeholders.</p></div></aside></div></section>
+<section id="vehiclePanel" class="panel hidden"><div class="page-heading"><div><p class="eyebrow">YOUR INVENTORY</p><h1>Vehicles</h1><p class="muted">Only enter the basics here. Put poster wording in the Studio.</p></div><button id="saveVehicle" class="primary-btn">Save vehicle</button></div>
+<div class="vehicle-layout"><aside class="surface vehicle-list-panel"><div class="panel-heading"><h2>Your vehicles</h2><span id="vehicleCount" class="step-number">0</span></div><div id="vehicleList" class="vehicle-list"></div></aside><section class="surface vehicle-form-panel"><div class="panel-heading"><div><p class="eyebrow">VEHICLE BASICS</p><h2>About this vehicle</h2></div></div><form id="vehicleForm" class="vehicle-fields"><input type="hidden" name="id"><label>Make<input name="make" placeholder="Mahindra" required></label><label>Model<input name="model" placeholder="Thar" required></label><label>Variant <small>optional</small><input name="variant" placeholder="LX 4x4"></label><label>Year <small>optional</small><input name="year" placeholder="2022"></label></form><div class="vehicle-footer"><button id="deleteVehicle" class="danger-btn hidden">Delete vehicle</button></div></section></div></section>
+<section id="templatesPanel" class="panel hidden"><div class="page-heading"><div><p class="eyebrow">YOUR DESIGNS</p><h1>Templates</h1><p class="muted">Choose a saved design or add your own HTML + Tailwind template.</p></div></div><div class="template-layout"><section class="surface template-list-panel"><h2>Saved designs</h2><div id="templateList" class="template-list"></div></section><section class="surface template-form-panel"><h2>Add a design</h2><form id="templateForm" class="template-form"><label>Template name<input name="name" placeholder="Clean modern listing" required></label><label>Short note<input name="description" placeholder="Optional description"></label><label>Paste your HTML + Tailwind<textarea name="html" rows="16" class="code-input" required placeholder="<main class='...'>&#10;  <h1>{{title1}}</h1>&#10;  <img src='{{image1}}'>&#10;  <h2>{{price}}</h2>&#10;</main>"></textarea></label><button class="primary-btn">Save template</button></form><div class="placeholder-help"><b>Simple placeholder names</b><p><code>{{title1}}</code> <code>{{title2}}</code> <code>{{price}}</code> become editable fields. <code>{{image1}}</code> <code>{{image2}}</code> become photo drop targets. Add as many as your design needs.</p></div></section></div></section>
+<div id="toast" class="toast hidden"></div></main><script src="/static/app.js"></script></body></html>
