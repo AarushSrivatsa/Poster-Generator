@@ -42,10 +42,9 @@ const app = Vue.createApp({
         {title:"Manufacturer branding",description:"Use the name as text and the logo as an image source.",items:[
           {token:"{{make.name}}",label:"Manufacturer name"},{token:"{{make.icon}}",label:"Manufacturer logo"}
         ]},
-        {title:"Images",description:"Generic photo placements. Each number can hold any vehicle photo; the numbers do not describe photo types.",items:[
-          {token:"{{image.1}}",label:"Image 1"},{token:"{{image.2}}",label:"Image 2"},
-          {token:"{{image.3}}",label:"Image 3"},{token:"{{image.4}}",label:"Image 4"}
-        ],tip:"These are not fixed photo types. Use {{image.5}}, {{image.6}}, or any further number when the layout needs more photo placements."},
+        {title:"Unlimited image placements",description:"There is no fixed number of photos. The template itself decides how many image positions it needs.",items:[
+          {token:"{{image.1}}",label:"Example: first image slot"}
+        ],tip:"For every additional photo position in the design, use the next unique number: {{image.2}}, {{image.3}}, {{image.4}}, and so on without a maximum. Use any photo in any slot. Repeating the same token reuses the same photo."},
         {title:"Editable poster text",description:"These become fields the customer can fill separately on each poster.",items:[
           {token:"{{text.eyebrow}}",label:"Small heading"},{token:"{{text.price}}",label:"Selling price"},
           {token:"{{text.tagline}}",label:"Short description"},{token:"{{text.contact}}",label:"Contact information"}
@@ -108,6 +107,9 @@ const app = Vue.createApp({
     detectedTokens() {
       const matches = this.templateForm.html_content.match(/\{\{\s*[a-zA-Z][a-zA-Z0-9_.-]{0,79}\s*\}\}/g) || [];
       return [...new Set(matches.map(item => item.replace(/\{\{|\}\}/g, "").trim()))];
+    },
+    detectedImageTokens() {
+      return this.detectedTokens.filter(token => token.startsWith("image."));
     },
     activeTextFields() {
       return this.activeTemplate?.placeholder_schema?.text || [];
@@ -444,12 +446,10 @@ const app = Vue.createApp({
         "{{make.name}} — manufacturer name",
         "{{make.icon}} — manufacturer logo URL (use as an image src)",
         "",
-        "IMAGES (generic numbered photo placements; each can contain ANY vehicle photo):",
-        '<img src="{{image.1}}" alt="Image 1">',
-        '<img src="{{image.2}}" alt="Image 2">',
-        '<img src="{{image.3}}" alt="Image 3">',
-        '<img src="{{image.4}}" alt="Image 4">',
-        "Use {{image.5}}, {{image.6}}, etc. for as many additional image placements as the design needs. They are not tied to front, rear, interior or any particular photo type.",
+        "UNLIMITED IMAGES (the template chooses the count; there is no fixed maximum):",
+        "Put a placeholder in the src of every photo position you want in the design. Example:",
+        '<img src="{{image.1}}" alt="Vehicle photo">',
+        "For the next independent photo position use {{image.2}}, then {{image.3}}, {{image.4}}, and continue with {{image.5}}, {{image.6}}, etc. for as many positions as the layout needs. Do not stop at four or five. The number of unique image placeholders in the HTML becomes the exact number of photo slots in the poster editor. Any vehicle photo can be assigned to any slot. Reusing the same token intentionally reuses the same assigned photo.",
         "",
         "CUSTOM POSTER TEXT (editable separately for each poster):",
         "{{text.eyebrow}} — small heading",
