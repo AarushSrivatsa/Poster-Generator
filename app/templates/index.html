@@ -323,8 +323,8 @@
             <textarea v-model="templateForm.html_content" @input="scheduleTemplatePreview" rows="13" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste the complete HTML from your AI designer here. For reliable previews, ask for plain HTML and CSS, not Tailwind utility classes…"></textarea>
           </label>
           <div class="template-detection-row">
-            <div v-if="detectedTokens.length" class="template-detection-success"><span>✓</span> [[ detectedTokens.length ]] placeholders detected automatically</div>
-            <div v-else class="template-detection-empty">No vehicle fields detected yet. Use the complete field guide below when preparing your design.</div>
+            <div v-if="detectedTokens.length" class="template-detection-success"><span>✓</span> [[ detectedTokens.length ]] fields detected · [[ detectedImageTokens.length ]] image slots</div>
+            <div v-else class="template-detection-empty">No fields detected yet. Paste a complete design with as many image positions as its layout needs.</div>
             <button v-if="templateForm.html_content.trim()" type="button" class="text-action" @click="refreshTemplatePreview" :disabled="templatePreviewLoading">[[ templatePreviewLoading ? 'Updating…' : 'Update preview' ]]</button>
           </div>
           <div v-if="detectedTokens.length" class="template-detected-tokens">
